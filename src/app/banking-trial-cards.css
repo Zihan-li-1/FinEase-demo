@@ -1,64 +1,64 @@
-.financial-read-card { width: 100%; max-width: 590px; min-width: 0; margin-top: 14px; border: 1px solid #d9e3ef; border-radius: 16px; padding: 18px; background: #fff; color: #183047; overflow-wrap: anywhere; }
+.financial-read-card { width: 100%; max-width: 590px; min-width: 0; margin-top: 14px; border: 1px solid #34343C; border-radius: 16px; padding: 18px; background: #151518; color: #F052A0; overflow-wrap: anywhere; }
 .financial-read-card header { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
 .financial-read-card header b { font-size: 16px; }
-.financial-read-card header span { font-size: 11px; padding: 4px 9px; border-radius: 20px; background: #edf4fb; color: #365d85; }
-.financial-read-card .financial-source, .financial-read-card footer { color: #64788d; font-size: 11px; line-height: 1.7; }
-.financial-read-card article { padding: 14px 0; border-top: 1px solid #e8eef5; }
+.financial-read-card header span { font-size: 11px; padding: 4px 9px; border-radius: 20px; background: #151518; color: #F052A0; }
+.financial-read-card .financial-source, .financial-read-card footer { color: #B8B8C2; font-size: 11px; line-height: 1.7; }
+.financial-read-card article { padding: 14px 0; border-top: 1px solid #34343C; }
 .financial-read-card h3 { font-size: 14px; margin: 0 0 10px; }
 .financial-data-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
 .financial-data-grid p { margin: 0; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.financial-data-grid span { font-size: 11px; color: #708295; }
+.financial-data-grid span { font-size: 11px; color: #B8B8C2; }
 .financial-data-grid strong { font-size: 13px; }
 .subscription-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
-.subscription-summary p { display: grid; gap: 5px; margin: 0; padding: 11px; border-radius: 10px; background: #f3f7fb; }
-.subscription-summary span, .subscription-reason { color: #64788d; font-size: 11px; line-height: 1.6; }
-.subscription-summary strong { color: #234f79; font-size: 15px; }
-.financial-read-card .subscription-reason { margin: 10px 0 0; padding: 9px 10px; border-radius: 8px; background: #fff8e8; }
+.subscription-summary p { display: grid; gap: 5px; margin: 0; padding: 11px; border-radius: 10px; background: #151518; }
+.subscription-summary span, .subscription-reason { color: #B8B8C2; font-size: 11px; line-height: 1.6; }
+.subscription-summary strong { color: #F052A0; font-size: 15px; }
+.financial-read-card .subscription-reason { margin: 10px 0 0; padding: 9px 10px; border-radius: 8px; background: #151518; }
 .financial-term-help { display: grid; gap: 7px; margin-top: 12px; }
-.financial-term-help details { border: 1px solid #dce7f2; border-radius: 9px; background: #f8fbfe; }
-.financial-term-help summary { cursor: pointer; list-style-position: inside; padding: 8px 10px; color: #365d85; font-size: 12px; font-weight: 600; }
-.financial-term-help summary span { margin-left: 5px; color: #71869b; font-size: 10px; font-weight: 400; }
-.financial-term-help details p { margin: 0; padding: 0 10px 10px; color: #5f7388; font-size: 11px; line-height: 1.65; }
-.savings-input-card p, .savings-plan-card article p { color: #455e76; font-size: 12px; line-height: 1.7; }
+.financial-term-help details { border: 1px solid #34343C; border-radius: 9px; background: #151518; }
+.financial-term-help summary { cursor: pointer; list-style-position: inside; padding: 8px 10px; color: #F052A0; font-size: 12px; font-weight: 600; }
+.financial-term-help summary span { margin-left: 5px; color: #B8B8C2; font-size: 10px; font-weight: 400; }
+.financial-term-help details p { margin: 0; padding: 0 10px 10px; color: #B8B8C2; font-size: 11px; line-height: 1.65; }
+.savings-input-card p, .savings-plan-card article p { color: #F052A0; font-size: 12px; line-height: 1.7; }
 .savings-input-grid, .savings-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
-.savings-input-grid label { display: grid; gap: 5px; color: #365d85; font-size: 12px; font-weight: 600; }
-.savings-input-grid input { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #bfd0df; border-radius: 8px; background: #fff; color: #183047; }
-.savings-input-grid input:focus-visible { outline: 2px solid #3e80bd; outline-offset: 2px; }
-.savings-input-card fieldset { min-width: 0; margin: 12px 0; padding: 8px 12px; border: 1px solid #dce7f2; border-radius: 10px; }
-.savings-input-card legend { color: #365d85; font-size: 12px; font-weight: 600; }
+.savings-input-grid label { display: grid; gap: 5px; color: #F052A0; font-size: 12px; font-weight: 600; }
+.savings-input-grid input { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #34343C; border-radius: 8px; background: #151518; color: #F052A0; }
+.savings-input-grid input:focus-visible { outline: 2px solid #F052A0; outline-offset: 2px; }
+.savings-input-card fieldset { min-width: 0; margin: 12px 0; padding: 8px 12px; border: 1px solid #34343C; border-radius: 10px; }
+.savings-input-card legend { color: #F052A0; font-size: 12px; font-weight: 600; }
 .savings-input-card button:disabled { opacity: .55; cursor: not-allowed; }
-.savings-metrics p { display: grid; gap: 4px; margin: 0; padding: 10px; border-radius: 9px; background: #f3f7fb; }
-.savings-metrics span { color: #64788d; font-size: 11px; }
-.savings-metrics strong { color: #234f79; font-size: 14px; }
+.savings-metrics p { display: grid; gap: 4px; margin: 0; padding: 10px; border-radius: 9px; background: #151518; }
+.savings-metrics span { color: #B8B8C2; font-size: 11px; }
+.savings-metrics strong { color: #F052A0; font-size: 14px; }
 .savings-category-list { display: grid; gap: 8px; }
-.savings-category-list > div { display: grid; gap: 5px; padding: 10px; border: 1px solid #e3ebf3; border-radius: 9px; }
+.savings-category-list > div { display: grid; gap: 5px; padding: 10px; border: 1px solid #34343C; border-radius: 9px; }
 .savings-category-list b { font-size: 12px; }
-.savings-category-list span, .savings-category-list small { color: #60758a; font-size: 11px; line-height: 1.6; }
+.savings-category-list span, .savings-category-list small { color: #B8B8C2; font-size: 11px; line-height: 1.6; }
 .bubble.banking_savings_plan { width: 100%; min-width: 0; max-width: min(590px, calc(100% - 39px)); }
 .savings-plan-card { container-type: inline-size; }
-.savings-plan-card .savings-section-note { margin: -3px 0 10px; color: #60758a; font-size: 11px; }
+.savings-plan-card .savings-section-note { margin: -3px 0 10px; color: #B8B8C2; font-size: 11px; }
 .savings-plan-card .savings-compact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.savings-plan-card .savings-compact-card { display: grid; align-content: start; min-width: 0; gap: 4px; padding: 12px; border: 1px solid #e3ebf3; border-radius: 9px; background: #f8fbfe; font-variant-numeric: tabular-nums; }
-.savings-plan-card .savings-compact-card h4 { margin: 0 0 4px; color: #365d85; font-size: 13px; font-weight: 600; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.savings-plan-card .savings-compact-label, .savings-plan-card .savings-compact-recent { color: #60758a; font-size: 11px; line-height: 1.5; }
-.savings-plan-card .savings-compact-value { color: #183047; font-size: clamp(22px, 4.5cqi, 28px); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; }
+.savings-plan-card .savings-compact-card { display: grid; align-content: start; min-width: 0; gap: 4px; padding: 12px; border: 1px solid #34343C; border-radius: 9px; background: #151518; font-variant-numeric: tabular-nums; }
+.savings-plan-card .savings-compact-card h4 { margin: 0 0 4px; color: #F052A0; font-size: 13px; font-weight: 600; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.savings-plan-card .savings-compact-label, .savings-plan-card .savings-compact-recent { color: #B8B8C2; font-size: 11px; line-height: 1.5; }
+.savings-plan-card .savings-compact-value { color: #F052A0; font-size: clamp(22px, 4.5cqi, 28px); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; }
 .savings-plan-card .savings-budget-card .savings-compact-value { font-size: clamp(26px, 5cqi, 30px); }
-.savings-plan-card .savings-change { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; color: #455e76; line-height: 1.5; }
+.savings-plan-card .savings-change { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; color: #F052A0; line-height: 1.5; }
 .savings-plan-card .savings-change strong { font-size: 13px; font-weight: 600; }
 .savings-plan-card .savings-change span { font-size: 11px; }
-.savings-plan-card .savings-change--up { color: #b83a3a; }
-.savings-plan-card .savings-change--down { color: #19734d; }
+.savings-plan-card .savings-change--up { color: #FFBE72; }
+.savings-plan-card .savings-change--down { color: #71DFA9; }
 .savings-plan-card .savings-compact-recent { margin-top: 6px; }
-.savings-plan-card .savings-calculation-details { margin-top: 10px; font-size: 11px; color: #60758a; }
-.savings-plan-card .savings-calculation-details summary { width: fit-content; cursor: pointer; padding: 4px 0; color: #365d85; }
-.savings-plan-card .savings-calculation-details summary:focus-visible { outline: 2px solid #3e80bd; outline-offset: 3px; border-radius: 3px; }
+.savings-plan-card .savings-calculation-details { margin-top: 10px; font-size: 11px; color: #B8B8C2; }
+.savings-plan-card .savings-calculation-details summary { width: fit-content; cursor: pointer; padding: 4px 0; color: #F052A0; }
+.savings-plan-card .savings-calculation-details summary:focus-visible { outline: 2px solid #F052A0; outline-offset: 3px; border-radius: 3px; }
 .savings-plan-card .savings-calculation-details p { margin: 6px 0; font-size: 11px; }
 .savings-plan-card .savings-calculation-details dl { margin: 0; }
-.savings-plan-card .savings-calculation-details dl > div { display: grid; grid-template-columns: minmax(50px, 1fr) minmax(0, 4fr); gap: 8px; padding: 6px 0; border-top: 1px solid #e8eef5; line-height: 1.6; }
+.savings-plan-card .savings-calculation-details dl > div { display: grid; grid-template-columns: minmax(50px, 1fr) minmax(0, 4fr); gap: 8px; padding: 6px 0; border-top: 1px solid #34343C; line-height: 1.6; }
 .savings-plan-card .savings-calculation-details dd { min-width: 0; margin: 0; }
 .savings-plan-card .savings-empty { margin: 8px 0; }
 @container (max-width: 380px) { .savings-plan-card .savings-compact-grid { grid-template-columns: minmax(0, 1fr); } }
-.savings-plan-card footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid #e8eef5; padding-top: 13px; }
+.savings-plan-card footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid #34343C; padding-top: 13px; }
 @media (max-width: 480px) { .financial-read-card { padding: 13px; } .financial-data-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 480px) { .savings-input-grid, .savings-metrics { grid-template-columns: minmax(0, 1fr); } }
 
