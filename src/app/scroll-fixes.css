@@ -31,13 +31,13 @@
   }
 }
 button:disabled { cursor: not-allowed; opacity: .5; }
-.consent-control { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 10px; color: var(--theme-274); }
-.consent-control input { width: 16px; height: 16px; accent-color: var(--theme-275); }
-.validation-message { color: var(--theme-276); font-size: 13px; padding: 10px; }
+.consent-control { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 10px; color: #B8B8C2; }
+.consent-control input { width: 16px; height: 16px; accent-color: #71DFA9; }
+.validation-message { color: #FFBE72; font-size: 13px; padding: 10px; }
 .error-actions { flex-wrap: wrap; overflow-wrap: anywhere; }
 .exception-toggle { flex-wrap: wrap; }
-.exception-toggle select { max-width: 100%; padding: 6px; border: var(--theme-277); border-radius: 6px; background: var(--theme-278); color: var(--theme-80); }
-.model-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--theme-274); }
-.model-controls select, .model-controls input { border: var(--theme-277); border-radius: 6px; padding: 6px 8px; background: var(--theme-278); color: var(--theme-80); max-width: 100%; }
+.exception-toggle select { max-width: 100%; padding: 6px; border: 1px solid #34343C; border-radius: 6px; background: #151518; color: #F5F5F7; }
+.model-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 12px; color: #B8B8C2; }
+.model-controls select, .model-controls input { border: 1px solid #34343C; border-radius: 6px; padding: 6px 8px; background: #151518; color: #F5F5F7; max-width: 100%; }
 .model-controls input { flex: 1; min-width: 170px; }
 .bubble p { white-space: pre-wrap; }

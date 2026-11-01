@@ -1,9 +1,0 @@
-{
-  "mode": "baseline",
-  "errors": [],
-  "failedRequests": [],
-  "cases": [
-    "desktop: rendered",
-    "mobile: rendered"
-  ]
-}
