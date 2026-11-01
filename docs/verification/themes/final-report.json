@@ -1,0 +1,158 @@
+{
+  "mode": "final",
+  "origin": "http://127.0.0.1:3189",
+  "success": true,
+  "errors": [],
+  "failedRequests": [],
+  "expectedMockErrors": [
+    {
+      "url": "/api/banking-agent",
+      "status": 503
+    },
+    {
+      "url": "/api/banking-agent",
+      "status": 503
+    }
+  ],
+  "cases": [
+    {
+      "label": "light assistant desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light 账户概览",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light 卡片管理",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark 账户概览",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark 卡片管理",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark card result desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light card result desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    "desktop: in-flight read-only Mock card query keeps history, scroll and task; exactly one request",
+    {
+      "label": "dark bill desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light bill desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark error desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light error desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light /shopping desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light /shopping/product desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark /shopping desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark /shopping/product desktop",
+      "overflow": false,
+      "lowContrast": []
+    },
+    "desktop: default ignores light OS; draft and geometry stable; both preferences survive reload, navigation and new page",
+    "desktop: rendered",
+    {
+      "label": "light assistant mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark card result mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light card result mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    "mobile: in-flight read-only Mock card query keeps history, scroll and task; exactly one request",
+    {
+      "label": "dark bill mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light bill mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark error mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light error mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light /shopping mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "light /shopping/product mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark /shopping mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    {
+      "label": "dark /shopping/product mobile",
+      "overflow": false,
+      "lowContrast": []
+    },
+    "mobile: default ignores light OS; draft and geometry stable; both preferences survive reload, navigation and new page",
+    "mobile: rendered",
+    "invalid: safe first-paint preference",
+    "unreadable: safe first-paint preference",
+    "saved-light: safe first-paint preference"
+  ]
+}

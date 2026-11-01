@@ -1,0 +1,19 @@
+{
+  "reference": "72bb881",
+  "css": [
+    "src/app/BankingSkillOverview.module.css",
+    "src/app/account-overview.css",
+    "src/app/banking-bill-card.css",
+    "src/app/banking-trial-cards.css",
+    "src/app/globals.css",
+    "src/app/modern-bank-overrides.css",
+    "src/app/scroll-fixes.css",
+    "src/app/subscription-overview.css",
+    "src/components/PurchaseFlow.module.css"
+  ],
+  "tsx": [
+    "src/components/PurchaseRequestCard.tsx",
+    "src/app/page.tsx"
+  ],
+  "scope": "All existing CSS and PurchaseRequestCard reproduce pre-change values exactly in dark mode. Only theme menu integration changes page structure."
+}

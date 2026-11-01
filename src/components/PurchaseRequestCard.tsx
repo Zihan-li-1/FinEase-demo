@@ -12,11 +12,11 @@ const meaningLabel = (meaning?: 'order_on' | 'deliver_on') =>
   meaning === 'order_on' ? '提醒我下单' : meaning === 'deliver_on' ? '希望送达' : '';
 const chip: React.CSSProperties = {
   display: 'inline-block', margin: '0 6px 4px 0', padding: '4px 12px', borderRadius: '999px',
-  border: '1px solid #34343C', color: '#F5F5F7', fontSize: '13px', cursor: 'pointer', background: '#151518',
+  border: '1px solid var(--theme-305)', color: 'var(--theme-306)', fontSize: '13px', cursor: 'pointer', background: 'var(--theme-302)',
 };
 const fieldStyle: React.CSSProperties = { margin: '8px 0' };
-const inputStyle: React.CSSProperties = { padding: '6px 8px', border: '1px solid #34343C', borderRadius: 6, marginRight: 4, background: '#151518', color: '#F5F5F7' };
-const submitStyle: React.CSSProperties = { marginTop: 4, padding: '6px 16px', borderRadius: 6, border: '1px solid #34343C', background: '#151518', color: '#F5F5F7', cursor: 'pointer' };
+const inputStyle: React.CSSProperties = { padding: '6px 8px', border: '1px solid var(--theme-307)', borderRadius: 6, marginRight: 4, background: 'var(--theme-7)', color: 'var(--theme-306)' };
+const submitStyle: React.CSSProperties = { marginTop: 4, padding: '6px 16px', borderRadius: 6, border: '1px solid var(--theme-307)', background: 'var(--theme-7)', color: 'var(--theme-306)', cursor: 'pointer' };
 
 type BrowserReminder = {
   categories: PurchaseCategory[];
@@ -119,7 +119,7 @@ export function PurchaseRequestCard({ slots = {}, cards = [] }: {
         {link.check_before_order.length > 0 && <p style={{ margin: '2px 0 0' }}>下单前核对排除项：{link.check_before_order.join('、')}</p>}
       </article>)}
     </div>}
-    {needsReservation && <div style={{ marginTop: 12, padding: '12px 14px', border: '1px solid #34343C', borderRadius: 10, background: '#151518' }}>
+    {needsReservation && <div style={{ marginTop: 12, padding: '12px 14px', border: '1px solid var(--theme-305)', borderRadius: 10, background: 'var(--theme-304)' }}>
       {savedReminder ? <div role="status" aria-label="提醒设置回执">
         <b>提醒信息已保存</b>
         <p>{savedReminder.categories.map(categoryLabel).join('、')} · {meaningLabel(savedReminder.meaning)} {savedReminder.date} {savedReminder.start}–{savedReminder.end}</p>
@@ -142,7 +142,7 @@ export function PurchaseRequestCard({ slots = {}, cards = [] }: {
         {(['鲜花', '蛋糕', '耳机'] as const).map(option => {
           const category = option === '鲜花' ? 'flowers' as const : option === '蛋糕' ? 'cake' as const : 'headphones' as const;
           const selected = cats.includes(category);
-          return <button key={option} type="button" style={{ ...chip, background: selected ? '#1E1E23' : '#151518' }} onClick={() => toggleCat(category)}>{option}</button>;
+          return <button key={option} type="button" style={{ ...chip, background: selected ? 'var(--theme-303)' : 'var(--theme-302)' }} onClick={() => toggleCat(category)}>{option}</button>;
         })}
       </div>}
       <div style={fieldStyle}><span>{dateFields.date ? need('date_expression') ? '日期已填入，请补充时间段：' : '已识别的购买时间：' : '哪天、哪个时间段？'} </span>
@@ -153,17 +153,17 @@ export function PurchaseRequestCard({ slots = {}, cards = [] }: {
       {need('date_meaning') && <div style={fieldStyle}><span>届时怎么处理？ </span>
         {(['提醒我下单', '希望送达'] as const).map(option => {
           const value = option === '提醒我下单' ? 'order_on' as const : 'deliver_on' as const;
-          return <button key={option} type="button" style={{ ...chip, background: meaning === value ? '#1E1E23' : '#151518' }} onClick={() => setMeaning(value)}>{option}</button>;
+          return <button key={option} type="button" style={{ ...chip, background: meaning === value ? 'var(--theme-303)' : 'var(--theme-302)' }} onClick={() => setMeaning(value)}>{option}</button>;
         })}
       </div>}
       {need('budget') && <div style={fieldStyle}><span>预留多少预算？ </span>
         <input aria-label="预留预算" type="number" min="0.01" step="0.01" value={amount} onChange={event => setAmount(event.target.value)} style={inputStyle} /> 元
       </div>}
       {need('funding_account_ref') && <div style={fieldStyle}><span>用哪张卡预留？ </span>
-        {cardOptions.map(option => <button key={option} type="button" style={{ ...chip, background: card === option ? '#1E1E23' : '#151518' }} onClick={() => setCard(option)}>{option}</button>)}
+        {cardOptions.map(option => <button key={option} type="button" style={{ ...chip, background: card === option ? 'var(--theme-303)' : 'var(--theme-302)' }} onClick={() => setCard(option)}>{option}</button>)}
       </div>}
       </fieldset>
-      {error && <p role="alert" style={{ color: '#FF959B', margin: '8px 0 0' }}>{error}</p>}
+      {error && <p role="alert" style={{ color: 'var(--theme-301)', margin: '8px 0 0' }}>{error}</p>}
       <button type="button" onClick={prepare} style={submitStyle}>预览提醒设置</button>
       </>}
       {(preview || savedReminder) && error && <p role="alert">{error}</p>}

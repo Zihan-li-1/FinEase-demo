@@ -1,43 +1,43 @@
 /* Modern banking surface: calm blue accents, clear hierarchy, no legacy dark/gold palette. */
-.mini-icon.purple { color: #F052A0; background: #151518; }
-.ai-badge { color: #F052A0 !important; background: #151518; }
-.tip-card { background: #151518; border-color: #34343C; }
-.tip-icon { color: #F052A0; }
-.tip-card b { color: #F052A0; }
-.tip-card p { color: #F052A0; }
-.green-tag { color: #F052A0; background: #151518; }
+.mini-icon.purple { color: var(--theme-140); background: var(--theme-34); }
+.ai-badge { color: var(--theme-140) !important; background: var(--theme-34); }
+.tip-card { background: var(--theme-255); border-color: var(--theme-256); }
+.tip-icon { color: var(--theme-140); }
+.tip-card b { color: var(--theme-257); }
+.tip-card p { color: var(--theme-258); }
+.green-tag { color: var(--theme-33); background: var(--theme-34); }
 .analysis-categories { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-.analysis-categories span { color: #B8B8C2; background: #151518; border: 1px solid #34343C; border-radius: 999px; padding: 5px 8px; font-size: 10px; }
-.analysis-categories b { color: #F052A0; font-weight: 600; }
-.banking-choice-card, .banking-result-card, .banking-preview-card { margin-top: 10px; padding: 12px; border: 1px solid #34343C; border-radius: 8px; background: #151518; text-align: left; }
-.banking-choice-card > b, .banking-preview-card b, .banking-result-card > b { display: block; color: #F5F5F7; font-size: 12px; }
+.analysis-categories span { color: var(--theme-259); background: var(--theme-260); border: var(--theme-261); border-radius: 999px; padding: 5px 8px; font-size: 10px; }
+.analysis-categories b { color: var(--theme-137); font-weight: 600; }
+.banking-choice-card, .banking-result-card, .banking-preview-card { margin-top: 10px; padding: 12px; border: var(--theme-40); border-radius: 8px; background: var(--theme-68); text-align: left; }
+.banking-choice-card > b, .banking-preview-card b, .banking-result-card > b { display: block; color: var(--theme-32); font-size: 12px; }
 .banking-choice-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-.banking-choice-list button { border: 1px solid #34343C; border-radius: 6px; background: #151518; color: #F052A0; padding: 7px 10px; font-size: 11px; cursor: pointer; }
-.banking-choice-list button:hover { background: #151518; }
-.banking-choice-card small, .banking-result-card small, .banking-preview-card small { display: block; color: #B8B8C2; font-size: 10px; margin-top: 9px; }
-.banking-result-card { display: grid; gap: 5px; color: #B8B8C2; font-size: 11px; }
+.banking-choice-list button { border: var(--theme-262); border-radius: 6px; background: var(--theme-7); color: var(--theme-140); padding: 7px 10px; font-size: 11px; cursor: pointer; }
+.banking-choice-list button:hover { background: var(--theme-172); }
+.banking-choice-card small, .banking-result-card small, .banking-preview-card small { display: block; color: var(--theme-46); font-size: 10px; margin-top: 9px; }
+.banking-result-card { display: grid; gap: 5px; color: var(--theme-47); font-size: 11px; }
 .wealth-product-sections { display: grid; gap: 12px; margin-top: 8px; }
 .wealth-product-section { display: grid; gap: 8px; }
-.wealth-product-section h3 { margin: 0; color: #F052A0; font-size: 13px; }
+.wealth-product-section h3 { margin: 0; color: var(--theme-257); font-size: 13px; }
 .wealth-product-list { display: grid; gap: 9px; }
-.wealth-product-card { display: grid; gap: 6px; padding: 12px; border: 1px solid #34343C; border-radius: 10px; background: #151518; }
-.wealth-product-card strong { color: #F5F5F7; font-size: 13px; }
-.wealth-product-card a { width: fit-content; color: #F052A0; font-size: 11px; text-decoration: none; }
+.wealth-product-card { display: grid; gap: 6px; padding: 12px; border: var(--theme-263); border-radius: 10px; background: var(--theme-7); }
+.wealth-product-card strong { color: var(--theme-264); font-size: 13px; }
+.wealth-product-card a { width: fit-content; color: var(--theme-265); font-size: 11px; text-decoration: none; }
 .wealth-product-card a:hover { text-decoration: underline; }
 .banking-task-panel { display: none !important; }
 .error-actions details { display: none; }
-.banking-preview-card > div { display: flex; justify-content: space-between; gap: 12px; color: #B8B8C2; font-size: 10px; }
-.banking-preview-card > div span { color: #FFBE72; }
-.banking-preview-card strong { display: block; color: #F5F5F7; font-size: 22px; margin-top: 12px; }
-.banking-preview-card p { margin: 5px 0 0; color: #B8B8C2; font-size: 12px; }
+.banking-preview-card > div { display: flex; justify-content: space-between; gap: 12px; color: var(--theme-266); font-size: 10px; }
+.banking-preview-card > div span { color: var(--theme-267); }
+.banking-preview-card strong { display: block; color: var(--theme-45); font-size: 22px; margin-top: 12px; }
+.banking-preview-card p { margin: 5px 0 0; color: var(--theme-268); font-size: 12px; }
 .card-action-preview .secondary-button { margin-top: 12px; }
 .card-action-preview .secondary-button:disabled { opacity: .75; cursor: default; }
 .transfer-preview-actions, .transfer-preview-edit { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .transfer-preview-edit label { display: flex; align-items: center; gap: 8px; }
-.transfer-preview-edit input { width: 160px; padding: 8px; border: 1px solid #34343C; border-radius: 8px; }
+.transfer-preview-edit input { width: 160px; padding: 8px; border: var(--theme-269); border-radius: 8px; }
 .transfer-preview-actions button:disabled { opacity: .5; cursor: not-allowed; }
-.transfer-preview-otp { margin-top: 14px; padding: 12px; border: 1px dashed #34343C; border-radius: 10px; background: #151518; }
-.transfer-preview-otp > p { margin: 0 0 8px; color: #FFBE72; font-size: 12px; }
+.transfer-preview-otp { margin-top: 14px; padding: 12px; border: var(--theme-270); border-radius: 10px; background: var(--theme-271); }
+.transfer-preview-otp > p { margin: 0 0 8px; color: var(--theme-272); font-size: 12px; }
 .transfer-preview-otp .transfer-preview-edit { margin-top: 0; }
 .transfer-preview-otp input { letter-spacing: 3px; font-variant-numeric: tabular-nums; }
-.otp-error { margin: 8px 0 0; color: #FF959B; font-size: 12px; }
+.otp-error { margin: 8px 0 0; color: var(--theme-273); font-size: 12px; }
