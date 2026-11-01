@@ -30,17 +30,30 @@ test('query actions resolve products and return synthetic evidence without a wri
   assert.equal(recommend.body.data.status, 'wealth_result');
   assert.equal(recommend.body.data.data.kind, 'recommendation');
   assert.equal(recommend.body.data.data.synthetic_demo_only, true);
-  const compare = await send(core, parsed('wealth.compare', { product_refs: ['模拟灵活现金 A', '模拟稳健现金 B'] }));
+  const compare = await send(core, parsed('wealth.compare', { product_refs: ['模拟灵活现金基金 A', '模拟稳健债券基金 B'] }));
   assert.equal(compare.body.data.data.kind, 'comparison');
   assert.equal(compare.body.data.data.products.length, 2);
   const risk = await send(core, parsed('wealth.assess_risk', { assessment_scope: 'investment' }));
   assert.equal(risk.body.data.data.kind, 'risk_assessment');
 });
 
+test('unmatched Wealth references ask for a trusted selection instead of reporting model failure', async () => {
+  const core = createBankingCore();
+  const account = (await core.repository.getAccounts())[0];
+  const subscribe = await send(core, parsed('wealth.subscribe', { product_ref: '不确定的产品', amount: { amount_minor: 10000, currency: 'CNY' }, source_account_ref: account.name }));
+  assert.equal(subscribe.status, 200);
+  assert.equal(subscribe.body.code, 'NEEDS_CLARIFICATION');
+  assert.equal(subscribe.body.data.slot, 'product_ref');
+  const redeem = await send(core, parsed('wealth.redeem', { holding_ref: '不确定的持仓', quantity_or_amount: { kind: 'amount', amount_minor: 10000, currency: 'CNY' } }));
+  assert.equal(redeem.status, 200);
+  assert.equal(redeem.body.code, 'NEEDS_CLARIFICATION');
+  assert.equal(redeem.body.data.slot, 'holding_ref');
+});
+
 test('subscription requires preview and exact confirmation; repeated execution has one effect', async () => {
   const core = createBankingCore();
   const account = (await core.repository.getAccounts())[0];
-  const response = await send(core, parsed('wealth.subscribe', { product_ref: '模拟灵活现金 A', amount: { amount_minor: 10000, currency: 'CNY' }, source_account_ref: account.name }));
+  const response = await send(core, parsed('wealth.subscribe', { product_ref: '模拟灵活现金基金 A', amount: { amount_minor: 10000, currency: 'CNY' }, source_account_ref: account.name }));
   assert.equal(response.status, 200);
   const preview = response.body.data;
   assert.equal(preview.status, 'awaiting_confirmation');
@@ -61,7 +74,7 @@ test('subscription requires preview and exact confirmation; repeated execution h
 
 test('redemption requires separate confirmation; changing holdings invalidates preview', async () => {
   const core = createBankingCore();
-  const intent = parsed('wealth.redeem', { holding_ref: '模拟稳健现金 B', quantity_or_amount: { kind: 'amount', amount_minor: 10000, currency: 'CNY' } });
+  const intent = parsed('wealth.redeem', { holding_ref: '模拟稳健债券基金 B', quantity_or_amount: { kind: 'amount', amount_minor: 10000, currency: 'CNY' } });
   const response = await send(core, intent);
   assert.equal(response.status, 200);
   const preview = response.body.data;
