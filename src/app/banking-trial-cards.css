@@ -23,7 +23,7 @@
 .savings-input-grid, .savings-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
 .savings-input-grid label { display: grid; gap: 5px; color: #F052A0; font-size: 12px; font-weight: 600; }
 .savings-input-grid input { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #34343C; border-radius: 8px; background: #151518; color: #F052A0; }
-.savings-input-grid input:focus-visible { outline: 2px solid #34343C; outline-offset: 2px; }
+.savings-input-grid input:focus-visible { outline: 2px solid #F052A0; outline-offset: 2px; }
 .savings-input-card fieldset { min-width: 0; margin: 12px 0; padding: 8px 12px; border: 1px solid #34343C; border-radius: 10px; }
 .savings-input-card legend { color: #F052A0; font-size: 12px; font-weight: 600; }
 .savings-input-card button:disabled { opacity: .55; cursor: not-allowed; }
@@ -51,7 +51,7 @@
 .savings-plan-card .savings-compact-recent { margin-top: 6px; }
 .savings-plan-card .savings-calculation-details { margin-top: 10px; font-size: 11px; color: #B8B8C2; }
 .savings-plan-card .savings-calculation-details summary { width: fit-content; cursor: pointer; padding: 4px 0; color: #F052A0; }
-.savings-plan-card .savings-calculation-details summary:focus-visible { outline: 2px solid #34343C; outline-offset: 3px; border-radius: 3px; }
+.savings-plan-card .savings-calculation-details summary:focus-visible { outline: 2px solid #F052A0; outline-offset: 3px; border-radius: 3px; }
 .savings-plan-card .savings-calculation-details p { margin: 6px 0; font-size: 11px; }
 .savings-plan-card .savings-calculation-details dl { margin: 0; }
 .savings-plan-card .savings-calculation-details dl > div { display: grid; grid-template-columns: minmax(50px, 1fr) minmax(0, 4fr); gap: 8px; padding: 6px 0; border-top: 1px solid #34343C; line-height: 1.6; }
