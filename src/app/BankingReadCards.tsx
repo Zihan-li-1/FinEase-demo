@@ -9,6 +9,35 @@ const liquidityText = (value: string) => value === "T+0" ? "通常当天可取" 
 const durationText = (days: number) => days === 0 ? "没有固定持有期" : days % 30 === 0 ? `约 ${days / 30} 个月` : days >= 30 ? `约 ${Math.round(days / 30)} 个月（${days} 天）` : `${days} 天`;
 const actionNames: Record<string, string> = { "bill.analyze": "分析收支", "bill.report": "查看账单报告", "subscription.list": "查看订阅", "card.get": "查看卡片预算", "wealth.recommend": "筛选理财产品", "wealth.compare": "比较理财产品", "notification.remind": "达到条件时在应用内提醒" };
 const actionName = (action: string) => actionNames[action] || "查看建议";
+type ScenarioRuleView = {
+  status?: string;
+  trigger?: { type?: string; value?: string };
+  conditions?: Record<string, unknown>;
+  proposed_steps?: Array<{ action: string; parameters?: Record<string, unknown> }>;
+};
+const scenarioRuleCopy = (rule: ScenarioRuleView, saved: boolean) => {
+  const conditions = rule.conditions || {};
+  const cardRef = typeof conditions.card_ref === "string" && conditions.card_ref.trim() ? conditions.card_ref.trim() : "这张卡";
+  const threshold = conditions.budget_usage_percent_gte;
+  const isBudgetReminder = Number.isInteger(threshold) && Number(threshold) >= 1 && Number(threshold) <= 100 && rule.proposed_steps?.some(step => step.action === "notification.remind");
+  if (isBudgetReminder) return {
+    title: `${cardRef}本月预算到 ${threshold}% 设置提醒`,
+    condition: `当${cardRef}本月消费达到预算的 ${threshold}% 时`,
+    result: "在应用内提醒你",
+    status: saved ? "已保存，达到条件后会提醒你" : "等待你确认后保存",
+  };
+  const triggerNames: Record<string, string> = {
+    balance_changed: "账户余额发生变化时",
+    transaction_created: "出现新交易时",
+    subscription_changed: "订阅状态发生变化时",
+  };
+  return {
+    title: saved ? "提醒规则已保存" : "提醒规则设置预览",
+    condition: triggerNames[rule.trigger?.value || ""] || "达到你设置的条件时",
+    result: rule.proposed_steps?.map(step => actionName(step.action)).join("、") || "给出相应提醒或建议",
+    status: saved ? "已保存并生效" : "等待你确认后保存",
+  };
+};
 const ProductTerms = () => <div className="financial-term-help">
   <details><summary>风险等级 <span>点此了解</span></summary><p>风险等级用来表示价格波动和发生亏损的可能性。这里的百分比只是帮助理解差异的演示尺度，不代表实际产品最多只会亏这么多；购买前仍需查看产品说明和正式风险测评。</p></details>
   <details><summary>流动性 <span>点此了解</span></summary><p>流动性就是需要用钱时，多久能把理财资金取出来。当天可取最灵活；下一个工作日可取需要等待；持有到计划结束通常不能提前使用这笔钱。</p></details>
@@ -21,11 +50,13 @@ export function BankingReadCard({ data, accessCode = "", active = false, busy = 
   const products = data?.data?.products as InvestmentProduct[] | undefined;
   const wealthProducts = data?.data?.products as Array<{ product_ref: string; name: string; risk_level: string; expected_yield_bps: number; minimum_amount_minor: number; liquidity: string; duration_days: number }> | undefined;
   const steps = data?.data?.steps as Array<{ action: string; reason: string }> | undefined;
-  const rule = data?.data?.rule as { id?: string; status?: string; trigger?: { type?: string; value?: string }; proposed_steps?: Array<{ action: string }> } | undefined;
+  const rule = data?.data?.rule as ScenarioRuleView | undefined;
+  const readableRule = rule ? scenarioRuleCopy(rule, data?.status === "scenario_rule") : undefined;
   const isWealth = ["wealth_recommendation", "wealth_comparison"].includes(data?.status || "");
-  const title = data?.status === "goal_plan" ? "综合财务规划" : data?.status === "risk_assessment_required" ? "风险测评要求" : data?.status?.startsWith("scenario_") ? "跨场景规则" : subscriptions ? "订阅项目" : isWealth ? data?.status === "wealth_comparison" ? "理财产品对比" : "理财条件筛选" : "理财产品";
+  const isScenarioRule = data?.status?.startsWith("scenario_") === true;
+  const title = data?.status === "goal_plan" ? "综合财务规划" : data?.status === "risk_assessment_required" ? "风险测评要求" : isScenarioRule ? "提醒设置" : subscriptions ? "订阅项目" : isWealth ? data?.status === "wealth_comparison" ? "理财产品对比" : "理财条件筛选" : "理财产品";
   return <section className="financial-read-card" aria-label={title}>
-    <header><b>{title}</b><span>{data?.status === "scenario_rule" ? "模拟规则 · 已保存" : "模拟数据 · 只读或建议"}</span></header>
+    <header><b>{title}</b><span>{isScenarioRule ? data?.status === "scenario_rule" ? "已保存" : "保存前请确认" : "模拟数据 · 只读或建议"}</span></header>
     {subscriptions && subscriptionSummary && <div className="subscription-summary" aria-label="订阅费用汇总"><p><span>每月订阅总额</span><strong>{money(subscriptionSummary.activeMonthlyFeeFen ?? 0)}</strong></p><p><span>可能闲置月费</span><strong>{money(subscriptionSummary.potentiallyUnusedMonthlyFeeFen ?? 0)}</strong></p><p><span>预计每年可节省</span><strong>{money(subscriptionSummary.potentialAnnualSavingsFen ?? 0)}</strong></p></div>}
     {subscriptions?.map(s => <article key={s.id}>
       <h3>{s.name}</h3><div className="financial-data-grid">
@@ -56,7 +87,7 @@ export function BankingReadCard({ data, accessCode = "", active = false, busy = 
       <a href="https://personal.webank.com/s/hj/focus2/client/index.html?fid=1912&aid=10482&bg=_ffffff" target="_blank" rel="noopener noreferrer">前往微众银行理财界面查看 →</a>
     </article>)}
     {steps?.map((step, index) => <article key={`${step.action}-${index}`}><h3>{index + 1}. {actionName(step.action)}</h3><p>{step.reason}</p></article>)}
-    {rule && <article><h3>{rule.id ? `规则 ${rule.id}` : "规则变更预览"}</h3><div className="financial-data-grid"><p><span>状态</span><strong>{rule.status || "待确认"}</strong></p><p><span>触发</span><strong>{rule.trigger?.value || "—"}</strong></p><p><span>建议步骤</span><strong>{rule.proposed_steps?.map(step => actionName(step.action)).join("、") || "—"}</strong></p></div></article>}
+    {readableRule && <article><h3>{readableRule.title}</h3><div className="financial-data-grid"><p><span>什么时候提醒</span><strong>{readableRule.condition}</strong></p><p><span>提醒方式</span><strong>{readableRule.result}</strong></p><p><span>当前进度</span><strong>{readableRule.status}</strong></p></div></article>}
     {data?.status === 'scenario_rule_preview' && onConfirm && onReject && onCheck && <div className="error-actions">
       {data.outcomePending && <p>结果待核实，请先查询原操作。</p>}
       <button type="button" className="primary-button" disabled={!active || busy || data.outcomePending} onClick={() => onConfirm(data)}>确认并保存规则</button>
@@ -64,7 +95,7 @@ export function BankingReadCard({ data, accessCode = "", active = false, busy = 
       <button type="button" className="secondary-button" disabled={busy} onClick={() => onCheck(data)}>查询操作状态</button>
     </div>}
     {(subscriptions?.length === 0 || products?.length === 0 || (isWealth && wealthProducts?.length === 0)) && <p>当前没有符合条件的项目。</p>}
-    <footer>{isWealth ? "仅按用户声明条件筛选；未完成正式风险测评，不构成个性化投资建议。" : data?.status?.startsWith("scenario_") ? "规则只生成建议；资金或控制变更仍需重新预览并确认。" : products ? "合成产品数据，示例收益率不构成收益保证。" : subscriptions ? "节省金额按可能闲置订阅月费 × 12 估算；请核实后自行决定，本结果不会取消订阅。" : "本结果不会自动执行任何资金或控制变更。"}</footer>
+    <footer>{isWealth ? "仅按用户声明条件筛选；未完成正式风险测评，不构成个性化投资建议。" : isScenarioRule ? "这项设置只会提醒你或给出建议，不会自动转账、扣款或修改银行卡设置。" : products ? "合成产品数据，示例收益率不构成收益保证。" : subscriptions ? "节省金额按可能闲置订阅月费 × 12 估算；请核实后自行决定，本结果不会取消订阅。" : "本结果不会自动执行任何资金或控制变更。"}</footer>
   </section>;
 }
 

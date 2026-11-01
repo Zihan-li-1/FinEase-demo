@@ -34,6 +34,23 @@ test('理财产品卡片用通俗语言解释风险、取用时间和月度期�
   assert.equal(value.includes('180 天'), false);
 });
 
+test('预算提醒规则卡片只展示用户能看懂的完整说明', () => {
+  const rule = {
+    id: 'rule_25e51b15-a1aa-438c-bd47-1443e8a95535',
+    status: 'active',
+    trigger: { type: 'financial_event', value: 'card_monthly_budget_usage_changed' },
+    conditions: { card_ref: '娱乐卡', budget_usage_percent_gte: 80 },
+    proposed_steps: [{ action: 'notification.remind', parameters: { channel: 'in_app' } }],
+  };
+  const preview = text(renderToStaticMarkup(React.createElement(BankingReadCard, { data: { status: 'scenario_rule_preview', data: { rule } } })));
+  for (const expected of ['提醒设置', '保存前请确认', '娱乐卡本月预算到 80% 设置提醒', '当娱乐卡本月消费达到预算的 80% 时', '在应用内提醒你', '等待你确认后保存', '不会自动转账、扣款或修改银行卡设置']) assert.ok(preview.includes(expected), expected);
+  for (const internal of ['rule_25e51b15', 'active', 'financial_event', 'card_monthly_budget_usage_changed', 'notification.remind', 'in_app']) assert.equal(preview.includes(internal), false, internal);
+
+  const saved = text(renderToStaticMarkup(React.createElement(BankingReadCard, { data: { status: 'scenario_rule', data: { rule } } })));
+  assert.ok(saved.includes('已保存，达到条件后会提醒你'));
+  assert.equal(saved.includes('rule_25e51b15'), false);
+});
+
 test('August card uses structured amounts, exact signed balance, all transaction count and Chinese provenance', () => {
   const value = text(render(fixture));
   for (const expected of ['2026 年 8 月', '月度收支概览', '本月总支出¥8,460.00', '本月收入¥12,000.00', '+¥3,540.00', '不是账户可用余额', '总交易笔数12 笔', '模拟演示数据', '2026年9月1日 00:00（北京时间）', '房租', '35.5%', '¥3,000.00']) assert.ok(value.includes(expected), expected);
