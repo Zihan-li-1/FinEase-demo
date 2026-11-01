@@ -3,8 +3,66 @@ import assert from 'node:assert/strict';
 import { validateParsedIntent } from '../src/agent/validate-parsed-intent.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { bankingIntentSystemPrompt } from '../server/banking-intent-parser.mjs';
-import { bankingAgentSpec } from '../server/trueforge-banking-runtime.mjs';
+import { bankingAgentSpec, parseTrueforgeBankingIntent } from '../server/trueforge-banking-runtime.mjs';
+import { parseBankingIntent } from '../server/banking-intent-parser.mjs';
+import { createBankingCore } from '../src/banking-core/core.mjs';
 import { normalizePurchaseSlots, purchaseDateFields, purchaseIntentFromMessage, purchaseMissingQuestions } from '../src/lib/purchase-flow.mjs';
+
+// Replays the malformed item representation observed from the real model.
+const reminderIntent = items => ({ schemaVersion: '1.0.0', action: 'scenario.plan_purchase',
+  slots: { date_expression: '十一月十号', date_meaning: 'order_on', items }, missingSlots: [], status: 'ready_for_resolution' });
+const reminderRuntime = intent => ({ createSession: async () => 'reminder-fixture', cancel: async () => {}, runTurn: async () => JSON.stringify(intent) });
+const reminderNow = () => Date.parse('2026-11-01T12:00:00+08:00');
+
+test('Chinese November reminder repairs model string items and reaches the existing purchase card', async () => {
+  const env = { FINEASE_ACCESS_CODE: 'purchase-reminder-access', CONTINUATION_TOKEN_SECRET: 'purchase-reminder-test-continuation' };
+  const core = createBankingCore({ now: reminderNow });
+  const before = await core.repository.getAccounts();
+  const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'november-reminder',
+  }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在十一月十号买花' }) });
+  const response = await handleBankingAgent(request, { env, now: reminderNow,
+    core: { ...core, prepare: async () => assert.fail('no financial preview'), execute: async () => assert.fail('no financial execution') },
+    trueforgeRuntimeClient: reminderRuntime(reminderIntent(['flowers'])),
+  });
+  const payload = await response.json();
+  assert.equal(response.status, 200, JSON.stringify(payload));
+  assert.equal(payload.data.status, 'purchase_request');
+  const slots = payload.data.data.slots;
+  assert.equal(slots.date_expression, '2026-11-10');
+  assert.equal(slots.budget_month, '2026-11');
+  assert.equal(slots.date_meaning, 'order_on');
+  assert.deepEqual(slots.items, [{ category: 'flowers', quantity: 1 }]);
+  assert.equal(slots.budget, undefined);
+  assert.equal(slots.funding_account_ref, undefined);
+  assert.deepEqual(purchaseMissingQuestions(slots).map(item => item.field), ['date_expression', 'budget', 'funding_account_ref']);
+  assert.deepEqual(await core.repository.getAccounts(), before);
+});
+
+test('both model adapters normalize known item shorthand and retain valid supplied fields', async () => {
+  const value = reminderIntent(['flowers', { category: 'cake', quantity: 2 }]);
+  value.slots.budget = { amount_minor: 50000, currency: 'CNY' };
+  value.slots.funding_account_ref = '日常卡';
+  const expected = { ...value, slots: { ...value.slots, items: [{ category: 'flowers', quantity: 1 }, { category: 'cake', quantity: 2 }] } };
+  const message = '提醒我在十一月十号用日常卡预留500元买花和2个蛋糕';
+  assert.deepEqual(await parseTrueforgeBankingIntent(message, { client: reminderRuntime(value), now: reminderNow }), expected);
+  assert.deepEqual(await parseBankingIntent(message, { env: { DASHSCOPE_API_KEY: 'test-only' }, now: reminderNow,
+    onDiagnostic: () => {}, fetchImpl: async () => Response.json({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(value) } }] }),
+  }), expected);
+});
+
+test('item shape repair keeps strict rejection of unknown items, invalid amounts and signed continuations', async () => {
+  const invalid = [reminderIntent(['unknown_product']), reminderIntent(['flowers', 'flowers']), reminderIntent([{ category: 'flowers', quantity: 0 }])];
+  invalid.push({ ...reminderIntent(['flowers']), slots: { ...reminderIntent(['flowers']).slots, budget: { amount_minor: -100, currency: 'CNY' } } });
+  for (const value of invalid) {
+    await assert.rejects(parseTrueforgeBankingIntent('提醒我在十一月十号买花', { client: reminderRuntime(value) }), { code: 'TRUEFORGE_FORMAT_ERROR' });
+  }
+  const value = reminderIntent(['flowers']);
+  assert.throws(() => validateParsedIntent(value));
+  await assert.rejects(parseTrueforgeBankingIntent('继续', { client: reminderRuntime(value), context: {
+    action: 'scenario.plan_purchase', slots: { ...value.slots, items: [{ category: 'flowers', quantity: 3 }] },
+  } }), { code: 'TRUEFORGE_FORMAT_ERROR' });
+});
 
 test('a clear flower reminder bypasses an outer chat reply and keeps business slot extraction', async () => {
   const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };

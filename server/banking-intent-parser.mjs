@@ -3,6 +3,7 @@ import {
   ParsedIntentValidationError,
 } from '../src/agent/validate-parsed-intent.mjs';
 import { understandingContext } from './understanding-context.mjs';
+import { normalizePurchaseModelItems } from './purchase-intent-normalization.mjs';
 
 const DEFAULT_QWEN_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
 const MAX_MESSAGE_LENGTH = 2000;
@@ -10,6 +11,7 @@ const MAX_HISTORY_ITEMS = 12;
 const MAX_HISTORY_CONTENT_LENGTH = 2000;
 
 export const bankingIntentSystemPrompt = `你是 FinEase 的 Banking Intent Parser。你只负责把用户自然语言转换为 ParsedIntent v1，绝不调用工具、Skill 或银行服务。
+购物 items 必须是对象数组，每项包含 category（flowers/cake/headphones）和 quantity（1–10 的整数）；未说数量时默认 1。绝不能输出字符串数组，例如 ["flowers"]。用户“提醒我在十一月十号买花”输出 {"schemaVersion":"1.0.0","action":"scenario.plan_purchase","slots":{"date_expression":"十一月十号","date_meaning":"order_on","items":[{"category":"flowers","quantity":1}]},"missingSlots":[],"status":"ready_for_resolution"}。只识别日期时保留日期，不补造时间、预算或卡片。
 只允许输出一个 JSON 对象，且只能使用以下 action：transfer.create、bill.summary、card.get、card.set_budget、card.set_controls、card.security_review、card.freeze、card.unfreeze、subscription.list、product.list、wealth.recommend、wealth.compare、wealth.assess_risk、wealth.subscribe、wealth.redeem、scenario.create_rule、scenario.update_rule、scenario.disable_rule、scenario.review_event、scenario.plan_purchase、orchestrator.goal、clarify、unsupported。subscription.list、product.list 为只读列表，slots 为 {}，missingSlots 为 []，status 为 ready_for_resolution；取消订阅等不支持的动作返回 unsupported。多个独立动作必须返回 clarify，不得挑选其中一个执行。
 新增已注册的购物复合意图 scenario.plan_purchase：预留预算、指定日期买鲜花/蛋糕是一个业务目标，使用该 action，不拆成工具数组，也不当作普通理财推荐。slots 仅允许 budget（整数分金额对象）、budget_month（YYYY-MM）、funding_account_ref（用户原始账户称谓）、date_expression（保留含糊原话；明确年月日及时间窗时可规范为 YYYY-MM-DD HH:mm-HH:mm）、date_meaning（明确届时下单为 order_on、明确届时送达为 deliver_on；不明则省略）、items（flowers/cake、quantity 整数）、selection_mode（guided/browse）、preferences。preferences 仅允许 flower_colors、flower_materials、flower_exclusions、scent_preference、cake_flavors、cake_servings、ingredient_exclusions、occasion、style。规范值：粉/白/黄/混色对应 pink/white/yellow/mixed；玫瑰/郁金香/向日葵/康乃馨/百合对应 rose/tulip/sunflower/carnation/lily；不要香味/淡香/不限对应 none/light/any；水果/巧克力/草莓/坚果/香草口味对应 fruit/chocolate/strawberry/nuts/vanilla；坚果/乳制品/鸡蛋/小麦禁忌对应 nuts/milk/egg/wheat。数组字段只保留用户明确要求，不猜偏好。只买用户提到的品类，每品类不重复。此 action 用于把购物需求转成平台搜索链接，并把已知信息填入预算表单；用户没说时间时一律按现在就买，不填 budget、budget_month、funding_account_ref、date_expression、date_meaning（不预留预算、不设置提醒）；只有用户明确提到日期时间时才进入预留预算与提醒流程（日期已经过去也照样返回 scenario.plan_purchase，由卡片提示，绝不因此返回 unsupported、clarify 或拒绝执行），填写 budget、funding_account_ref、date_expression、date_meaning 等已知槽位；budget_month 固定等于时间所在月份，用户没单独说预算月份时省略，由流程按日期推导。无论信息多少，missingSlots 固定 []、status 固定 ready_for_resolution；未提供字段一律省略，不能默认冻结资金或已下单。用户改偏好时保留其余原槽位；清除禁忌需明确说不限/删除，不能因未提及而移除。多个无关业务仍返回 clarify。
 购物日期按输入中的 currentDate 理解：用户说“9.1号”“九月一号”时原样保留月日，不要自己推算年份、也不要改写成具体日期（不要把“9.1号”写成 2026-09-01），年份由服务端按 currentDate 补成当年；用户明确说了年份才写成带年份的日期，即使已过期也不能改成年份更晚的日期。只知道日期时不要因为缺少时间段丢掉日期，也不要编造 09:00-12:00 等时间。明天、后天等可据 currentDate 换算，仍含糊的时间保留原话。用户说“提醒我买”对应 order_on。已说的预算、卡片、品类和用途（preferences.occasion）均填入相应槽位，后续只询问缺少的字段。用户说「提醒我买花」「提醒我九月一号买蛋糕」「预留预算买花」这类购物请求，一律返回 scenario.plan_purchase，不是 scenario.create_rule、也不是 unsupported，不要回复「无法设置提醒」——提醒由购物流程创建。
@@ -120,7 +122,7 @@ function mapUpstreamError(status) {
   return new BankingIntentParserError('MODEL_UPSTREAM_ERROR', '模型服务暂时不可用，请稍后重试。', 502);
 }
 
-function parseModelResponse(payload, report) {
+function parseModelResponse(payload, report, context) {
   const choice = payload?.choices?.[0];
   if (choice?.finish_reason !== 'stop' || typeof choice?.message?.content !== 'string') {
     report('incomplete_response');
@@ -134,7 +136,7 @@ function parseModelResponse(payload, report) {
     throw new BankingIntentParserError('MODEL_FORMAT_ERROR', '模型返回了无效的结构化结果。');
   }
   try {
-    return validateParsedIntent(parsed);
+    return validateParsedIntent(normalizePurchaseModelItems(parsed, context));
   } catch (error) {
     if (error instanceof ParsedIntentValidationError) {
       // Validator messages contain only fixed schema paths/rules, never model values or unknown field names.
@@ -199,7 +201,7 @@ export async function parseBankingIntent(
     throw new BankingIntentParserError('MODEL_FORMAT_ERROR', '模型响应格式无效。');
   }
   try {
-    const result = parseModelResponse(payload, report);
+    const result = parseModelResponse(payload, report, context);
     diagnostic('agent_intent_validation', { jsonParsed: true, schemaValid: true, action: result.action });
     diagnostic('agent_model_response', { completed: true, success: true, durationMs: Date.now() - modelStartedAt });
     return result;

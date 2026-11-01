@@ -5,6 +5,7 @@ import { ParsedIntentValidationError, validateParsedIntent } from '../src/agent/
 import { trueforgeError } from './trueforge-client.mjs';
 import { withTrueforgeDeadline } from './trueforge-tool-result.mjs';
 import { understandingContext } from './understanding-context.mjs';
+import { normalizePurchaseModelItems } from './purchase-intent-normalization.mjs';
 
 // Understanding is deliberately capability-free. Only the server dispatcher
 // may turn a validated proposal into one existing Skill/Core operation.
@@ -81,7 +82,7 @@ export async function parseTrueforgeBankingIntent(message, { env = process.env, 
       let rawIntent;
       try {
         rawIntent = JSON.parse(output);
-        const intent = validateParsedIntent(rawIntent);
+        const intent = validateParsedIntent(normalizePurchaseModelItems(rawIntent, context));
         validateIntentGrounding(intent, message, context);
         report('agent_intent_validation', { jsonParsed: true, schemaValid: true, action: intent.action });
         report('agent_model_response', { provider: 'trueforge', completed: true, success: true, durationMs: Date.now() - startedAt });
