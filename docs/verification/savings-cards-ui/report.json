@@ -1,0 +1,709 @@
+{
+  "fixture": "real seeded amounts; offline model fixture; no financial writes",
+  "base": "http://127.0.0.1:4300",
+  "cases": [
+    {
+      "width": 1440,
+      "sections": [
+        {
+          "columns": 2,
+          "availableWidth": 552,
+          "count": 9,
+          "widths": [
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272
+          ],
+          "heights": [
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 24.84,
+          "labelSize": 11
+        },
+        {
+          "columns": 2,
+          "availableWidth": 552,
+          "count": 9,
+          "widths": [
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272
+          ],
+          "heights": [
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 27.6,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    },
+    {
+      "width": 1024,
+      "sections": [
+        {
+          "columns": 2,
+          "availableWidth": 552,
+          "count": 9,
+          "widths": [
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272
+          ],
+          "heights": [
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 24.84,
+          "labelSize": 11
+        },
+        {
+          "columns": 2,
+          "availableWidth": 552,
+          "count": 9,
+          "widths": [
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272,
+            272
+          ],
+          "heights": [
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134,
+            134
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 27.6,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    },
+    {
+      "width": 768,
+      "sections": [
+        {
+          "columns": 2,
+          "availableWidth": 394,
+          "count": 9,
+          "widths": [
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193
+          ],
+          "heights": [
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 22,
+          "labelSize": 11
+        },
+        {
+          "columns": 2,
+          "availableWidth": 394,
+          "count": 9,
+          "widths": [
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193,
+            193
+          ],
+          "heights": [
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132
+          ],
+          "firstRowAligned": true,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 26,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    },
+    {
+      "width": 430,
+      "sections": [
+        {
+          "columns": 1,
+          "availableWidth": 316,
+          "count": 9,
+          "widths": [
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316
+          ],
+          "heights": [
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 22,
+          "labelSize": 11
+        },
+        {
+          "columns": 1,
+          "availableWidth": 316,
+          "count": 9,
+          "widths": [
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316,
+            316
+          ],
+          "heights": [
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 26,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    },
+    {
+      "width": 390,
+      "sections": [
+        {
+          "columns": 1,
+          "availableWidth": 276,
+          "count": 9,
+          "widths": [
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276
+          ],
+          "heights": [
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 22,
+          "labelSize": 11
+        },
+        {
+          "columns": 1,
+          "availableWidth": 276,
+          "count": 9,
+          "widths": [
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276,
+            276
+          ],
+          "heights": [
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 26,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    },
+    {
+      "width": 320,
+      "sections": [
+        {
+          "columns": 1,
+          "availableWidth": 206,
+          "count": 9,
+          "widths": [
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206
+          ],
+          "heights": [
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130,
+            130
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 22,
+          "labelSize": 11
+        },
+        {
+          "columns": 1,
+          "availableWidth": 206,
+          "count": 9,
+          "widths": [
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206,
+            206
+          ],
+          "heights": [
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132,
+            132
+          ],
+          "firstRowAligned": false,
+          "overflow": false,
+          "inViewport": true,
+          "valueSize": 26,
+          "labelSize": 11
+        }
+      ],
+      "changes": [
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥56.25↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥41.25↑ 增长"
+        },
+        {
+          "state": "flat",
+          "color": "rgb(69, 94, 118)",
+          "text": "— ¥0.00持平"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥51.25↑ 增长"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥193.75↓ 下降"
+        },
+        {
+          "state": "down",
+          "color": "rgb(25, 115, 77)",
+          "text": "−¥222.50↓ 下降"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥22.50↑ 增长"
+        },
+        {
+          "state": "up",
+          "color": "rgb(184, 58, 58)",
+          "text": "+¥205.00↑ 增长"
+        }
+      ],
+      "keyboardDisclosure": "passed"
+    }
+  ],
+  "pageErrors": []
+}

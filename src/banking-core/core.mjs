@@ -1,4 +1,5 @@
 // @ts-check
+import { validRiskAssessment } from '../skills/wealth/risk-assessment.mjs';
 import { validCalendarDate } from '../lib/calendar.mjs';
 import { createFinancialContext } from './repository.mjs';
 import { BankingError, assertFen, assertId, canonical } from './errors.mjs';
@@ -85,7 +86,7 @@ function validateScenarioInput(action, input) {
 
 /** One isolated Mock banking session. Never feed model output to decide()/execute().
  * Future write actions must use this engine and a transaction adapter, not per-Skill Maps.
- * @param {{source?: Parameters<typeof createFinancialContext>[0], now?: () => number, store?: import('./contracts').BankingOperationStore, repository?: import('./contracts').FinancialContextRepository, wealthPorts?: ReturnType<typeof createWealthMockPorts>, ownerId?: string, policy?: {version: string, maxTransferFen: number, previewTtlMs: number}, deliverVerificationCode?: (args: {operationId: string, challengeId: string, code: string, expiresAt: string}) => void, demoOtpCode?: string}} [options] */
+ * @param {{riskStore?: any, source?: Parameters<typeof createFinancialContext>[0], now?: () => number, store?: import('./contracts').BankingOperationStore, repository?: import('./contracts').FinancialContextRepository, wealthPorts?: ReturnType<typeof createWealthMockPorts>, ownerId?: string, policy?: {version: string, maxTransferFen: number, previewTtlMs: number}, deliverVerificationCode?: (args: {operationId: string, challengeId: string, code: string, expiresAt: string}) => void, demoOtpCode?: string}} [options] */
 export function createBankingCore(options = {}) {
   const context = createFinancialContext(options.source);
   const repository = options.repository ?? context.repository;
@@ -98,7 +99,7 @@ export function createBankingCore(options = {}) {
   const now = options.now ?? Date.now;
   // The synthetic Wealth write port is only valid for this in-memory context.
   // A configured database must supply its own transactional adapter before enabling writes.
-  const wealthPorts = options.wealthPorts ?? (options.repository || options.store ? undefined : createWealthMockPorts({ getHoldings: context.getWealthHoldings, now }));
+  const wealthPorts = options.wealthPorts ?? (options.repository || options.store ? undefined : createWealthMockPorts({ getHoldings: context.getWealthHoldings, now, riskStore: options.riskStore }));
   const policy = Object.freeze({ version: 'mock-transfer-v1', maxTransferFen: 10000000, previewTtlMs: 300000, largeTransferFen: 100000, ...options.policy });
   assertFen(policy.maxTransferFen); assertFen(policy.previewTtlMs); assertFen(policy.largeTransferFen);
   /** 受控测试渠道：把明文验证码交给演示投递方。默认不投递——演示验证码固定为 DEMO_OTP_CODE（不在界面上明文展示，演示时口头告知）；真实接入短信/邮件渠道时注入 options.deliverVerificationCode。明文绝不写进风险响应或日志。 */
@@ -198,6 +199,7 @@ export function createBankingCore(options = {}) {
   }
   /** @param {import('./contracts').WealthAction} action @param {Record<string, any>} input @returns {Promise<import('./contracts').WealthEffect>} */
   async function wealthEffectFor(action, input) {
+    if ((await repository.getContextInfo()).dataSource !== 'synthetic_demo_only') throw new BankingError('CAPABILITY_UNAVAILABLE', '模拟理财操作仅可用于合成数据环境');
     if (!wealthPorts) throw new BankingError('CAPABILITY_UNAVAILABLE', '当前持久化环境未配置 Wealth 事务适配器');
     const keys = action === 'wealth.subscribe' ? ['productId', 'amountFen', 'currency', 'sourceAccountId'] : ['holdingId', 'quantityKind', 'amountFen', 'currency', 'unitsMilli'];
     if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(key => !keys.includes(key))) throw new BankingError('VALIDATION_ERROR', 'Wealth 请求字段无效');
@@ -212,7 +214,8 @@ export function createBankingCore(options = {}) {
       const disclosure = await wealthPorts.getDisclosure(input.productId);
       const rule = await wealthPorts.getOperationRule(input.productId);
       if (!product || !account || account.status !== 'active') throw new BankingError('VALIDATION_ERROR', '产品或来源账户不可用');
-      if (!assessment || assessment.source !== 'trusted_ui' || Date.parse(assessment.expires_at) <= now() || Number(assessment.risk_level.slice(1)) < Number(product.riskLevel.slice(1))) throw new BankingError('SUITABILITY_FAILED', '风险测评不匹配或已过期');
+      if (!product.isSynthetic) throw new BankingError('CAPABILITY_UNAVAILABLE', '模拟测评不能用于真实产品交易');
+      if (!validRiskAssessment(assessment, new Date(now()).toISOString()) || Number(assessment.risk_level.slice(1)) < Number(product.riskLevel.slice(1))) throw new BankingError('SUITABILITY_FAILED', '风险测评不匹配或已过期');
       if (!disclosure || disclosure.status !== 'active' || Date.parse(disclosure.expires_at) <= now() || !rule?.subscription_enabled) throw new BankingError('CAPABILITY_UNAVAILABLE', '产品披露或申购规则不可用');
       if (input.amountFen < product.minimumAmountFen) throw new BankingError('BELOW_MINIMUM_AMOUNT', '申购金额低于产品最低金额');
       if (account.availableBalanceFen < input.amountFen) throw new BankingError('INSUFFICIENT_BALANCE', '账户余额不足');

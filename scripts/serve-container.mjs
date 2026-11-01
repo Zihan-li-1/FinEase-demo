@@ -1,16 +1,17 @@
 import { handlePurchaseRequest } from '../server/purchase-api.mjs';
-// Serve the existing static export and original API handlers in one container.
+// Keep legacy API handlers and delegate pages and App Router APIs to Next.js.
 import http from 'node:http';
 import { Readable } from 'node:stream';
-import { readFile } from 'node:fs/promises';
-import { resolve, sep, extname } from 'node:path';
+import next from 'next';
 import { handleAgent } from '../server/qwen.mjs';
 import { handleBanking } from '../server/banking.mjs';
 import { handleBankingAgent, bankingAuthConfigStatus } from '../server/banking-agent.mjs';
 import { handleExecuteTrial } from '../server/transfer-execute-bridge.mjs';
 
-const root = resolve('out');
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8' };
+const port = Number(process.env.PORT || 3000);
+const app = next({ dev: false, hostname: '0.0.0.0', port });
+await app.prepare();
+const handleNext = app.getRequestHandler();
 const visits = [];
 const server = http.createServer(async (req, res) => {
   const pathname = req.url?.split('?')[0];
@@ -33,20 +34,9 @@ const server = http.createServer(async (req, res) => {
       const response = await (purchase ? handlePurchaseRequest(request) : banking ? handleBanking(request) : agent ? handleBankingAgent(request) : executeTrial ? handleExecuteTrial(request) : handleAgent(request));
       res.writeHead(response.status, Object.fromEntries(response.headers)); res.end(await response.text()); return;
     }
-    if (pathname?.startsWith('/api/')) { res.writeHead(404).end(); return; }
-    if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
-    let decoded;
-    try { decoded = decodeURIComponent(pathname || '/'); } catch { res.writeHead(400).end(); return; }
-    if (decoded.includes('\\') || decoded.includes('\0') || decoded.split('/').includes('..')) { res.writeHead(400).end(); return; }
-    const file = resolve(root, `.${decoded.endsWith('/') ? `${decoded}index.html` : decoded}`);
-    if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
-    let body, status = 200;
-    try { body = await readFile(file); }
-    catch { status = 404; body = await readFile(resolve(root, '404.html')).catch(() => Buffer.from('Not found')); }
-    res.writeHead(status, { 'Content-Type': status === 404 ? types['.html'] : types[extname(file)] || 'application/octet-stream', 'Cache-Control': pathname?.startsWith('/_next/static/') ? 'public, max-age=31536000, immutable' : 'no-cache' });
-    res.end(req.method === 'HEAD' ? undefined : body);
+    await handleNext(req, res);
   } catch { if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'application/json' }); res.end('{"code":"INTERNAL_ERROR","message":"Service unavailable"}'); }
 });
 console.info(JSON.stringify({ event: 'banking_auth_config', ...bankingAuthConfigStatus() }));
-server.listen(Number(process.env.PORT || 3000), '0.0.0.0', () => console.log('SaveFlow container HTTP ready'));
-for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { server.close(() => process.exit(0)); setTimeout(() => server.closeAllConnections(), 5000).unref(); });
+server.listen(port, '0.0.0.0', () => console.log('SaveFlow container HTTP ready'));
+for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { server.close(async () => { await app.close(); process.exit(0); }); setTimeout(() => server.closeAllConnections(), 5000).unref(); });

@@ -34,7 +34,7 @@ export async function handleWealth(intent, repository, ports, selections = {}) {
     if (intent.action === 'wealth.recommend') {
       resolved.goal = slots.goal;
       if (slots.constraints !== undefined) resolved.constraints = slots.constraints;
-    } else if (intent.action === 'wealth.assess_risk') resolved.assessment_scope = slots.assessment_scope;
+    } else if (intent.action === 'wealth.assess_risk') resolved.assessment_scope = 'investment'; // Normalize legacy scope aliases at the boundary.
     else if (intent.action === 'wealth.compare') {
       const ids = [];
       for (const raw of slots.product_refs) {

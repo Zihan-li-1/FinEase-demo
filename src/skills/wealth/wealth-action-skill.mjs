@@ -1,4 +1,5 @@
 // @ts-check
+import { validRiskAssessment } from './risk-assessment.mjs';
 
 export const WEALTH_ACTIONS = Object.freeze([
   'wealth.recommend',
@@ -111,7 +112,7 @@ export function validateWealthIntent(value) {
     }
     case 'wealth.assess_risk':
       exactKeys(slots, ['assessment_scope']);
-      if (!['investment', 'portfolio'].includes(String(slots.assessment_scope))) throw new WealthSkillError('VALIDATION_ERROR', 'assessment_scope 无效');
+      if (!['investment', 'portfolio', 'investment_suitability'].includes(String(slots.assessment_scope))) throw new WealthSkillError('VALIDATION_ERROR', 'assessment_scope 无效');
       break;
     case 'wealth.subscribe':
       exactKeys(slots, ['product_ref', 'amount', 'source_account_ref']);
@@ -161,7 +162,7 @@ export function validateResolvedWealthIntent(value) {
       break;
     case 'wealth.assess_risk':
       exactKeys(slots, ['assessment_scope']);
-      if (!['investment', 'portfolio'].includes(String(slots.assessment_scope)) || references.length) throw new WealthSkillError('VALIDATION_ERROR', 'risk ResolvedIntent 无效');
+      if (!['investment', 'portfolio', 'investment_suitability'].includes(String(slots.assessment_scope)) || references.length) throw new WealthSkillError('VALIDATION_ERROR', 'risk ResolvedIntent 无效');
       break;
     case 'wealth.subscribe':
       exactKeys(slots, ['product_id', 'amount', 'source_account_id']); validId(slots.product_id, 'product_id'); validId(slots.source_account_id, 'source_account_id'); validateMoney(slots.amount);
@@ -192,7 +193,7 @@ function metadata(context, entityIds, extraEvidence = []) {
 
 /** @param {Record<string, unknown>} assessment @param {string} asOf @param {string} scope */
 function validAssessment(assessment, asOf, scope) {
-  return assessment?.source === 'trusted_ui' && assessment.assessment_scope === scope && Object.hasOwn(RISK_RANK, String(assessment.risk_level)) && !isExpired(String(assessment.expires_at), asOf);
+  return validRiskAssessment(assessment, asOf, scope);
 }
 
 /** @param {Record<string, any>} ports */
@@ -231,6 +232,7 @@ export async function runResolvedWealthIntent(repository, ports, value) {
     const evaluationTime = typeof ports.now === 'function' ? ports.now() : new Date().toISOString();
     if (typeof evaluationTime !== 'string' || !Number.isFinite(Date.parse(evaluationTime))) throw new WealthSkillError('CAPABILITY_UNAVAILABLE', '可信时钟不可用');
     const meta = metadata(context, []);
+    if (context.dataSource !== 'synthetic_demo_only') throw new WealthSkillError('CAPABILITY_UNAVAILABLE', '模拟测评和理财仅可用于合成数据环境');
 
     if (intent.action === 'wealth.assess_risk') {
       const assessment = await ports.getRiskAssessment?.();

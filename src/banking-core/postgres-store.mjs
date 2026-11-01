@@ -1,6 +1,7 @@
 // @ts-check
+import { createRiskAssessmentStore, riskStoreScope } from '../../server/risk-assessment-store.mjs';
 import seed from '../data/saveflow_mock_data.json' with { type: 'json' };
-import { createBankingCore, bankingCore } from './core.mjs';
+import { createBankingCore } from './core.mjs';
 import { createFinancialContext } from './repository.mjs';
 import { BankingError, assertFen, assertId, canonical } from './errors.mjs';
 import { createWealthMockPorts } from '../skills/wealth/mock-ports.mjs';
@@ -42,7 +43,7 @@ function cardFromRow(row) {
 }
 
 /** Creates an async Postgres adapter; migrations 001 through 005 must be applied first. */
-export async function createPostgresBankingCore({ connectionString, source = seed, demoOtpCode } = {}) {
+export async function createPostgresBankingCore({ connectionString, source = seed, demoOtpCode, env = process.env } = {}) {
   if (typeof connectionString !== 'string' || !connectionString.trim()) throw new Error('DATABASE_URL is required');
   const { default: postgres } = await import('postgres');
   const sql = postgres(connectionString, { max: 1, idle_timeout: 20, connect_timeout: 10 });
@@ -127,6 +128,7 @@ export async function createPostgresBankingCore({ connectionString, source = see
   });
 
   const wealthPorts = createWealthMockPorts({
+    riskStore: createRiskAssessmentStore({ scope: riskStoreScope(ownerId, source.datasetId, env), env, sql }),
     getHoldings: async () => {
       const rows = await sql.unsafe('SELECT * FROM banking_wealth_holdings WHERE owner_id = $1 ORDER BY holding_id', [ownerId]);
       return rows.map(row => ({ id: row.holding_id, product_id: row.product_id, amount_fen: Number(row.amount_fen), units_milli: Number(row.units_milli), currency: row.currency, lock_until: row.lock_until ? new Date(row.lock_until).toISOString() : null, version: Number(row.version) }));
@@ -353,16 +355,17 @@ export async function getConfiguredBankingCore(env = process.env) {
   const demoOtpCode = (explicitDemoOtp || localDemo) ? (env.SAVEFLOW_DEMO_OTP_CODE || DEMO_OTP_CODE) : undefined;
   if (!env.DATABASE_URL) {
     if (env.NETLIFY && env.ALLOW_EPHEMERAL_BANKING !== 'true') throw Object.assign(new Error('DATABASE_URL is required for Netlify banking persistence'), { code: 'DATABASE_NOT_CONFIGURED' });
-    if (demoOtpCode) {
-      if (demoCore && demoCoreCode === demoOtpCode) return demoCore;
-      demoCoreCode = demoOtpCode;
-      demoCore = createBankingCore({ demoOtpCode });
+    {
+      if (demoCore && demoCoreCode === riskStoreScope(demoOtpCode, seed.datasetId, env)) return demoCore;
+      demoCoreCode = riskStoreScope(demoOtpCode, seed.datasetId, env);
+      const context = createFinancialContext(seed);
+      const riskStore = createRiskAssessmentStore({ scope: riskStoreScope(context.ownerId, seed.datasetId, env), env });
+      demoCore = createBankingCore({ demoOtpCode, riskStore });
       return demoCore;
     }
-    return bankingCore;
   }
-  if (configuredCore && configuredUrl === env.DATABASE_URL) return configuredCore;
-  configuredUrl = env.DATABASE_URL;
-  configuredCore = createPostgresBankingCore({ connectionString: configuredUrl, demoOtpCode });
+  if (configuredCore && configuredUrl === riskStoreScope(env.DATABASE_URL, seed.datasetId, env)) return configuredCore;
+  configuredUrl = riskStoreScope(env.DATABASE_URL, seed.datasetId, env);
+  configuredCore = createPostgresBankingCore({ connectionString: env.DATABASE_URL, demoOtpCode, env });
   return configuredCore;
 }
