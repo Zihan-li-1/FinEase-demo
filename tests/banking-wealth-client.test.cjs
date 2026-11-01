@@ -24,7 +24,7 @@ test('browser accepts Wealth result, preview and the verified execution receipt'
     global.fetch = async (url, init) => handleBankingAgent(new Request(`http://localhost${url}`, init), {
       env, core, parseIntent: async () => action === 'wealth.recommend'
         ? { schemaVersion: '1.0.0', action, slots: { goal: { kind: 'steady_growth' } }, missingSlots: [], status: 'ready_for_resolution' }
-        : { schemaVersion: '1.0.0', action, slots: { product_ref: '模拟灵活现金 A', amount: { amount_minor: 10000, currency: 'CNY' }, source_account_ref: '活期账户' }, missingSlots: [], status: 'ready_for_resolution' },
+        : { schemaVersion: '1.0.0', action, slots: { product_ref: '模拟灵活现金基金 A', amount: { amount_minor: 10000, currency: 'CNY' }, source_account_ref: '活期账户' }, missingSlots: [], status: 'ready_for_resolution' },
     });
     const read = await askBankingAgent({ message: '推荐模拟理财' }, env.FINEASE_ACCESS_CODE, new AbortController().signal);
     assert.equal(read.status, 'wealth_result');

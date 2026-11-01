@@ -37,7 +37,7 @@ test('flat recommend without financial context keeps the original contract', asy
   );
   assert.equal(result.ok, true);
   assert.equal(result.data.bill_basis, undefined);
-  assert.deepEqual(result.data.products.map(item => item.product_ref), ['product_001', 'product_002']);
+  assert.deepEqual(result.data.products.map(item => item.product_ref), ['product_001', 'product_002', 'product_004', 'product_007']);
 });
 
 test('orchestrator wires bill analysis into wealth.recommend end-to-end without a write', async () => {
@@ -81,7 +81,7 @@ test('阶段3（mock 传输层）：理解服务把「根据我的账单流水�
   assert.equal(body.code, 'NEEDS_CLARIFICATION');
   assert.equal(body.data.status, 'needs_clarification');
   assert.equal(body.data.action, 'wealth.recommend');
-  assert.equal(body.data.slot, 'goal');
+  assert.equal(body.data.slot, 'max_risk_level');
   assert.equal(body.data.operationId, undefined);
   assert.ok(!JSON.stringify(body).includes('TRUEFORGE_FORMAT_ERROR'));
 });
@@ -134,6 +134,6 @@ test('账单净现金流不会改写风险等级与投资金额', async () => {
   assert.equal(result.data.methodology.net_cash_flow_is_investable, false);
   assert.equal(result.data.methodology.risk_level_source, 'user_declared_constraint');
   // 仅 R1 产品入选：净现金流再多也不把风险从 R1 抬到 R2/R3。
-  assert.deepEqual(result.data.products.map(p => p.product_ref), ['product_001']);
+  assert.deepEqual(result.data.products.map(p => p.product_ref), ['product_001', 'product_004']);
   assert.ok(result.data.products.every(p => p.risk_level === 'R1'));
 });
