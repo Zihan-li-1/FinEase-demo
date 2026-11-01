@@ -34,6 +34,30 @@
 .savings-category-list > div { display: grid; gap: 5px; padding: 10px; border: 1px solid #e3ebf3; border-radius: 9px; }
 .savings-category-list b { font-size: 12px; }
 .savings-category-list span, .savings-category-list small { color: #60758a; font-size: 11px; line-height: 1.6; }
+.bubble.banking_savings_plan { width: 100%; min-width: 0; max-width: min(590px, calc(100% - 39px)); }
+.savings-plan-card { container-type: inline-size; }
+.savings-plan-card .savings-section-note { margin: -3px 0 10px; color: #60758a; font-size: 11px; }
+.savings-plan-card .savings-compact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.savings-plan-card .savings-compact-card { display: grid; align-content: start; min-width: 0; gap: 4px; padding: 12px; border: 1px solid #e3ebf3; border-radius: 9px; background: #f8fbfe; font-variant-numeric: tabular-nums; }
+.savings-plan-card .savings-compact-card h4 { margin: 0 0 4px; color: #365d85; font-size: 13px; font-weight: 600; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.savings-plan-card .savings-compact-label, .savings-plan-card .savings-compact-recent { color: #60758a; font-size: 11px; line-height: 1.5; }
+.savings-plan-card .savings-compact-value { color: #183047; font-size: clamp(22px, 4.5cqi, 28px); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; }
+.savings-plan-card .savings-budget-card .savings-compact-value { font-size: clamp(26px, 5cqi, 30px); }
+.savings-plan-card .savings-change { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; color: #455e76; line-height: 1.5; }
+.savings-plan-card .savings-change strong { font-size: 13px; font-weight: 600; }
+.savings-plan-card .savings-change span { font-size: 11px; }
+.savings-plan-card .savings-change--up { color: #b83a3a; }
+.savings-plan-card .savings-change--down { color: #19734d; }
+.savings-plan-card .savings-compact-recent { margin-top: 6px; }
+.savings-plan-card .savings-calculation-details { margin-top: 10px; font-size: 11px; color: #60758a; }
+.savings-plan-card .savings-calculation-details summary { width: fit-content; cursor: pointer; padding: 4px 0; color: #365d85; }
+.savings-plan-card .savings-calculation-details summary:focus-visible { outline: 2px solid #3e80bd; outline-offset: 3px; border-radius: 3px; }
+.savings-plan-card .savings-calculation-details p { margin: 6px 0; font-size: 11px; }
+.savings-plan-card .savings-calculation-details dl { margin: 0; }
+.savings-plan-card .savings-calculation-details dl > div { display: grid; grid-template-columns: minmax(50px, 1fr) minmax(0, 4fr); gap: 8px; padding: 6px 0; border-top: 1px solid #e8eef5; line-height: 1.6; }
+.savings-plan-card .savings-calculation-details dd { min-width: 0; margin: 0; }
+.savings-plan-card .savings-empty { margin: 8px 0; }
+@container (max-width: 380px) { .savings-plan-card .savings-compact-grid { grid-template-columns: minmax(0, 1fr); } }
 .savings-plan-card footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border-top: 1px solid #e8eef5; padding-top: 13px; }
 @media (max-width: 480px) { .financial-read-card { padding: 13px; } .financial-data-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 480px) { .savings-input-grid, .savings-metrics { grid-template-columns: minmax(0, 1fr); } }

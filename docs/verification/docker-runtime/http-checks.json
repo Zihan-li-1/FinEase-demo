@@ -1,0 +1,27 @@
+﻿{
+  "base": "http://127.0.0.1:4300",
+  "version": {
+    "service": "saveflow",
+    "gitSha": "6040c1bf94d97a4eb2fadb2dcee1caef11f4d013",
+    "gitDirty": "true",
+    "nodeEnv": "production"
+  },
+  "checks": [
+    "GET /: 200",
+    "GET /_next/static/chunks/3ngusfqtcqrew.css: 200",
+    "GET /shopping: 200",
+    "GET /shopping/product: 200",
+    "GET /api/saveflow: 200",
+    "GET /healthz: 200",
+    "GET /version: 200",
+    "GET /health: 200",
+    "GET /version: 200",
+    "GET /ready: 401",
+    "GET /api/v1/skills: 401",
+    "GET /ready: 200",
+    "GET /api/v1/skills: 200",
+    "POST /api/banking: 200",
+    "POST /api/banking-agent: 401"
+  ],
+  "passed": 15
+}

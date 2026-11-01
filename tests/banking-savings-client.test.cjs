@@ -39,7 +39,8 @@ test('repository-backed input card only asks for saved amount and shows the trus
 
 test('verified plan card shows target math, category comparison and data provenance', () => {
   const html = render(BankingSavingsPlanCard, { status: 'goal_plan', data: { verification_status: 'verified', recent: { month: '2026-09', category_expenses_minor: { 购物: 128000 } }, calculation: { target_amount_minor: 1000000, saved_amount_minor: 0, remaining_minor: 1000000, deadline: '2026-12-31', required_monthly_minor: 500000, observed_income_minor: 1200000, observed_expense_minor: 846000, observed_surplus_minor: 354000, monthly_gap_minor: 146000, opportunity_dates: ['2026-11-01', '2026-12-01'] }, advice: { feasible: false, proposed_expense_minor: 100000, remaining_gap_minor: 146000, category_budgets: [{ category: '购物', suggested_minor: 100000, reason: '适度降低', evidence_refs: ['recent:购物'] }], observations: [{ category: '购物', trend: 'up', reason: '近期偏高', evidence_refs: ['recent:购物', 'history:2026-08:购物'], uncertain: true }], caveats: [] } }, evidence: [{ source: 'user_provided', asOf: '2026-10-22', entityIds: [] }] });
-  for (const label of ['¥10,000.00', '¥5,000.00', '¥1,460.00', '购物', '用户填写', '2026-09', '消费习惯观察', '历史演示数据', '类别依据', '建议能否执行', '分类建议支出合计', '¥1,000.00']) assert.ok(html.includes(label), label);
+  for (const label of ['¥10,000.00', '¥5,000.00', '¥1,460.00', '购物', '用户填写', '2026-09', '消费习惯观察', '历史演示数据', '计算依据', '基于历史数据预测 · 待用户确认', '分类建议支出合计', '¥1,000.00', '数据不足']) assert.ok(html.includes(label), label);
+  assert.doesNotMatch(html, /近期偏高|适度降低|类别依据|建议能否执行/);
 });
 
 test('verified plan offers separate Wealth inputs without pre-filling goal money as investable cash', () => {
@@ -91,3 +92,79 @@ test('browser accepts the trusted questionnaire step when screening cannot proce
   } finally { global.fetch = oldFetch; }
 });
 
+const { savingsComparison, savingsAmount } = require('../src/lib/savings-card-display.ts');
+const comparison = (category, recent, total, months = ['2026-07', '2026-08'], trend = 'flat') => ({ category,
+  history_month_count: months.length, history_total_minor: total, history_average_minor: total / months.length,
+  delta_minor: recent - total / months.length, threshold_minor: Math.max(1000, total / months.length * .1), trend, history_months: months });
+
+test('compact display uses exact signed differences even inside the unchanged trend threshold', () => {
+  const up = savingsComparison('餐饮', 140000, [comparison('餐饮', 140000, 270000)]);
+  assert.equal(up.state, 'up'); assert.equal(up.difference, '+¥50.00'); assert.equal(up.label, '↑ 增长');
+  assert.equal(up.comparison.trend, 'flat');
+  const down = savingsComparison('餐饮', 140000, [comparison('餐饮', 140000, 300000)]);
+  assert.equal(down.state, 'down'); assert.equal(down.difference, '−¥100.00');
+  const flat = savingsComparison('餐饮', 140000, [comparison('餐饮', 140000, 280000)]);
+  assert.equal(flat.state, 'flat'); assert.equal(flat.difference, '— ¥0.00');
+  assert.equal(savingsComparison('餐饮', 100, [comparison('餐饮', 100, 299, ['2026-06', '2026-07', '2026-08'])]).difference, '+<¥0.01');
+});
+
+test('zero historical mean is valid, absent/invalid history never becomes a flat comparison', () => {
+  assert.equal(savingsComparison('交通', 100, [comparison('交通', 100, 0)]).difference, '+¥1.00');
+  assert.equal(savingsComparison('交通', 0, [comparison('交通', 0, 0)]).state, 'flat');
+  const valid = comparison('交通', 100, 100);
+  for (const item of [undefined, [], [{...valid, history_month_count: 0}], [{...valid, history_total_minor: Infinity}],
+    [{...valid, history_average_minor: NaN}], [{...valid, delta_minor: Infinity}], [{...valid, history_months: []}],
+    [{...valid, history_months: ['2026-08', '2026-08']}], [{...valid, history_months: ['2026-13', '2026-08']}],
+    [{...valid, history_average_minor: 0}], [{...valid, delta_minor: 0}], [valid, valid]]) {
+    assert.equal(savingsComparison('交通', 100, item).state, 'unavailable');
+  }
+  for (const recent of [undefined, null, NaN, Infinity, -1, .5, '100', Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(savingsComparison('交通', recent, [valid]).label, '数据不足');
+    assert.equal(savingsAmount(recent), '数据不足');
+  }
+  assert.equal(savingsAmount(0), '¥0.00');
+});
+
+test('compact cards preserve real server averages, sample counts and budgets without writes', async () => {
+  const { verifySavingsAdvice } = await import('../server/savings-advisor.mjs');
+  const { savingsAdviceFixture } = await import('./fixtures/savings-runtime.mjs');
+  const facts = { recent: {month: '2026-09', income_minor: 1000000, category_expenses_minor: { 房租: 300000, 餐饮: 140000, 交通: 40000, 新增: 500 }},
+    history: [{month: '2026-06', category_expenses_minor: {房租: 300000, 餐饮: 130000, 交通: 50000}},
+      {month: '2026-07', category_expenses_minor: {房租: 300000}},
+      {month: '2026-08', category_expenses_minor: {房租: 300000, 餐饮: 130000, 交通: 50000}}],
+    required_monthly_minor: 100000, sources: {recent: 'repository', recent_as_of: '2026-10-01', history: 'synthetic_demo_only', history_as_of: '2026-10-01'} };
+  const advice = verifySavingsAdvice(savingsAdviceFixture(facts), facts);
+  const data = {status: 'goal_plan', data: {verification_status: 'verified', recent_source: 'repository', recent: facts.recent, advice,
+    calculation: { target_amount_minor: 1000000, saved_amount_minor: 0, remaining_minor: 1000000, deadline: '2026-12-31', opportunity_dates: ['2026-11-01'], required_monthly_minor: 100000,
+      observed_income_minor: 1000000, observed_expense_minor: 480500, observed_surplus_minor: 519500, monthly_gap_minor: 0 }}};
+  const before = JSON.stringify(data);
+  const html = render(BankingSavingsPlanCard, data);
+  assert.equal(JSON.stringify(data), before);
+  assert.match(html, /savings-change--up/); assert.match(html, /savings-change--down/); assert.match(html, /savings-change--flat/);
+  assert.match(html, /savings-change--unavailable/);
+  assert.match(html, /\+¥100.00/); assert.match(html, /−¥100.00/); assert.match(html, /— ¥0.00/);
+  assert.match(html, /历史 2 个月平均 ¥1,300.00/);
+  assert.equal((html.match(/<details class="savings-calculation-details"/g) || []).length, 2);
+  assert.equal((html.match(/基于历史数据预测 · 待用户确认/g) || []).length, 1);
+  assert.equal((html.match(/savings-compact-grid/g) || []).length, 2);
+  assert.equal((html.match(/<button/g) || []).length, 0);
+  assert.match(html, /savings-compact-value">¥3,000.00/);
+  assert.doesNotMatch(html, /根据最近月该类别支出|模型提出|类别依据|样本有限<\/small>/);
+  assert.equal(advice.category_budgets.find(item => item.category === '餐饮').suggested_minor, 140000);
+  // Model evidence is limited to two references, while the verified mean uses all three rent months.
+  assert.equal(advice.comparisons.find(item => item.category === '房租').history_month_count, 3);
+  const empty = structuredClone(data);
+  empty.data.recent.category_expenses_minor = {};
+  empty.data.advice.observations = [];
+  empty.data.advice.category_budgets = [];
+  empty.data.advice.comparisons = [];
+  const emptyHtml = render(BankingSavingsPlanCard, empty);
+  assert.match(emptyHtml, /暂无消费记录，数据不足/);
+  assert.match(emptyHtml, /暂无分类消费建议，数据不足/);
+  const invalid = structuredClone(data);
+  invalid.data.advice.category_budgets[0].suggested_minor = NaN;
+  delete invalid.data.recent.category_expenses_minor.房租;
+  const invalidHtml = render(BankingSavingsPlanCard, invalid);
+  assert.doesNotMatch(invalidHtml, /¥NaN|¥Infinity/);
+  assert.match(invalidHtml, /savings-compact-value">数据不足/);
+});

@@ -2,10 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import type { BankingAgentData, SavingsPlanInputs, WealthScreeningInputs } from "@/lib/banking-agent-client";
+import { savingsAmount, savingsComparison } from "../lib/savings-card-display";
 import "./banking-trial-cards.css";
 
 const amount = (minor: number) => `¥${(minor / 100).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const evidenceLabel = (ref: string, month: string, recentSource: string) => ref.startsWith("recent:") ? `${recentSource === "repository" ? "演示账单" : "你填写的"} ${month}` : `历史演示数据 ${ref.split(":")[1]}`;
 function toMinor(value: string) {
   if (!/^(?:0|[1-9]\d{0,7})(?:\.\d{1,2})?$/.test(value.trim())) return null;
   const [yuan, cents = ""] = value.trim().split(".");
@@ -76,16 +76,46 @@ export function BankingSavingsPlanCard({ data, onWealth }: { data?: BankingAgent
   if (data?.status !== "goal_plan" || data.data?.verification_status !== "verified") return null;
   const details = data.data;
   const calc = details.calculation as { target_amount_minor: number; saved_amount_minor: number; remaining_minor: number; deadline: string; opportunity_dates: string[]; required_monthly_minor: number; observed_income_minor: number; observed_expense_minor: number; observed_surplus_minor: number; monthly_gap_minor: number };
-  const advice = details.advice as { feasible: boolean; proposed_expense_minor: number; remaining_gap_minor: number; observations: Array<{ category: string; trend: "up" | "down" | "flat"; reason: string; evidence_refs: string[]; uncertain: boolean }>; category_budgets: Array<{ category: string; suggested_minor: number; reason: string; evidence_refs: string[] }> ; caveats: string[] };
+  const advice = details.advice as { feasible: boolean; proposed_expense_minor: number; remaining_gap_minor: number; observations: Array<{ category: string }>; category_budgets: Array<{ category: string; suggested_minor: number }>; comparisons?: unknown; caveats: string[] };
   const recent = details.recent as { month: string; category_expenses_minor: Record<string, number> } | undefined;
   if (!calc || !advice || !recent) return null;
+  const categories = [...new Set([...Object.keys(recent.category_expenses_minor), ...advice.observations.map(item => item.category), ...advice.category_budgets.map(item => item.category)])];
+  const comparisons = categories.map(category => ({ category, ...savingsComparison(category, recent.category_expenses_minor[category], advice.comparisons) }));
+  const source = details.recent_source === "repository" ? "演示账单" : "用户填写（未与账户核对）";
+  const calculationDetails = (budget = false) => <details className="savings-calculation-details">
+    <summary>计算依据</summary>
+    <p>最近月 {recent.month} 来自{source}；历史演示数据仅使用该类别有有效记录的月份，缺失记录不计为零。样本有限，不能保证未来支出。{budget ? "建议金额来自已复核的模型预算，不会自动写入预算配置。" : "颜色仅表示金额增减，不评价消费好坏；原趋势按既有阈值判定。"}</p>
+    <dl>{comparisons.map(({ category, comparison }) => <div key={category}><dt>{category}</dt><dd>{comparison
+      ? <>历史 {comparison.history_month_count} 个月平均 ¥{(comparison.history_average_minor / 100).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}；有效月份：{comparison.history_months.join("、")}。{!budget && <>原趋势：{comparison.trend === "up" ? "高于历史" : comparison.trend === "down" ? "低于历史" : "与历史接近"}；阈值 ¥{(comparison.threshold_minor / 100).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}。</>}</>
+      : "数据不足，无法核实历史均值及有效月份。"}</dd></div>)}</dl>
+  </details>;
   return <section className="financial-read-card savings-plan-card" aria-label="储蓄计划卡片">
     <header><b>储蓄计划草案</b><span>已完成算术与证据复核 · 只读</span></header>
     <p className="financial-source">按{details.recent_source === "repository" ? "演示账单" : "用户填写的"} {recent.month} 收支测算；更早的历史 Mock 仅作对比。目标已存金额由你提供，未与真实账户核对。</p>
     <div className="savings-metrics"><p><span>目标金额</span><strong>{amount(calc.target_amount_minor)}</strong></p><p><span>本目标已存</span><strong>{amount(calc.saved_amount_minor)}</strong></p><p><span>还差</span><strong>{amount(calc.remaining_minor)}</strong></p><p><span>截止日期</span><strong>{calc.deadline}</strong></p></div>
     <article><h3>{calc.remaining_minor === 0 ? "目标已达成" : "每月需要存多少"}</h3><p>{calc.remaining_minor === 0 ? "按你填写的本目标已存金额，目前无需继续为此目标存款。" : `从下一个完整月起，共 ${calc.opportunity_dates.length} 次月初机会（${calc.opportunity_dates[0]} 至 ${calc.opportunity_dates.at(-1)}）。每次至少存 ${amount(calc.required_monthly_minor)}。`}</p><div className="savings-metrics"><p><span>最近月收入</span><strong>{amount(calc.observed_income_minor)}</strong></p><p><span>最近月支出</span><strong>{amount(calc.observed_expense_minor)}</strong></p><p><span>最近月结余</span><strong>{amount(calc.observed_surplus_minor)}</strong></p><p><span>按原消费水平的月缺口</span><strong>{amount(calc.monthly_gap_minor)}</strong></p></div></article>
-    {advice.observations.length > 0 && <article><h3>消费习惯观察</h3><div className="savings-category-list">{advice.observations.map(item => <div key={item.category}><b>{item.category}：{item.trend === "up" ? "高于历史" : item.trend === "down" ? "低于历史" : "与历史接近"}</b><span>{item.reason}</span><small>依据：{item.evidence_refs.map(ref => evidenceLabel(ref, recent.month, String(details.recent_source))).join("、")}；样本有限</small></div>)}</div></article>}
-    <article><h3>分类消费建议</h3><div className="savings-category-list">{advice.category_budgets.map(item => <div key={item.category}><b>{item.category}</b><span>最近月 {amount(recent.category_expenses_minor[item.category] ?? 0)} → 建议上限 {amount(item.suggested_minor)}</span><small>{item.reason}</small><small>类别依据：{item.evidence_refs.map(ref => evidenceLabel(ref, recent.month, String(details.recent_source))).join("、")}；建议能否执行需你确认。</small></div>)}</div></article>
+    <article aria-label="消费习惯观察" className="savings-insights-section"><h3>消费习惯观察</h3>
+      <p className="savings-section-note">最近月 {recent.month} · 对比各类别有效历史月均</p>
+      <div className="savings-compact-grid">{comparisons.map(item => <div className="savings-compact-card" key={item.category}>
+        <h4 title={item.category}>{item.category}</h4>
+        <span className="savings-compact-label">最近月消费</span>
+        <strong className="savings-compact-value">{savingsAmount(recent.category_expenses_minor[item.category])}</strong>
+        <div className={`savings-change savings-change--${item.state}`}><strong>{item.difference}</strong>{item.state !== "unavailable" && <span>{item.label}</span>}</div>
+      </div>)}</div>
+      {!categories.length && <p className="savings-empty">暂无消费记录，数据不足。</p>}
+      {calculationDetails()}
+    </article>
+    <article aria-label="分类消费建议" className="savings-insights-section"><h3>分类消费建议</h3>
+      <p className="savings-section-note">基于历史数据预测 · 待用户确认</p>
+      <div className="savings-compact-grid">{advice.category_budgets.map(item => <div className="savings-compact-card savings-budget-card" key={item.category}>
+        <h4 title={item.category}>{item.category}</h4>
+        <span className="savings-compact-label">建议上限</span>
+        <strong className="savings-compact-value">{savingsAmount(item.suggested_minor)}</strong>
+        <span className="savings-compact-recent">最近月 {savingsAmount(recent.category_expenses_minor[item.category])}</span>
+      </div>)}</div>
+      {!advice.category_budgets.length && <p className="savings-empty">暂无分类消费建议，数据不足。</p>}
+      {calculationDetails(true)}
+    </article>
     <article><h3>{advice.feasible ? "按建议金额可覆盖目标" : "建议后仍有资金缺口"}</h3><div className="savings-metrics"><p><span>分类建议支出合计</span><strong>{amount(advice.proposed_expense_minor)}</strong></p><p><span>最近月收入</span><strong>{amount(calc.observed_income_minor)}</strong></p><p><span>每月目标储蓄</span><strong>{amount(calc.required_monthly_minor)}</strong></p><p><span>建议后月缺口</span><strong>{amount(advice.remaining_gap_minor)}</strong></p></div><p>{advice.feasible ? "分类建议与最近月收入在算术上匹配；未来收入和支出仍可能变化。" : `按分类建议，仍差 ${amount(advice.remaining_gap_minor)}/月。可延长期限、增加收入或调整可变消费；不要假设已自动取消订阅。`}</p>{advice.caveats.map((item, index) => <small key={index}>{item}</small>)}</article>
     <footer>仅作模拟规划，未创建储蓄任务、转账或理财申购。{onWealth && data.wealthHandoffToken && <details><summary>单独查看只读理财筛选</summary><WealthScreeningForm data={data} deadline={calc.deadline} onWealth={onWealth} /></details>}</footer>
   </section>;

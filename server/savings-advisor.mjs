@@ -79,7 +79,12 @@ export function verifySavingsAdvice(advice, facts) {
     return { ...item, reason: `${baseline}根据最近月该类别支出，模型提出${direction}预算，实际能否执行需要你确认。` };
   });
   const caveats = [facts.sources?.recent === 'repository' ? '近期收支来自演示账单快照，并非真实银行账户。' : '近期收入和支出由用户填写，未与真实账户核对。', '历史分类数据来自合成演示账单，不能预测未来消费。', '本计划不保证达成目标或取得投资收益。'];
-  return { observations, category_budgets, caveats,
+  // Expose existing checked aggregates for display; model evidence_refs may only
+  // include a subset of months and cannot reconstruct the historical average.
+  const comparisons = trusted.comparisons.map(item => ({ ...item,
+    history_months: facts.history.filter(month => Object.hasOwn(month.category_expenses_minor, item.category)).map(month => month.month).sort(),
+  }));
+  return { observations, category_budgets, caveats, comparisons,
     proposed_expense_minor: proposed, feasible: remainingGap === 0, remaining_gap_minor: remainingGap };
 }
 
