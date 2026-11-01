@@ -37,6 +37,35 @@ test('savings goal reads bill categories and asks only for saved progress before
   assert.equal(final.data.data.execution_allowed, false);
 });
 
+test('November offers September data and preserves the goal for both data-source paths', async () => {
+  const config = { ...options, now: () => Date.parse('2026-11-01T12:00:00+08:00') };
+  for (const manual of [false, true]) {
+    const initial = await (await handleBankingAgent(request({ message: '我要年底存够一万' }), config)).json();
+    assert.equal(initial.data.requiredMonth, '2026-10');
+    assert.equal(initial.data.recent.month, '2026-09');
+    assert.match(initial.message, /手填表单.*上一次有效数据/);
+    const inputs = manual ? { ...manualOverride, month: '2026-10', saved_amount_minor: 200000 } : { saved_amount_minor: 200000 };
+    const plan = await (await handleBankingAgent(request({ continuationToken: initial.data.continuationToken, planInputs: inputs }), config)).json();
+    assert.equal(plan.data.status, 'goal_plan', JSON.stringify(plan));
+    assert.equal(plan.data.data.recent.month, manual ? '2026-10' : '2026-09');
+    assert.equal(plan.data.data.recent_source, manual ? 'user_provided' : 'repository');
+    assert.equal(plan.data.data.calculation.target_amount_minor, 1000000);
+    assert.equal(plan.data.data.calculation.deadline, '2026-12-31');
+    assert.equal(plan.data.data.calculation.saved_amount_minor, 200000);
+    assert.equal(plan.data.data.calculation.required_monthly_minor, 800000);
+  }
+});
+
+test('no certified complete month returns a concise data insufficiency without a form', async () => {
+  const base = createBankingCore().repository;
+  const context = await base.getContextInfo();
+  const repository = { ...base, getContextInfo: async () => ({ ...context, completeMonths: [] }) };
+  const result = await (await handleBankingAgent(request({ message: '我要年底存够一万' }), { ...options, repository })).json();
+  assert.equal(result.code, 'CAPABILITY_UNAVAILABLE');
+  assert.match(result.message, /暂时没有.*完整模拟账单/);
+  assert.notEqual(result.data.status, 'needs_plan_inputs');
+});
+
 test('plan input token is bound to goal and invalid model advice never yields a card', async () => {
   const initial = await (await handleBankingAgent(request({ message: '我要年底存够一万' }), options)).json();
   const bad = await (await handleBankingAgent(request({ continuationToken: initial.data.continuationToken, planInputs: { ...planInputs, month: '2026-08' } }), options)).json();

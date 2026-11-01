@@ -7,18 +7,25 @@ export async function collectSavingsData(repository, currentDate) {
   const context = await repository.getContextInfo();
   const asOfMonth = /^\d{4}-(0[1-9]|1[0-2])/.test(context.asOf || '') ? context.asOf.slice(0, 7) : '';
   const available = [...new Set((context.availableMonths || []).filter(month => /^\d{4}-(0[1-9]|1[0-2])$/.test(month)))].sort();
+  // Both availability and the source's completeness marker are required.
+  // The snapshot month and the current calendar month are never complete here.
+  const complete = available.filter(month => (context.completeMonths || []).includes(month) &&
+    month < currentDate.slice(0, 7) && month < asOfMonth);
   const history = [];
-  for (const month of available.filter(month => month < requiredMonth && month < asOfMonth)) {
-    history.push({ month, category_expenses_minor: postedSummary(await repository.getTransactions({ month })).categoryTotals });
-  }
   let recent = null;
-  // availableMonths only means records exist; it does not certify complete coverage.
-  if (available.includes(requiredMonth) && (context.completeMonths || []).includes(requiredMonth) && requiredMonth < asOfMonth) {
-    const summary = postedSummary(await repository.getTransactions({ month: requiredMonth }));
-    recent = { month: requiredMonth, income_minor: summary.totalIncomeFen, category_expenses_minor: summary.categoryTotals };
+  for (const month of [...complete].reverse()) {
+    const transactions = await repository.getTransactions({ month });
+    if (!transactions.some(item => item.status === 'posted')) continue;
+    const summary = postedSummary(transactions);
+    // An advertised month with no records is missing data, not a zero balance.
+    if (!recent && transactions.some(item => item.status === 'posted' && item.type === 'income')) {
+      recent = { month, income_minor: summary.totalIncomeFen, category_expenses_minor: summary.categoryTotals };
+    } else if (recent) {
+      history.unshift({ month, category_expenses_minor: summary.categoryTotals });
+    }
   }
-  const categories = [...new Set([...history.flatMap(item => Object.keys(item.category_expenses_minor)), ...Object.keys(recent?.category_expenses_minor || {})])].sort();
-  if (recent) for (const category of categories) recent.category_expenses_minor[category] ??= 0;
+  const categories = [...new Set(recent ? Object.keys(recent.category_expenses_minor) :
+    history.flatMap(item => Object.keys(item.category_expenses_minor)))].sort();
   const recentSource = recent ? 'repository' : 'user_provided';
   return { requiredMonth, context, history, recent, categories, recentSource,
     sources: { recent: recentSource, recent_as_of: recent ? context.asOf : currentDate, history: context.dataSource || 'synthetic_demo_only', history_as_of: context.asOf } };

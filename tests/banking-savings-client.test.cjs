@@ -33,17 +33,61 @@ test('理财产品对比卡片展示微众银行入口链接', () => {
   assert.equal((html.match(/https:\/\/personal\.webank\.com\/s\/hj\/focus2\/client\/index\.html\?fid=1912&amp;aid=10482&amp;bg=_ffffff/g) || []).length, 2);
 });
 
-test('missing data card requests saved amount, income and every category without showing a plan', () => {
+test('missing data card declares the gap and waits for a source choice', () => {
   const html = render(BankingSavingsInputsCard, { status: 'needs_plan_inputs', goal: { target_amount_minor: 1000000, deadline: '2026-12-31' }, recentSource: 'user_provided', requiredMonth: '2026-09', categories: ['房租', '购物'], continuationToken: 'opaque' });
-  for (const label of ['2026-09', '本目标已存金额', '月收入', '房租', '购物', '¥10,000.00', '2026-12-31']) assert.ok(html.includes(label), label);
+  for (const label of ['2026-09', '手填表单', '使用上一次有效数据', '暂无', '¥10,000.00', '2026-12-31']) assert.ok(html.includes(label), label);
+  assert.equal((html.match(/<input/g) || []).length, 0);
   assert.doesNotMatch(html, /每月最低需存/);
 });
 
 test('repository-backed input card only asks for saved amount and shows the trusted snapshot', () => {
   const html = render(BankingSavingsInputsCard, { status: 'needs_plan_inputs', goal: { target_amount_minor: 1000000, deadline: '2026-12-31' }, recentSource: 'repository', recent: { month: '2026-09', income_minor: 1200000, category_expenses_minor: { 房租: 420000, 购物: 128000 } }, requiredMonth: '2026-09', categories: ['房租', '购物'], continuationToken: 'opaque' });
-  for (const label of ['演示账单已覆盖最近完整月', '¥12,000.00', '¥4,200.00', '¥1,280.00', '本目标已存金额']) assert.ok(html.includes(label), label);
+  for (const label of ['使用完整模拟账单', '2026-09', '为这个目标，你目前已经存了多少钱？', '生成储蓄计划']) assert.ok(html.includes(label), label);
   assert.equal((html.match(/<input/g) || []).length, 1);
   assert.doesNotMatch(html, /月收入（元）|按消费类别填写/);
+});
+
+test('source choice switches between saved-only and manual forms without losing goal progress', async () => {
+  const { create, act } = require('react-test-renderer');
+  global.IS_REACT_ACT_ENVIRONMENT = true;
+  const data = { status: 'needs_plan_inputs', goal: { target_amount_minor: 1000000, deadline: '2026-12-31' }, recentSource: 'repository', recent: { month: '2026-09', income_minor: 1200000, category_expenses_minor: { 房租: 300000, 购物: 80000 } }, requiredMonth: '2026-10', categories: ['房租', '购物'], continuationToken: 'opaque' };
+  const submitted = [];
+  let tree;
+  try {
+    await act(async () => { tree = create(React.createElement(BankingSavingsInputsCard, { data, onSubmit: (_, inputs) => submitted.push(inputs) })); });
+    assert.equal(tree.root.findAllByType('input').length, 0);
+    const choices = () => tree.root.findAllByType('button').filter(button => button.props.type === 'button');
+    await act(async () => choices()[1].props.onClick());
+    assert.equal(tree.root.findAllByType('input').length, 1);
+    await act(async () => tree.root.findByType('input').props.onChange({ target: { value: '123.45' } }));
+    await act(async () => tree.root.findByType('form').props.onSubmit({ preventDefault() {} }));
+    assert.deepEqual(submitted.pop(), { saved_amount_minor: 12345 });
+    await act(async () => choices()[0].props.onClick());
+    const inputs = tree.root.findAllByType('input');
+    assert.equal(inputs.length, 4);
+    assert.equal(inputs[0].props.value, '123.45');
+    for (const [index, value] of [[1, '12000'], [2, '3000'], [3, '800']]) {
+      await act(async () => tree.root.findAllByType('input')[index].props.onChange({ target: { value } }));
+    }
+    await act(async () => tree.root.findByType('form').props.onSubmit({ preventDefault() {} }));
+    assert.deepEqual(submitted.pop(), { month: '2026-10', saved_amount_minor: 12345, income_minor: 1200000, category_expenses_minor: { 房租: 300000, 购物: 80000 } });
+    await act(async () => choices()[1].props.onClick());
+    assert.equal(tree.root.findAllByType('input').length, 1);
+  } finally {
+    if (tree) await act(async () => tree.unmount());
+    delete global.IS_REACT_ACT_ENVIRONMENT;
+  }
+});
+
+test('browser accepts an older complete month but rejects one newer than the requested month', async () => {
+  const oldFetch = global.fetch;
+  try {
+    const data = { status: 'needs_plan_inputs', action: 'orchestrator.goal', goal: { target_amount_minor: 1000000, deadline: '2026-12-31' }, recentSource: 'repository', requiredMonth: '2026-10', categories: ['房租'], continuationToken: 'opaque', recent: { month: '2026-09', income_minor: 1200000, category_expenses_minor: { 房租: 300000 } } };
+    global.fetch = async () => ({ ok: true, status: 200, json: async () => ({ code: 'NEEDS_PLAN_INPUTS', requestId: 'month-choice', message: '请选择', reply: { text: '请选择', style: 'concise', safetyNotices: [] }, data }) });
+    assert.equal((await askBankingAgent({ message: '年底存一万' }, 'access', new AbortController().signal)).recent.month, '2026-09');
+    data.recent.month = '2026-11';
+    await assert.rejects(() => askBankingAgent({ message: '年底存一万' }, 'access', new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+  } finally { global.fetch = oldFetch; }
 });
 
 test('verified plan card shows target math, category comparison and data provenance', () => {

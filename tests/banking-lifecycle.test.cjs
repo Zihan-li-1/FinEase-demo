@@ -75,6 +75,11 @@ before(async () => {
 afterEach(async () => { if (root) await act(async () => root.unmount()); root = null; agent.askBankingAgent = realAsk; });
 after(() => { global.fetch = originalFetch; delete global.sessionStorage; });
 
+async function choosePreviousSavingsData() {
+  const button = root.root.findAllByType('button').find(node => node.props.type === 'button' && node.children.some(child => typeof child === 'string' && child.includes('使用上一次有效数据')));
+  if (button) await act(async () => button.props.onClick());
+}
+
 test('savings form resumes the goal and displays only a verified card', async () => {
   await mount();
   intent = { schemaVersion: '1.0.0', action: 'orchestrator.goal', slots: { goal_text: '年底存一万', amount: { amount_minor: 1000000, currency: 'CNY' }, deadline: '2026-12-31' }, missingSlots: [], status: 'ready_for_resolution' };
@@ -82,6 +87,7 @@ test('savings form resumes the goal and displays only a verified card', async ()
   const pending = flow.messages.findLast(message => message.banking?.status === 'needs_plan_inputs')?.banking;
   assert.ok(pending?.continuationToken);
   assert.equal(flow.messages.some(message => message.banking?.status === 'goal_plan'), false);
+  await choosePreviousSavingsData();
   const form = root.root.findAll(node => node.type === 'form' && node.props['aria-label'] === '补充储蓄计划数据')[0];
   assert.ok(form);
   const inputs = form.findAllByType('input');
@@ -202,6 +208,7 @@ test('savings review failure keeps form values and retries only on an explicit c
   const submissions = [];
   intercept = (body, run) => { if (body.planInputs) submissions.push(body); return run(); };
   const form = () => root.root.findAll(node => node.type === 'form' && node.props['aria-label'] === '补充储蓄计划数据')[0];
+  await choosePreviousSavingsData();
   await act(async () => { form().findAllByType('input')[0].props.onChange({ target: { value: '650' } }); });
   savingsRejectOnce = true;
   await act(async () => { await form().props.onSubmit({ preventDefault() {} }); });
@@ -225,6 +232,7 @@ test('refresh resumes the separate Wealth screening without skipping its require
   await mount();
   intent = { schemaVersion: '1.0.0', action: 'orchestrator.goal', slots: { goal_text: '年底存一万', amount: { amount_minor: 1000000, currency: 'CNY' }, deadline: '2026-12-31' }, missingSlots: [], status: 'ready_for_resolution' };
   await act(async () => { await flow.startDemo('年底存一万'); });
+  await choosePreviousSavingsData();
   const savings = root.root.findAll(node => node.type === 'form' && node.props['aria-label'] === '补充储蓄计划数据')[0];
   const inputs = savings.findAllByType('input');
   assert.equal(inputs.length, 1);

@@ -17,10 +17,15 @@ export function BankingSavingsInputsCard({ data, active = true, onSubmit }: { da
   const [income, setIncome] = useState("");
   const [expenses, setExpenses] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
+  const [source, setSource] = useState<"manual" | "repository" | null>(null);
   if (data?.status !== "needs_plan_inputs" || !data.continuationToken || !data.requiredMonth || !data.categories?.length) return null;
-  const repositoryRecent = data.recentSource === "repository" ? data.recent : undefined;
+  const availableRecent = data.recentSource === "repository" ? data.recent : undefined;
+  const needsChoice = !availableRecent || availableRecent.month !== data.requiredMonth;
+  const repositoryRecent = !needsChoice || source === "repository" ? availableRecent : undefined;
+  const ready = !needsChoice || source !== null;
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    if (!ready) return;
     const savedMinor = toMinor(saved);
     if (savedMinor === null) { setError("请填写本目标已存金额，金额最多两位小数。"); return; }
     if (repositoryRecent) {
@@ -40,13 +45,22 @@ export function BankingSavingsInputsCard({ data, active = true, onSubmit }: { da
     onSubmit(data, { month: data.requiredMonth!, saved_amount_minor: savedMinor, income_minor: incomeMinor, category_expenses_minor: categoryExpenses });
   };
   return <form className="financial-read-card savings-input-card" onSubmit={submit} aria-label="补充储蓄计划数据">
-    <header><b>{repositoryRecent ? "确认目标进度" : "补充近期收支"}</b><span>确认后才生成计划</span></header>
+    <header><b>生成储蓄计划</b><span>模拟账单测算</span></header>
+    {needsChoice && <article aria-label="账单数据声明"><h3>目前没有上月（{data.requiredMonth}）的完整流水数据</h3>
+      <p>{availableRecent ? `上一次有效的完整模拟账单为 ${availableRecent.month}。请选择本次计划使用的数据。` : "暂时没有可用于生成储蓄建议的完整模拟账单。你可以选择手填上月收支。"}</p>
+      <div className="savings-input-grid">
+        <button type="button" className="secondary-button" disabled={!active} aria-pressed={source === "manual"} onClick={() => { setSource("manual"); setError(""); }}>手填表单</button>
+        <button type="button" className="secondary-button" disabled={!active || !availableRecent} aria-pressed={source === "repository"} onClick={() => { setSource("repository"); setError(""); }}>使用上一次有效数据{availableRecent ? `（${availableRecent.month}）` : "（暂无）"}</button>
+      </div>
+    </article>}
     <p>目标 {data.goal ? amount(data.goal.target_amount_minor) : "待确认"}，截止 {data.goal?.deadline || "待确认"}。本目标已存金额与账户总余额可能不同，需要由你填写。</p>
-    {repositoryRecent ? <article><h3>演示账单已覆盖最近完整月 {repositoryRecent.month}</h3><p>月收入 {amount(repositoryRecent.income_minor)}。分类支出来自同一演示数据快照，不与手工输入混用。</p><div className="savings-category-list">{data.categories.map(category => <div key={category}><b>{category}</b><span>{amount(repositoryRecent.category_expenses_minor[category] ?? 0)}</span></div>)}</div></article> : <p>请按最近完整月 <strong>{data.requiredMonth}</strong> 填写。以下数字来自你填写，系统只能核对计算，无法证明账单真实。</p>}
-    <div className="savings-input-grid"><label>本目标已存金额（元）<input required inputMode="decimal" value={saved} onChange={event => setSaved(event.target.value)} placeholder="未存请填 0" /></label>{!repositoryRecent && <label>月收入（元）<input required inputMode="decimal" value={income} onChange={event => setIncome(event.target.value)} /></label>}</div>
+    {ready && <>
+    {repositoryRecent ? <article><h3>使用完整模拟账单 {repositoryRecent.month}</h3><p>收支数据由系统自动读取。</p></article> : <p>请填写上月 <strong>{data.requiredMonth}</strong> 的收支。以下数字来自你填写，系统只能核对计算，无法证明账单真实。</p>}
+    <div className="savings-input-grid"><label>为这个目标，你目前已经存了多少钱？（元）<input required inputMode="decimal" value={saved} onChange={event => setSaved(event.target.value)} placeholder="未存请填 0" /></label>{!repositoryRecent && <label>月收入（元）<input required inputMode="decimal" value={income} onChange={event => setIncome(event.target.value)} /></label>}</div>
     {!repositoryRecent && <fieldset><legend>按消费类别填写 {data.requiredMonth} 支出（元）</legend><div className="savings-input-grid">{data.categories.map(category => <label key={category}>{category}<input required inputMode="decimal" value={expenses[category] ?? ""} onChange={event => setExpenses(current => ({ ...current, [category]: event.target.value }))} placeholder="未支出请填 0" /></label>)}</div></fieldset>}
     {error && <p role="alert">{error}</p>}
-    <button type="submit" className="primary-button" disabled={!active}>核算并生成储蓄计划</button>
+    <button type="submit" className="primary-button" disabled={!active}>生成储蓄计划</button>
+    </>}
     {!active && <p>这份补充请求已失效，请重新描述储蓄目标。</p>}
   </form>;
 }

@@ -248,12 +248,16 @@ export async function runBankingConversation(body, {
       if (continuation.recentSource !== financial.recentSource ||
         continuation.recentSnapshotId !== (financial.context.snapshotId || financial.context.asOf || '')) throw inputError('SOURCE_CHANGED', '账单数据已更新，请重新发起目标请求。', 409);
       if (!financial.categories.length) throw inputError('CAPABILITY_UNAVAILABLE', '没有可用的分类账单数据', 503);
-      const normalized = financial.recent
+      const useRepository = financial.recent && !Object.hasOwn(body.planInputs || {}, 'month');
+      if (!useRepository && financial.recent?.month === financial.requiredMonth) validateSavedAmount(body.planInputs);
+      const normalized = useRepository
         ? { savedAmountMinor: validateSavedAmount(body.planInputs), incomeMinor: financial.recent.income_minor, categoryExpensesMinor: financial.recent.category_expenses_minor }
         : validatePlanInputs(body.planInputs, { currentDate, categories: financial.categories });
       const calculation = calculateSavingsGoal({ targetAmountMinor: continuation.slots.amount.amount_minor, deadline: continuation.slots.deadline, ...normalized, currentDate });
-      const recent = financial.recent || { month: normalized.month, income_minor: normalized.incomeMinor, category_expenses_minor: normalized.categoryExpensesMinor };
-      const facts = { recent, history: financial.history, sources: financial.sources, required_monthly_minor: calculation.required_monthly_minor };
+      const recentSource = useRepository ? 'repository' : 'user_provided';
+      const recent = useRepository ? financial.recent : { month: normalized.month, income_minor: normalized.incomeMinor, category_expenses_minor: normalized.categoryExpensesMinor };
+      const history = [...financial.history, ...(!useRepository && financial.recent ? [{ month: financial.recent.month, category_expenses_minor: financial.recent.category_expenses_minor }] : [])].filter(item => item.month < recent.month);
+      const facts = { recent, history, sources: { ...financial.sources, recent: recentSource, recent_as_of: useRepository ? financial.context.asOf : currentDate }, required_monthly_minor: calculation.required_monthly_minor };
       let advice;
       try {
         const candidate = await savingsAdvisor(facts, { env, fetchImpl, signal });
@@ -271,9 +275,9 @@ export async function runBankingConversation(body, {
       const generic = await handleGoal({ slots: continuation.slots }, repository);
       const wealthHandoffToken = core.wealthPorts ? issueState({ action: 'wealth.recommend', slots: { goal: { kind: 'steady_growth', target_date: calculation.deadline } }, pendingSlot: '__wealth_screening', env, now }) : undefined;
       return reply(200, 'OK', '储蓄计划已核算', { status: 'goal_plan', action: 'orchestrator.goal', data: {
-        ...generic.data, verification_status: 'verified', recent_month: recent.month, recent, recent_source: financial.recentSource,
+        ...generic.data, verification_status: 'verified', recent_month: recent.month, recent, recent_source: recentSource,
         calculation, advice, execution_allowed: false,
-      }, ...(wealthHandoffToken ? { wealthHandoffToken } : {}), evidence: [...generic.evidence, { source: financial.recentSource === 'repository' ? financial.context.dataSource : 'user_provided', asOf: financial.sources.recent_as_of, entityIds: [] }] });
+      }, ...(wealthHandoffToken ? { wealthHandoffToken } : {}), evidence: [...generic.evidence, { source: useRepository ? financial.context.dataSource : 'user_provided', asOf: facts.sources.recent_as_of, entityIds: [] }] });
     }
     if (body.wealthInputs !== undefined) {
       if (continuation.action !== 'wealth.recommend' || continuation.pendingSlot !== '__wealth_screening' || continuation.slots.goal?.kind !== 'steady_growth' || typeof continuation.slots.goal.target_date !== 'string') throw inputError('CONTINUATION_INVALID', '理财筛选与已核验计划不匹配', 400);
@@ -412,9 +416,9 @@ export async function runBankingConversation(body, {
     const nextFullMonthStart = new Date(Date.UTC(Number(currentDate.slice(0, 4)), Number(currentDate.slice(5, 7)), 1)).toISOString().slice(0, 10);
     if (parsed.slots.deadline < nextFullMonthStart) throw inputError('DEADLINE_TOO_SOON', '截止日前没有可安排的完整月，请延长目标期限。', 400);
     const financial = await collectSavingsData(repository, currentDate);
-    if (!financial.categories.length) throw inputError('CAPABILITY_UNAVAILABLE', '没有可用的分类账单数据', 503);
+    if (!financial.categories.length) throw inputError('CAPABILITY_UNAVAILABLE', '暂时没有可用于生成储蓄建议的完整模拟账单。', 503);
     const continuationToken = issueState({ action: parsed.action, slots: parsed.slots, pendingSlot: '__plan_inputs', recentSource: financial.recentSource, recentSnapshotId: financial.context.snapshotId || financial.context.asOf || '', env, now });
-    return reply(200, 'NEEDS_PLAN_INPUTS', financial.recent ? '请补充本目标已存金额' : '请补充近期分类收支和本目标已存金额', { status: 'needs_plan_inputs', action: parsed.action, goal: { target_amount_minor: parsed.slots.amount.amount_minor, deadline: parsed.slots.deadline }, requiredMonth: financial.requiredMonth, categories: financial.categories, recentSource: financial.recentSource, ...(financial.recent ? { recent: financial.recent } : {}), continuationToken });
+    return reply(200, 'NEEDS_PLAN_INPUTS', financial.recent?.month === financial.requiredMonth ? '请填写本目标已存金额' : '目前没有上月完整流水数据，请选择手填表单或使用上一次有效数据。', { status: 'needs_plan_inputs', action: parsed.action, goal: { target_amount_minor: parsed.slots.amount.amount_minor, deadline: parsed.slots.deadline }, requiredMonth: financial.requiredMonth, categories: financial.categories, recentSource: financial.recentSource, ...(financial.recent ? { recent: financial.recent } : {}), continuationToken });
   }
   if (parsed.action === 'subscription.list') {
     const result = await handleSubscriptionList(parsed, repository);
