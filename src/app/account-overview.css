@@ -1,61 +1,61 @@
-.account-overview { flex: 1; min-width: 0; background: #fff; display: flex; flex-direction: column; padding: 32px 8%; overflow: auto; }
+.account-overview { flex: 1; min-width: 0; background: #0B0B0D; display: flex; flex-direction: column; padding: 32px 8%; overflow: auto; }
 .account-overview-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-.account-overview-header .eyebrow { color: #acb4bd; font-size: 9px; letter-spacing: .11em; }
-.account-overview-header h2 { color: #33404d; font-size: 20px; margin: 5px 0 0; }
-.account-chip { color: #2f6ec7; background: #eaf2ff; font-size: 15px; font-weight: 700; padding: 6px 12px; border-radius: 99px; }
-.account-balance-card small .account-name { color: #2a3948; font-weight: 700; font-size: 14px; }
-.account-balance-card { border: 1px solid #e9edf1; background: #fff; border-radius: 10px; padding: 16px; }
-.account-balance-card span { color: #a2abb4; font-size: 10px; display: block; }
-.account-balance-card strong { color: #2a3948; font-size: 28px; display: block; margin: 8px 0 4px; }
-.account-balance-card small { color: #a0a9b3; font-size: 10px; }
+.account-overview-header .eyebrow { color: #B8B8C2; font-size: 9px; letter-spacing: .11em; }
+.account-overview-header h2 { color: #F5F5F7; font-size: 20px; margin: 5px 0 0; }
+.account-chip { color: #F052A0; background: #151518; font-size: 15px; font-weight: 700; padding: 6px 12px; border-radius: 99px; }
+.account-balance-card small .account-name { color: #F5F5F7; font-weight: 700; font-size: 14px; }
+.account-balance-card { border: 1px solid #34343C; background: #151518; border-radius: 10px; padding: 16px; }
+.account-balance-card span { color: #B8B8C2; font-size: 10px; display: block; }
+.account-balance-card strong { color: #F5F5F7; font-size: 28px; display: block; margin: 8px 0 4px; }
+.account-balance-card small { color: #B8B8C2; font-size: 10px; }
 .voucher-section { margin-top: 24px; }
-.voucher-section-title { font-size: 12px; color: #53606d; margin-bottom: 12px; font-weight: 600; }
-.voucher-empty { color: #a2abb4; font-size: 11px; }
-.expense-voucher { border: 1px solid #e4eaf1; border-radius: 10px; background: #fbfcfe; padding: 14px; margin-bottom: 12px; text-align: left; }
-.expense-voucher-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #eef1f4; }
-.expense-voucher-parties { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #47525f; flex-wrap: wrap; }
-.expense-voucher-arrow { color: #b9c1c8; }
-.expense-voucher-head strong { color: #2e4050; font-size: 22px; }
+.voucher-section-title { font-size: 12px; color: #B8B8C2; margin-bottom: 12px; font-weight: 600; }
+.voucher-empty { color: #B8B8C2; font-size: 11px; }
+.expense-voucher { border: 1px solid #34343C; border-radius: 10px; background: #382025; padding: 14px; margin-bottom: 12px; text-align: left; }
+.expense-voucher-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #34343C; }
+.expense-voucher-parties { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #F5F5F7; flex-wrap: wrap; }
+.expense-voucher-arrow { color: #B8B8C2; }
+.expense-voucher-head strong { color: #F5F5F7; font-size: 22px; }
 .expense-voucher-body { display: grid; gap: 8px; padding-top: 12px; }
-.expense-voucher-row { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: #8e9aa6; }
-.expense-voucher-row b { color: #586675; font-weight: 500; text-align: right; }
-.expense-voucher small { display: block; color: #a0a9b3; font-size: 9px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #eef1f4; }
-.card-management { flex: 1; min-width: 0; background: #fff; padding: 32px 6%; overflow: auto; }
+.expense-voucher-row { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: #B8B8C2; }
+.expense-voucher-row b { color: #B8B8C2; font-weight: 500; text-align: right; }
+.expense-voucher small { display: block; color: #B8B8C2; font-size: 9px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #34343C; }
+.card-management { flex: 1; min-width: 0; background: #0B0B0D; padding: 32px 6%; overflow: auto; }
 .card-management-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
-.card-management-header .eyebrow { color: #acb4bd; font-size: 9px; letter-spacing: .11em; }
-.card-management-header h2 { color: #33404d; font-size: 20px; margin: 5px 0 0; }
-.card-management-note { color: #7c8997; font-size: 11px; line-height: 1.7; margin: 0 0 18px; }
+.card-management-header .eyebrow { color: #B8B8C2; font-size: 9px; letter-spacing: .11em; }
+.card-management-header h2 { color: #F5F5F7; font-size: 20px; margin: 5px 0 0; }
+.card-management-note { color: #B8B8C2; font-size: 11px; line-height: 1.7; margin: 0 0 18px; }
 .managed-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.managed-card { border: 1px solid #dce7f5; border-radius: 14px; padding: 18px; background: linear-gradient(145deg, #fbfdff, #f3f7fd); box-shadow: 0 10px 30px rgba(47, 110, 199, .06); }
-.managed-card.is-frozen { background: #f6f7f9; border-color: #e0e4e8; }
+.managed-card { border: 1px solid #34343C; border-radius: 14px; padding: 18px; background: linear-gradient(145deg, #151518, #151518); box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.managed-card.is-frozen { background: #151518; border-color: #34343C; }
 .managed-card-title { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-.managed-card-title small { color: #9ba8b5; font-size: 9px; }
-.managed-card-title h3 { color: #2d4054; margin: 4px 0 0; font-size: 16px; }
-.managed-card-title > span { color: #2f6ec7; background: #e8f1ff; border-radius: 99px; padding: 5px 9px; font-size: 9px; }
-.managed-card.is-frozen .managed-card-title > span { color: #7c8792; background: #e9ecef; }
+.managed-card-title small { color: #B8B8C2; font-size: 9px; }
+.managed-card-title h3 { color: #F5F5F7; margin: 4px 0 0; font-size: 16px; }
+.managed-card-title > span { color: #F052A0; background: #151518; border-radius: 99px; padding: 5px 9px; font-size: 9px; }
+.managed-card.is-frozen .managed-card-title > span { color: #B8B8C2; background: #151518; }
 .managed-card-budget { margin-top: 22px; }
-.managed-card-budget > span, .managed-card-budget > small { display: block; color: #8d99a5; font-size: 10px; }
-.managed-card-budget strong { display: block; color: #263a4d; font-size: 28px; margin: 5px 0; }
-.managed-card-progress { height: 5px; background: #e5ebf2; border-radius: 99px; overflow: hidden; margin-top: 14px; }
-.managed-card-progress span { display: block; height: 100%; background: #3978df; border-radius: inherit; }
-.managed-card > p { color: #718092; font-size: 10px; margin: 7px 0 16px; }
-.managed-card > p.over-budget { color: #c66d45; }
-.managed-card dl { border-top: 1px solid #e4eaf1; margin: 0; padding-top: 12px; }
+.managed-card-budget > span, .managed-card-budget > small { display: block; color: #B8B8C2; font-size: 10px; }
+.managed-card-budget strong { display: block; color: #F5F5F7; font-size: 28px; margin: 5px 0; }
+.managed-card-progress { height: 5px; background: #151518; border-radius: 99px; overflow: hidden; margin-top: 14px; }
+.managed-card-progress span { display: block; height: 100%; background: linear-gradient(90deg,#B51ACB 0%,#EF3F86 30%,#FF7043 55%,#FFA500 78%,#FFD600 100%); border-radius: inherit; }
+.managed-card > p { color: #B8B8C2; font-size: 10px; margin: 7px 0 16px; }
+.managed-card > p.over-budget { color: #FF959B; }
+.managed-card dl { border-top: 1px solid #34343C; margin: 0; padding-top: 12px; }
 .managed-card dl div { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; font-size: 10px; }
-.managed-card dt { color: #929eaa; }
-.managed-card dd { color: #4e5f70; margin: 0; text-align: right; }
-.managed-card-version { color: #a0aab5; display: block; font-size: 9px; margin-top: 14px; }
-.card-activity { margin-top: 24px; padding: 16px; border: 1px solid #e4eaf1; border-radius: 12px; background: #fbfcfe; }
+.managed-card dt { color: #B8B8C2; }
+.managed-card dd { color: #B8B8C2; margin: 0; text-align: right; }
+.managed-card-version { color: #B8B8C2; display: block; font-size: 9px; margin-top: 14px; }
+.card-activity { margin-top: 24px; padding: 16px; border: 1px solid #34343C; border-radius: 12px; background: #151518; }
 .card-activity-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.card-activity-heading h3 { margin: 0; color: #405163; font-size: 13px; }
-.card-activity-heading > span { color: #8d99a5; font-size: 10px; }
+.card-activity-heading h3 { margin: 0; color: #F5F5F7; font-size: 13px; }
+.card-activity-heading > span { color: #B8B8C2; font-size: 10px; }
 .card-activity ul { display: grid; gap: 0; margin: 10px 0 0; padding: 0; list-style: none; }
-.card-activity li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 11px 0; border-top: 1px solid #edf1f5; }
+.card-activity li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 11px 0; border-top: 1px solid #34343C; }
 .card-activity li > div { display: grid; gap: 4px; min-width: 0; }
-.card-activity li strong { color: #435365; font-size: 11px; }
-.card-activity li div span, .card-activity > p { color: #8b97a4; font-size: 10px; line-height: 1.5; }
+.card-activity li strong { color: #F5F5F7; font-size: 11px; }
+.card-activity li div span, .card-activity > p { color: #B8B8C2; font-size: 10px; line-height: 1.5; }
 .card-activity > p { margin: 12px 0 0; }
-.card-activity-status { flex-shrink: 0; padding: 4px 7px; border-radius: 99px; background: #edf3fb; color: #4f75a4; font-size: 9px; }
-.card-activity-status.status-已完成 { background: #e9f7f0; color: #27805c; }
-.card-activity-status.status-已取消, .card-activity-status.status-操作失败, .card-activity-status.status-结果待核实 { background: #fff3e9; color: #a56635; }
+.card-activity-status { flex-shrink: 0; padding: 4px 7px; border-radius: 99px; background: #151518; color: #F052A0; font-size: 9px; }
+.card-activity-status.status-已完成 { background: #193026; color: #71DFA9; }
+.card-activity-status.status-已取消, .card-activity-status.status-操作失败, .card-activity-status.status-结果待核实 { background: #382025; color: #FF959B; }
 @media (max-width: 900px) { .managed-card-grid { grid-template-columns: 1fr; } }
