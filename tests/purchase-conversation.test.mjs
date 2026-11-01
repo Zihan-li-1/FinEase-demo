@@ -7,10 +7,10 @@ import { bankingAgentSpec } from '../server/trueforge-banking-runtime.mjs';
 import { normalizePurchaseSlots, purchaseDateFields, purchaseIntentFromMessage, purchaseMissingQuestions } from '../src/lib/purchase-flow.mjs';
 
 test('a clear flower reminder bypasses an outer chat reply and keeps business slot extraction', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   let routeCalls = 0, parserCalls = 0;
   const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-outer-route-test',
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-outer-route-test',
   }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在11.3号买鲜花' }) });
   const response = await handleBankingAgent(request, { env, now: () => Date.parse('2026-10-30T00:00:00Z'),
     routeConversation: async () => { routeCalls++; return { schemaVersion: '1.0.0', kind: 'conversation_reply', topic: 'general', text: '我无法设置真实提醒。' }; },
@@ -29,9 +29,9 @@ test('a clear flower reminder bypasses an outer chat reply and keeps business sl
 });
 
 test('a past flower reminder reaches the purchase date guard without creating a reminder', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-past-outer-route',
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-past-outer-route',
   }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在九月一号买花' }) });
   const response = await handleBankingAgent(request, { env, now: () => Date.parse('2026-10-30T00:00:00Z'),
     routeConversation: async () => ({ schemaVersion: '1.0.0', kind: 'conversation_reply', topic: 'general', text: '我无法设置真实日历提醒。' }),
@@ -59,10 +59,10 @@ test('purchase keeps a known month/day without inventing a time, and defaults th
 });
 
 test('a purchase capability question stays in the outer conversation route', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   let routeCalls = 0;
   const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-capability-question',
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-capability-question',
   }, body: JSON.stringify({ consent: true, history: [], message: '你能提醒我买花吗？' }) });
   const response = await handleBankingAgent(request, { env,
     routeConversation: async () => { routeCalls++; return { schemaVersion: '1.0.0', kind: 'conversation_reply', topic: 'general', text: '可以提供应用内模拟提醒。' }; },
@@ -74,12 +74,12 @@ test('a purchase capability question stays in the outer conversation route', asy
 });
 
 test('banking purchase response fills September 1 from the model slots before asking for missing time', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   const intent = { schemaVersion: '1.0.0', action: 'scenario.plan_purchase', slots: {
     date_expression: '九月一号', date_meaning: 'order_on', items: [{ category: 'flowers', quantity: 1 }],
   }, missingSlots: [], status: 'ready_for_resolution' };
   const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-date-test',
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-date-test',
   }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在九月一号买花' }) });
   const response = await handleBankingAgent(request, { env, now: () => Date.parse('2026-08-15T00:00:00Z'), parseIntent: async () => intent });
   assert.equal(response.status, 200);
@@ -98,9 +98,9 @@ test('purchase draft is a registered composite intent; model cannot confirm or s
   assert.match(bankingAgentSpec({ TRUEFORGE_MODEL: 'test/model' }).instructions, /已注册的购物复合意图/);
 });
 test('banking HTTP routes birthday shopping to a business flow card without executing any steps', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   const intent = { schemaVersion: '1.0.0', action: 'scenario.plan_purchase', slots: { items: [{ category: 'flowers', quantity: 1 }, { category: 'cake', quantity: 1 }] }, missingSlots: [], status: 'ready_for_resolution' };
-  const req = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-route-test' }, body: JSON.stringify({ consent: true, history: [], message: '预留一千元，生日送花和蛋糕' }) });
+  const req = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-route-test' }, body: JSON.stringify({ consent: true, history: [], message: '预留一千元，生日送花和蛋糕' }) });
   const response = await handleBankingAgent(req, { env, parseIntent: async () => intent });
   assert.equal(response.status, 200);
   const payload = await response.json(); assert.equal(payload.data.status, 'purchase_request');
@@ -110,10 +110,10 @@ test('banking HTTP routes birthday shopping to a business flow card without exec
 test('a model refusal on a shopping request still reaches the purchase flow', async () => {
   assert.deepEqual(purchaseIntentFromMessage('提醒我在九月一号买花'), { items: [{ category: 'flowers', quantity: 1 }], date_expression: '2026-09-01', date_meaning: 'order_on' });
   for (const message of ['取消鲜花订阅', '看看花呗账单', '转 200 给张三', '提醒我给花店转账 200', '帮我查一下买花的订单']) assert.equal(purchaseIntentFromMessage(message), null);
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   const refusal = { schemaVersion: '1.0.0', action: 'unsupported', slots: {}, missingSlots: [], status: 'unsupported' };
   const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-guard-test',
+    'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-guard-test',
   }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在九月一号买花' }) });
   const response = await handleBankingAgent(request, { env, now: () => Date.parse('2026-10-30T00:00:00Z'), parseIntent: async () => refusal });
   assert.equal(response.status, 200);
@@ -124,14 +124,14 @@ test('a model refusal on a shopping request still reaches the purchase flow', as
 });
 
 test('any wrong model action on a shopping request is corrected to the purchase flow', async () => {
-  const env = { SAVEFLOW_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
+  const env = { FINEASE_ACCESS_CODE: 'purchase-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-test-continuation' };
   const wrongActions = [
     { schemaVersion: '1.0.0', action: 'unsupported', slots: {}, missingSlots: [], status: 'unsupported' },
     { schemaVersion: '1.0.0', action: 'clarify', slots: {}, missingSlots: ['action'], status: 'needs_clarification' },
   ];
   for (const intent of wrongActions) {
     const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-      'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-any-wrong-action',
+      'x-finease-access': env.FINEASE_ACCESS_CODE, 'content-type': 'application/json', 'x-forwarded-for': 'purchase-any-wrong-action',
     }, body: JSON.stringify({ consent: true, history: [], message: '提醒我在11月3号买花' }) });
     const response = await handleBankingAgent(request, { env, now: () => Date.parse('2026-10-30T00:00:00Z'), parseIntent: async () => intent });
     assert.equal(response.status, 200);

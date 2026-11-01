@@ -23,7 +23,7 @@ export type PurchaseBudgetCheck = { coverage_status: 'enough' | 'shortfall'; req
 export async function purchaseRequest<T>(action: string, input: unknown, accessCode: string, consent: boolean): Promise<T> {
   if (!consent) throw new Error('请先勾选本次演示和模型使用同意项。');
   let response: Response;
-  try { response = await fetch('/api/purchase', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+  try { response = await fetch('/api/purchase', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
     body: JSON.stringify({ action, input, consent }), signal: AbortSignal.timeout(30000) }); }
   catch { throw new Error('购物预算服务连接失败，请稍后重试。'); }
   let body;

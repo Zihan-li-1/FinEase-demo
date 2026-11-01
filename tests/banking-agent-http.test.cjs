@@ -4,10 +4,10 @@ const assert = require('node:assert/strict');
 const { createBankingCore } = require('../src/banking-core/core.mjs');
 const { handleBankingAgent } = require('../server/banking-agent.mjs');
 
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234', DASHSCOPE_API_KEY: 'fake-key' };
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234', DASHSCOPE_API_KEY: 'fake-key' };
 const request = (body, headers = {}) => new Request('http://localhost/api/banking-agent', {
   method: 'POST',
-  headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, ...headers },
+  headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, ...headers },
   body: JSON.stringify(body),
 });
 const transferIntent = payee => ({
@@ -107,13 +107,13 @@ test('old /api/agent handler remains available', async () => {
 });
 
 test('banking-agent enforces access code, same-origin, body size, and rate limit', async () => {
-  const unauthorized = await handleBankingAgent(request({ message: 'bill' }, { 'x-saveflow-access': 'wrong' }), { env, fetchImpl: fakeQwen(parse), now: () => 10 });
+  const unauthorized = await handleBankingAgent(request({ message: 'bill' }, { 'x-finease-access': 'wrong' }), { env, fetchImpl: fakeQwen(parse), now: () => 10 });
   assert.equal(unauthorized.status, 401);
   const crossOrigin = await handleBankingAgent(request({ message: 'bill' }, { origin: 'https://evil.example' }), { env, fetchImpl: fakeQwen(parse), now: () => 11 });
   assert.equal(crossOrigin.status, 403);
 
   const oversized = new Request('http://localhost/api/banking-agent', {
-    method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': 'size-test' },
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': 'size-test' },
     body: JSON.stringify({ message: 'bill', padding: 'x'.repeat(17000) }),
   });
   const tooLarge = await handleBankingAgent(oversized, { env, fetchImpl: fakeQwen(parse), now: () => 12 });

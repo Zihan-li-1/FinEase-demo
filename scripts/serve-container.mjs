@@ -15,9 +15,9 @@ const handleNext = app.getRequestHandler();
 const visits = [];
 const server = http.createServer(async (req, res) => {
   const pathname = req.url?.split('?')[0];
-  if (pathname === '/healthz') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ ok: true, service: 'saveflow', gitSha: process.env.SAVEFLOW_GIT_SHA || 'unknown', gitDirty: process.env.SAVEFLOW_GIT_DIRTY || 'unknown' })); return; }
-  if (pathname === '/version') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ service: 'saveflow', gitSha: process.env.SAVEFLOW_GIT_SHA || 'unknown', gitDirty: process.env.SAVEFLOW_GIT_DIRTY || 'unknown', nodeEnv: process.env.NODE_ENV || 'unknown' })); return; }
-  const banking = pathname === '/api/banking' || (pathname === '/api/saveflow' && req.method === 'POST');
+  if (pathname === '/healthz') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ ok: true, service: 'finease', gitSha: process.env.FINEASE_GIT_SHA || 'unknown', gitDirty: process.env.FINEASE_GIT_DIRTY || 'unknown' })); return; }
+  if (pathname === '/version') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ service: 'finease', gitSha: process.env.FINEASE_GIT_SHA || 'unknown', gitDirty: process.env.FINEASE_GIT_DIRTY || 'unknown', nodeEnv: process.env.NODE_ENV || 'unknown' })); return; }
+  const banking = pathname === '/api/banking' || (pathname === '/api/finease' && req.method === 'POST');
   const agent = pathname === '/api/banking-agent';
   const executeTrial = pathname === '/api/execute-trial';
   const purchase = pathname === '/api/purchase';
@@ -38,5 +38,5 @@ const server = http.createServer(async (req, res) => {
   } catch { if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'application/json' }); res.end('{"code":"INTERNAL_ERROR","message":"Service unavailable"}'); }
 });
 console.info(JSON.stringify({ event: 'banking_auth_config', ...bankingAuthConfigStatus() }));
-server.listen(port, '0.0.0.0', () => console.log('SaveFlow container HTTP ready'));
+server.listen(port, '0.0.0.0', () => console.log('FinEase container HTTP ready'));
 for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { server.close(async () => { await app.close(); process.exit(0); }); setTimeout(() => server.closeAllConnections(), 5000).unref(); });

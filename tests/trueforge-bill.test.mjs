@@ -10,8 +10,8 @@ import { billClarificationQuestion } from '../src/lib/trueforge-routing.mjs';
 
 // Captured from the real 0.3.1 service on 2026-10-14. Replay tests are NOT E2E tests.
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/trueforge-bill-turn.json', import.meta.url)));
-const env = { SAVEFLOW_ACCESS_CODE: 'trial-access-code-1234', CONTINUATION_TOKEN_SECRET: 'trial-secret-code-1234',
-  SAVEFLOW_TRUEFORGE_BILL_ENABLED: 'true', TRUEFORGE_BASE_URL: 'http://localhost:8790',
+const env = { FINEASE_ACCESS_CODE: 'trial-access-code-1234', CONTINUATION_TOKEN_SECRET: 'trial-secret-code-1234',
+  FINEASE_TRUEFORGE_BILL_ENABLED: 'true', TRUEFORGE_BASE_URL: 'http://localhost:8790',
   TRUEFORGE_MODEL: 'test/deepseek-v4-1-flash', TRUEFORGE_MCP_SERVER: 'sv-trial' };
 const clone = () => structuredClone(fixture);
 const resultOf = t => JSON.parse(t.responses[0].content);
@@ -34,7 +34,7 @@ const body = message => ({ message, history: [], consent: true });
 const scope = 'owner-a';
 let ip = 0;
 const request = (b, headers = {}) => new Request('http://localhost/api/banking-agent', { method: 'POST',
-  headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE,
+  headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE,
     'x-forwarded-for': `192.0.2.${++ip}`, ...headers }, body: JSON.stringify(b) });
 
 test('captured real bill data maps to the unchanged HTTP envelope and TS browser validator', async () => {
@@ -49,7 +49,7 @@ test('captured real bill data maps to the unchanged HTTP envelope and TS browser
     global.fetch = async (_url, init) => handleBankingAgent(request(JSON.parse(init.body)), {
       env, trueforgeRuntimeClient: { createSession: async () => 'runtime', cancel: async () => {}, runTurn: async () => JSON.stringify({ schemaVersion: '1.0.0', action: 'bill.summary', slots: { month: '2026-08' }, missingSlots: [], status: 'ready_for_resolution' }) },
     });
-    const data = await askBankingAgent({ message: '查询 2026 年 8 月账单' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal);
+    const data = await askBankingAgent({ message: '查询 2026 年 8 月账单' }, env.FINEASE_ACCESS_CODE, new AbortController().signal);
     assert.equal(data.status, 'bill_result'); assert.equal(data.data.totalIncomeFen, 1200000);
     assert.equal(data.data.totalExpenseFen, 846000); assert.equal(data.data.transactionCount, 12);
     assert.equal(typeof data.requestId, 'string'); assert.equal(data.operationId, undefined);
@@ -183,7 +183,7 @@ test('the router accepts only explicit narrow bill queries and trial continuatio
   for (const message of ['查询 2026 年 8 月账单', '查账单', '查看2026-08的账单', '查2026年13月账单', '查上月账单']) assert.equal(shouldRouteTrueforgeBill(body(message), env), true);
   for (const message of ['给张三转500元', '冻结我的卡', '查看我的卡', '取消订阅', '账单查完给张三转账', '聊聊账单', '这个月呢', '查2026年8月账单并执行转账']) assert.equal(shouldRouteTrueforgeBill(body(message), env), false);
   assert.equal(shouldRouteTrueforgeBill({ message: '查账单', continuationToken: 'legacy-token' }, env), false);
-  assert.equal(shouldRouteTrueforgeBill(body('查账单'), { ...env, SAVEFLOW_TRUEFORGE_BILL_ENABLED: 'false' }), false);
+  assert.equal(shouldRouteTrueforgeBill(body('查账单'), { ...env, FINEASE_TRUEFORGE_BILL_ENABLED: 'false' }), false);
 });
 
 test('invalid months and unauthorized body fields fail before creating a session', async () => {
@@ -195,7 +195,7 @@ test('invalid months and unauthorized body fields fail before creating a session
 
 test('transport security runs before TrueForge routing', async () => {
   const adapter = { handle: () => assert.fail('must reject before service call') };
-  for (const [b, h, status] of [[body('查账单'), { 'x-saveflow-access': 'wrong' }, 401], [body('查账单'), { origin: 'https://evil.test' }, 403], [body('查账单'), { 'content-type': 'text/plain' }, 415], [{ message: '查账单', junk: 'x'.repeat(17000) }, {}, 413]]) {
+  for (const [b, h, status] of [[body('查账单'), { 'x-finease-access': 'wrong' }, 401], [body('查账单'), { origin: 'https://evil.test' }, 403], [body('查账单'), { 'content-type': 'text/plain' }, 415], [{ message: '查账单', junk: 'x'.repeat(17000) }, {}, 413]]) {
     const r = await handleBankingAgent(request(b, h), { env, trueforgeBillAdapter: adapter }); assert.equal(r.status, status);
   }
   for (let i = 0; i < 10; i++) assert.equal((await handleBankingAgent(request(body('查账单'), { 'x-forwarded-for': 'rate-test' }), { env, parseIntent: async () => ({ schemaVersion: '1.0.0', action: 'unsupported', slots: {}, missingSlots: [], status: 'unsupported' }) })).status, 200);
@@ -206,13 +206,13 @@ test('retired phrase flags cannot override an explicitly configured legacy runti
   const core = createBankingCore(); let parsed = 0;
   const parseIntent = async () => { parsed++; return { schemaVersion: '1.0.0', action: 'bill.summary', slots: { month: '2026-08' }, missingSlots: [], status: 'ready_for_resolution' }; };
   const never = { handle: () => assert.fail('must use old Harness') };
-  for (const [message, e] of [['查账单', { ...env, SAVEFLOW_TRUEFORGE_BILL_ENABLED: 'false' }], ['查看我的卡', env], ['给张三转500元', env], ['账单和转账', env]]) {
-    const r = await handleBankingAgent(request(body(message)), { env: { ...e, SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent, trueforgeBillAdapter: never }); assert.equal(r.status, 200);
+  for (const [message, e] of [['查账单', { ...env, FINEASE_TRUEFORGE_BILL_ENABLED: 'false' }], ['查看我的卡', env], ['给张三转500元', env], ['账单和转账', env]]) {
+    const r = await handleBankingAgent(request(body(message)), { env: { ...e, FINEASE_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent, trueforgeBillAdapter: never }); assert.equal(r.status, 200);
   }
   assert.equal(parsed, 4);
-  const legacy = await handleBankingAgent(request(body('anything')), { env: { ...env, SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent: async () => ({ schemaVersion: '1.0.0', action: 'bill.summary', slots: {}, missingSlots: ['month'], status: 'needs_clarification' }), trueforgeBillAdapter: never });
+  const legacy = await handleBankingAgent(request(body('anything')), { env: { ...env, FINEASE_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent: async () => ({ schemaVersion: '1.0.0', action: 'bill.summary', slots: {}, missingSlots: ['month'], status: 'needs_clarification' }), trueforgeBillAdapter: never });
   const token = (await legacy.json()).data.continuationToken;
-  const resumed = await handleBankingAgent(request({ ...body('2026 年 8 月'), continuationToken: token }), { env: { ...env, SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent, trueforgeBillAdapter: never }); assert.equal(resumed.status, 200);
+  const resumed = await handleBankingAgent(request({ ...body('2026 年 8 月'), continuationToken: token }), { env: { ...env, FINEASE_BANKING_RUNTIME: 'legacy-qwen' }, core, parseIntent, trueforgeBillAdapter: never }); assert.equal(resumed.status, 200);
 });
 
 test('retired bill pilot tokens cannot cross the unified Banking boundary', async () => {
@@ -283,6 +283,6 @@ test('real SDK HTTP failures are not retried or leaked, and disabled pilot token
   const adapter = createTrueforgeBillAdapter({ env, client: service });
   const r = await adapter.handle(body('查账单'), { scope }); assert.equal(r.code, 'TRUEFORGE_UNAVAILABLE'); assert.equal(requests, 1); assert.ok(!r.message.includes('secret'));
   const response = await handleBankingAgent(request({ ...body('2026 年 8 月'), continuationToken: 'tfb1.forged' }), {
-    env: { ...env, SAVEFLOW_TRUEFORGE_BILL_ENABLED: 'false' }, parseIntent: () => assert.fail('reject trial token'),
+    env: { ...env, FINEASE_TRUEFORGE_BILL_ENABLED: 'false' }, parseIntent: () => assert.fail('reject trial token'),
   }); assert.equal(response.status, 400);
 });

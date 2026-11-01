@@ -12,7 +12,7 @@ let browserHttpRequests = 0;
 page.on('request', r => { if (r.url().endsWith('/api/banking-agent')) browserHttpRequests++; });
 page.on('pageerror', error => report.errors.push(error.message));
 const card = id => page.locator('.banking-preview-card').filter({ hasText: id });
-const authorize = async () => { await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE); await page.locator('.consent-control input').check(); };
+const authorize = async () => { await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE); await page.locator('.consent-control input').check(); };
 async function send(message, action) {
   starts.push(Date.now()); const start = Date.now();
   const pending = page.waitForResponse(r => r.url().endsWith('/api/banking-agent') && r.request().method() === 'POST', { timeout: 30000 }); void pending.catch(() => {});
@@ -54,7 +54,7 @@ try {
   assert.equal(bill.data.status, 'bill_result'); assert.equal(bill.data.data.totalExpenseFen, 846000);
   assert.equal(await page.locator('.banking-preview-card').count(), 3); report.checks.push('转账预览 → 查询8月账单：真实账单 Skill 澄清年份 → 2026年8月真实统计');
   starts.push(Date.now());
-  const forged = await page.request.post('/api/banking-agent', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE }, data: { message: '查看我的卡', continuationToken: resumed.data.continuationToken, history: [], consent: true } });
+  const forged = await page.request.post('/api/banking-agent', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE }, data: { message: '查看我的卡', continuationToken: resumed.data.continuationToken, history: [], consent: true } });
   const rejection = await forged.json(); assert.equal(rejection.code, 'CONTINUATION_ACTION_MISMATCH'); assert.equal(forged.status(), 400);
   report.requests.push({ message: '卡片查询中强行携带转账token', status: forged.status(), code: rejection.code });
   report.checks.push('伪造跨动作携带转账凭据被服务端拒绝');
@@ -78,7 +78,7 @@ try {
   await page.getByText(/请明确要查询卡片/).waitFor(); assert.equal(browserHttpRequests, requestsBefore);
   report.checks.push('含糊/混合请求只澄清，不套用转账凭据');
   assert.equal(await card(afterResume.data.operationId).getByRole('button', { name: '确认转账（未开放）', exact: true }).isDisabled(), true);
-  const blocked = await page.request.post('/api/banking', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': afterResume.data.operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: afterResume.data.operationId, preview_hash: afterResume.data.preview.previewHash } } });
+  const blocked = await page.request.post('/api/banking', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': afterResume.data.operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: afterResume.data.operationId, preview_hash: afterResume.data.preview.previewHash } } });
   assert.equal(blocked.status(), 403); report.checks.push('确认仍禁用，直接 Core 执行仍403');
   assert.deepEqual(report.errors, []); report.success = true;
   await card(afterResume.data.operationId).scrollIntoViewIfNeeded(); await page.screenshot({ path: `${dir}/switch-history.png`, fullPage: true });

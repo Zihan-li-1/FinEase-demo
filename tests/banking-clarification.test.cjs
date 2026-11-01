@@ -4,13 +4,13 @@ const assert = require('node:assert/strict');
 const { createLowBalanceCore: createBankingCore } = require('./fixtures/low-balance-core.mjs');
 const { handleBankingAgent } = require('../server/banking-agent.mjs');
 
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
 let requestNumber = 0;
 const request = body => new Request('http://localhost/api/banking-agent', {
   method: 'POST',
   headers: {
     'content-type': 'application/json',
-    'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE,
+    'x-finease-access': env.FINEASE_ACCESS_CODE,
     'x-forwarded-for': `clarification-test-${++requestNumber}`,
   },
   body: JSON.stringify(body),
@@ -119,7 +119,7 @@ test('未配置续接密钥时澄清入口明确报配置错误，不信任客�
   let prepares = 0;
   const wrapped = { ...core, prepare: async input => { prepares++; return core.prepare(input); } };
   const result = await handleBankingAgent(request({ message: '给张三转500元' }), {
-    env: { SAVEFLOW_ACCESS_CODE: env.SAVEFLOW_ACCESS_CODE }, core: wrapped, parseIntent, now: () => 1200,
+    env: { FINEASE_ACCESS_CODE: env.FINEASE_ACCESS_CODE }, core: wrapped, parseIntent, now: () => 1200,
   });
   const body = await json(result);
   assert.equal(result.status, 503);

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ActionReceipt, InternalTransferEffect, TransferEffect } from "@/banking-core/contracts";
-import type { Message } from "@/lib/use-saveflow";
+import type { Message } from "@/lib/use-finease";
 import { BankingExpenseVoucher, type TransferVoucher } from "./BankingExpenseVoucher";
 
 const DEFAULT_ACCOUNT = "模拟活期账户";

@@ -37,7 +37,7 @@ const dockerEvidenceCode = `
   let files = 0; const findings = [];
   function walk(dir) { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const p = dir + '/' + e.name; if (e.isDirectory()) walk(p); else { files++; const s = fs.readFileSync(p).toString('utf8'); for (const [key,value] of secrets) if (s.includes(value)) findings.push({ path: p, key }); } } }
   walk('/app/out');
-  const paths = ['src/banking-core/postgres-store.mjs', 'server/mcp/saveflow-trial.mjs'];
+  const paths = ['src/banking-core/postgres-store.mjs', 'server/mcp/finease-trial.mjs'];
   console.log(JSON.stringify({ staticFiles: files, findings, envFilePresent: fs.existsSync('/app/.env.local'), uid: process.getuid(), websitePostgresConfigured: !!process.env.DATABASE_URL, hashes: Object.fromEntries(paths.map(p => [p, crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')])) }));
 `;
 const runtimeBoundary = JSON.parse(execFileSync('docker', ['compose', '--env-file', '.env.local', 'exec', '-T', 'web', 'node', '-e', dockerEvidenceCode], { encoding: 'utf8' }));
@@ -69,7 +69,7 @@ const report = {
   trackedGeneratedFilesToExcludeFromCommit: generated.filter(f => files.includes(f)),
   pendingFileCount: pending.length,
   files: files.map(path => ({ path, generated: generated.includes(path) })),
-  sourceHashes: Object.fromEntries(await Promise.all(['src/banking-core/postgres-store.mjs', 'tests/postgres-persistence.test.mjs', 'server/mcp/saveflow-trial.mjs', 'compose.yaml', 'compose.postgres.yaml'].map(async path => [path, createHash('sha256').update(await readFile(path)).digest('hex')]))),
+  sourceHashes: Object.fromEntries(await Promise.all(['src/banking-core/postgres-store.mjs', 'tests/postgres-persistence.test.mjs', 'server/mcp/finease-trial.mjs', 'compose.yaml', 'compose.postgres.yaml'].map(async path => [path, createHash('sha256').update(await readFile(path)).digest('hex')]))),
 };
 await writeFile('docs/verification/postgres-fix/submission-audit.json', JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ ...report, files: undefined }, null, 2));

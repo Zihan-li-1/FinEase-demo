@@ -17,7 +17,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-mcp",
+          "name": "finease-docker-mcp",
           "enable_tools": [
             "bill_summary"
           ],
@@ -67,8 +67,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "bill_summary",
-                "server_id": "saveflow-docker-mcp",
-                "server_name": "saveflow-docker-mcp"
+                "server_id": "finease-docker-mcp",
+                "server_name": "finease-docker-mcp"
               },
               "name": "bill_summary",
               "arguments": {
@@ -169,7 +169,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -222,8 +222,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -349,8 +349,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -478,8 +478,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -588,8 +588,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -661,7 +661,7 @@
               ],
               "expiresAt": "2026-10-18T03:11:35.388Z",
               "previewHash": "454ef50e4a9f13a9b42ec014de7dc85fcd25abc71f88fb785588dffc03e1947d",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:2"
+              "contextSnapshotId": "finease-phase1-fixed-v1:2"
             },
             "risk": {
               "allowed": true,
@@ -746,8 +746,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -817,7 +817,7 @@
               ],
               "expiresAt": "2026-10-18T03:11:36.881Z",
               "previewHash": "51d264a782e2356715d48a15b9e32394c4f819426ee9607b8f1a954b44853924",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:2"
+              "contextSnapshotId": "finease-phase1-fixed-v1:2"
             },
             "risk": {
               "allowed": true,
@@ -902,8 +902,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -973,7 +973,7 @@
               ],
               "expiresAt": "2026-10-18T03:11:41.351Z",
               "previewHash": "03e87f11f4431279ed621db34df40c3bf9099914333507a002c83b246e12015f",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:2"
+              "contextSnapshotId": "finease-phase1-fixed-v1:2"
             },
             "risk": {
               "allowed": true,
@@ -1037,7 +1037,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "card_get"
           ],
@@ -1086,8 +1086,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "card_get",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "card_get",
               "arguments": {
@@ -1134,11 +1134,11 @@
                 "previewGeneration": 0
               },
               "context": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:2",
+                "snapshotId": "finease-phase1-fixed-v1:2",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY"
               }
@@ -1200,7 +1200,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1253,8 +1253,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -1357,7 +1357,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1410,8 +1410,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -1514,7 +1514,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1545,7 +1545,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1598,8 +1598,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -1701,7 +1701,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-mcp",
+          "name": "finease-docker-mcp",
           "enable_tools": [
             "bill_summary"
           ],
@@ -1749,8 +1749,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "bill_summary",
-                "server_id": "saveflow-docker-mcp",
-                "server_name": "saveflow-docker-mcp"
+                "server_id": "finease-docker-mcp",
+                "server_name": "finease-docker-mcp"
               },
               "name": "bill_summary",
               "arguments": {}
@@ -1813,7 +1813,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1844,7 +1844,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -1897,8 +1897,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -2024,8 +2024,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-docker-bridge",
-                "server_name": "saveflow-docker-bridge"
+                "server_id": "finease-docker-bridge",
+                "server_name": "finease-docker-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -2097,7 +2097,7 @@
               ],
               "expiresAt": "2026-10-18T03:30:45.554Z",
               "previewHash": "94801b4db462696be2c81b44417bb0745b766add053a8f97766f59925fc6098a",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:2"
+              "contextSnapshotId": "finease-phase1-fixed-v1:2"
             },
             "risk": {
               "allowed": true,
@@ -2160,7 +2160,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-mcp",
+          "name": "finease-docker-mcp",
           "enable_tools": [
             "bill_summary"
           ],
@@ -2208,8 +2208,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "bill_summary",
-                "server_id": "saveflow-docker-mcp",
-                "server_name": "saveflow-docker-mcp"
+                "server_id": "finease-docker-mcp",
+                "server_name": "finease-docker-mcp"
               },
               "name": "bill_summary",
               "arguments": {}
@@ -2272,7 +2272,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-docker-bridge",
+          "name": "finease-docker-bridge",
           "enable_tools": [
             "transfer_preview"
           ],

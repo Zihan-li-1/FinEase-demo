@@ -5,13 +5,13 @@ import { createBankingCore } from '../src/banking-core/core.mjs';
 import { buildParsedIntent } from '../src/agent/clarification/merge-intent.mjs';
 import { bankingAgentSpec, createBankingRuntimeClient, parseTrueforgeBankingIntent } from '../server/trueforge-banking-runtime.mjs';
 import { bankingReply, previewSafetyNotice } from '../server/banking-reply.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 
-const env = { SAVEFLOW_ACCESS_CODE: 'runtime-access-test-1234', CONTINUATION_TOKEN_SECRET: 'runtime-continuation-test-1234',
+const env = { FINEASE_ACCESS_CODE: 'runtime-access-test-1234', CONTINUATION_TOKEN_SECRET: 'runtime-continuation-test-1234',
   TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'qwen/test' };
 let sequence = 0;
 const request = body => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-  'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `runtime-${++sequence}`,
+  'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `runtime-${++sequence}`,
 }, body: JSON.stringify(body) });
 function runtime(resolve) {
   const seen = [];
@@ -31,7 +31,7 @@ test('all wording uses one TrueForge understanding boundary, ignoring retired ro
   for (const message of ['查询2026年8月账单', '请分析一下我在2026年8月的收支情况']) {
     const client = runtime(() => buildParsedIntent('bill.summary', { month: '2026-08' }));
     const result = await post({ message }, { trueforgeRuntimeClient: client,
-      env: { ...env, SAVEFLOW_TRUEFORGE_BILL_ENABLED: 'false', SAVEFLOW_TRUEFORGE_READ_ENABLED: 'true' },
+      env: { ...env, FINEASE_TRUEFORGE_BILL_ENABLED: 'false', FINEASE_TRUEFORGE_READ_ENABLED: 'true' },
       trueforgeBillAdapter: { handle: () => assert.fail('retired route') }, trueforgeSkillAdapter: { handle: () => assert.fail('retired route') },
       fetchImpl: () => assert.fail('Qwen fallback') });
     assert.equal(result.httpStatus, 200); assert.equal(result.data.status, 'bill_result');
@@ -108,7 +108,7 @@ test('unavailable runtime, missing/invalid configuration, malformed output and f
   assert.ok(!JSON.stringify(result).includes('private provider token'));
   result = await post({ message: '查看我的卡' }, { core, env: { ...env, TRUEFORGE_BASE_URL: '' }, fetchImpl: failFetch });
   assert.equal(result.code, 'TRUEFORGE_CONFIG_ERROR'); assert.equal(result.httpStatus, 503);
-  result = await post({ message: '查看我的卡' }, { core, env: { ...env, SAVEFLOW_BANKING_RUNTIME: 'auto' }, fetchImpl: failFetch });
+  result = await post({ message: '查看我的卡' }, { core, env: { ...env, FINEASE_BANKING_RUNTIME: 'auto' }, fetchImpl: failFetch });
   assert.equal(result.code, 'BANKING_RUNTIME_CONFIG_ERROR');
   for (const proposal of [
     { ...buildParsedIntent('card.get', { card_ref: '我的卡' }), tool: 'action.execute' },

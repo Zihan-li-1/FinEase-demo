@@ -20,11 +20,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -105,11 +105,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -190,11 +190,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -267,11 +267,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -449,11 +449,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -517,11 +517,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -585,11 +585,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -789,11 +789,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -879,11 +879,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -963,11 +963,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1039,11 +1039,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1221,11 +1221,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1290,11 +1290,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1345,11 +1345,11 @@
               "timezone": "America/New_York",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1565,11 +1565,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1613,11 +1613,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1661,11 +1661,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1709,11 +1709,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1754,11 +1754,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1805,11 +1805,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1854,11 +1854,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1892,11 +1892,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -1987,11 +1987,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2027,11 +2027,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2138,11 +2138,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2178,11 +2178,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2290,11 +2290,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2335,11 +2335,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2384,11 +2384,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [
@@ -2422,11 +2422,11 @@
               "timezone": "Asia/Shanghai",
               "dateRangeConvention": "inclusive local calendar dates: start_date <= transaction local date <= end_date",
               "financialData": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY",
                 "availableMonths": [

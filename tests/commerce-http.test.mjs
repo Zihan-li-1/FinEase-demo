@@ -79,7 +79,7 @@ test('Chinese allergen aliases and unknown hard restrictions fail closed', async
   assert.equal(unknown.candidates.length, 0);
 });
 test('configured Mock provider storage preserves order lookup and replay after restart', async t => {
-  const dir = await mkdtemp(join(tmpdir(), 'saveflow-commerce-')), stateFile = join(dir, 'state.json'), token = 'persistent-mock-test-token';
+  const dir = await mkdtemp(join(tmpdir(), 'finease-commerce-')), stateFile = join(dir, 'state.json'), token = 'persistent-mock-test-token';
   let server;
   const start = async () => {
     server = createCommerceMockServer({ token, stateFile });

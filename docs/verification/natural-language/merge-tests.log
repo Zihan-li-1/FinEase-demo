@@ -1,6 +1,6 @@
 
-> saveflow-demo@0.1.0 test
-> node --test tests/bill-period.test.mjs tests/flow.test.cjs tests/qwen.test.cjs tests/banking-core.test.mjs tests/banking-http.test.cjs tests/parsed-intent.test.cjs tests/banking-intent-parser.test.cjs tests/agent-dispatcher.test.cjs tests/transfer-orchestrator.test.cjs tests/banking-agent-http.test.cjs tests/banking-clarification.test.cjs tests/banking-agent-integration.test.cjs tests/card-agent.test.mjs tests/banking-card-client.test.cjs tests/card-skill.test.mjs tests/card-core.test.mjs tests/postgres-persistence.test.mjs tests/saveflow-trial.test.mjs tests/trueforge-bill.test.mjs tests/banking-agent-auth.test.cjs tests/banking-bill-card.test.cjs tests/trueforge-skills.test.mjs tests/trueforge-preview-client.test.cjs tests/transfer-alignment.test.cjs tests/transfer-execute.test.mjs tests/banking-agent.test.mjs tests/transfer-execute-bridge.test.mjs tests/bill-skill.test.mjs tests/wealth-skill.test.mjs tests/wealth-commerce.test.mjs tests/wealth-agent-integration.test.mjs tests/banking-wealth-client.test.cjs tests/scenario-skill.test.mjs tests/scenario-core.test.mjs tests/e-agent.test.mjs tests/banking-runtime.test.mjs tests/wealth-action-skill.test.mjs tests/natural-language.test.mjs
+> finease-demo@0.1.0 test
+> node --test tests/bill-period.test.mjs tests/flow.test.cjs tests/qwen.test.cjs tests/banking-core.test.mjs tests/banking-http.test.cjs tests/parsed-intent.test.cjs tests/banking-intent-parser.test.cjs tests/agent-dispatcher.test.cjs tests/transfer-orchestrator.test.cjs tests/banking-agent-http.test.cjs tests/banking-clarification.test.cjs tests/banking-agent-integration.test.cjs tests/card-agent.test.mjs tests/banking-card-client.test.cjs tests/card-skill.test.mjs tests/card-core.test.mjs tests/postgres-persistence.test.mjs tests/finease-trial.test.mjs tests/trueforge-bill.test.mjs tests/banking-agent-auth.test.cjs tests/banking-bill-card.test.cjs tests/trueforge-skills.test.mjs tests/trueforge-preview-client.test.cjs tests/transfer-alignment.test.cjs tests/transfer-execute.test.mjs tests/banking-agent.test.mjs tests/transfer-execute-bridge.test.mjs tests/bill-skill.test.mjs tests/wealth-skill.test.mjs tests/wealth-commerce.test.mjs tests/wealth-agent-integration.test.mjs tests/banking-wealth-client.test.cjs tests/scenario-skill.test.mjs tests/scenario-core.test.mjs tests/e-agent.test.mjs tests/banking-runtime.test.mjs tests/wealth-action-skill.test.mjs tests/natural-language.test.mjs
 
 ✔ routes transfer.create only to transferHandler (4.2998ms)
 ✔ routes bill.summary only to billHandler (3.0483ms)
@@ -159,9 +159,9 @@
 ✔ resolves quarters, recent months and explicit date ranges without model guessing (5.7906ms)
 ✔ resolves compact season wording and keeps genuinely ambiguous periods unresolved (15.1905ms)
 ✔ keeps a month without a year ambiguous while accepting an explicit year and month (3.8632ms)
-(node:9660) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/%E9%87%91%E7%A7%91%E5%9B%BD%E9%99%85/saveflow-demo/src/skills/bill/bill-skill.ts is not specified and it doesn't parse as CommonJS.
+(node:9660) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///D:/%E9%87%91%E7%A7%91%E5%9B%BD%E9%99%85/finease-demo/src/skills/bill/bill-skill.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to \\?\D:\金科国际\saveflow-demo\package.json.
+To eliminate this warning, add "type": "module" to \\?\D:\金科国际\finease-demo\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ bill.analyze computes comparison, categories and evidence from repository transactions (102.7819ms)
 ✔ bill summaries exclude transfer_out from consumer expense (1.3913ms)

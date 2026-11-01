@@ -7,7 +7,7 @@ export type AgentTurn = { role: 'user' | 'assistant'; content: string };
 export async function askQwen(message: string, history: AgentTurn[], accessCode: string, signal: AbortSignal): Promise<AgentReply> {
   let response: Response;
   try {
-    response = await fetch('/api/agent', { method: 'POST', signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]), headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode }, body: JSON.stringify({ message, history: history.slice(-6), consent: true }) });
+    response = await fetch('/api/agent', { method: 'POST', signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]), headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode }, body: JSON.stringify({ message, history: history.slice(-6), consent: true }) });
   } catch { throw new ApiError('MODEL_NETWORK_ERROR', '模型连接失败或超时，请稍后重试。'); }
   if (response.status === 404 || response.status === 405) throw new ApiError('MODEL_NOT_DEPLOYED', '模型服务尚未部署。本地请运行 npm run dev:qwen；Netlify 需要同时部署 Function。');
   let payload;

@@ -12,18 +12,18 @@ import { handleWealth } from '../src/agent/handlers/wealth-handler.mjs';
 
 const answers = n => Object.fromEntries(riskQuestions.map(q => [q.id, n]));
 const now = () => Date.parse('2026-11-01T04:00:00Z');
-const env = { SAVEFLOW_ACCESS_CODE: 'demo-risk-test-access', CONTINUATION_TOKEN_SECRET: 'demo-risk-test-secret' };
+const env = { FINEASE_ACCESS_CODE: 'demo-risk-test-access', CONTINUATION_TOKEN_SECRET: 'demo-risk-test-secret' };
 let sequence = 0;
 async function host() {
-  const directory = await mkdtemp(join(tmpdir(), 'saveflow-risk-'));
-  const config = { scope: riskStoreScope('owner', 'dataset', env), env: { ...env, SAVEFLOW_DEMO_DATA_DIR: directory }, now };
+  const directory = await mkdtemp(join(tmpdir(), 'finease-risk-'));
+  const config = { scope: riskStoreScope('owner', 'dataset', env), env: { ...env, FINEASE_DEMO_DATA_DIR: directory }, now };
   const store = createRiskAssessmentStore(config);
   const core = createBankingCore({ now, riskStore: store });
   return { core, store, config };
 }
 async function send(core, body, intent) {
   const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `risk-test-${++sequence}`,
+    'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `risk-test-${++sequence}`,
   }, body: JSON.stringify(body) }), { core, env, now, parseIntent: async () => intent });
   return { status: response.status, body: await response.json() };
 }
@@ -120,7 +120,7 @@ test('invalid/expired/forged records and model fields cannot unlock assessment o
   for (const changed of [{ ...record, risk_level: 'R3' }, { ...record, expires_at: 'bad-date' }, { ...record, assessment_id: '' }, { ...record, scoring_version: 'fake' }, { ...record, completed_at: '2099-01-01T00:00:00Z' }]) assert.equal(validRiskAssessment(changed, new Date(now()).toISOString()), false);
   assert.equal(validRiskAssessment(record, record.expires_at), false);
   await store.submitRiskAssessment(answers(0));
-  const path = join(config.env.SAVEFLOW_DEMO_DATA_DIR, 'risk-assessments', `${config.scope}.json`);
+  const path = join(config.env.FINEASE_DEMO_DATA_DIR, 'risk-assessments', `${config.scope}.json`);
   const saved = JSON.parse(await readFile(path, 'utf8'));
   await writeFile(path, JSON.stringify({ ...saved, risk_level: 'R3' }));
   assert.equal(await store.getRiskAssessment(), undefined);

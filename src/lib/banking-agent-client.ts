@@ -154,7 +154,7 @@ export async function askBankingAgent(
     response = await fetch('/api/banking-agent', {
       method: 'POST',
       signal: AbortSignal.any([signal, AbortSignal.timeout(45000)]),
-      headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+      headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
       body: JSON.stringify({ history: [], consent: true, ...body }),
     });
   } catch {
@@ -348,7 +348,7 @@ export async function executeTrialTransfer(
     response = await fetch('/api/execute-trial', {
       method: 'POST',
       signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]),
-      headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+      headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
       body: JSON.stringify({ trialOperationId, previewHash }),
     });
   } catch {
@@ -384,7 +384,7 @@ export async function startTrialVerification(
     response = await fetch('/api/execute-trial', {
       method: 'POST',
       signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]),
-      headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+      headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
       body: JSON.stringify({ action: 'verification.start', trialOperationId, previewHash }),
     });
   } catch {
@@ -413,7 +413,7 @@ export async function verifyTrialVerification(
     response = await fetch('/api/execute-trial', {
       method: 'POST',
       signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]),
-      headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+      headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
       body: JSON.stringify({ action: 'verification.verify', trialOperationId, previewHash, challengeId, code }),
     });
   } catch {

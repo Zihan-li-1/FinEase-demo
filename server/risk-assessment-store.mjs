@@ -6,11 +6,11 @@ import { createRiskRecord, validRiskAssessment } from '../src/skills/wealth/risk
 // Fixed demo owner + dataset + deployment credentials; never an IP or model ID.
 // Rotation of demo credentials/dataset starts an isolated lifecycle.
 export function riskStoreScope(ownerId, datasetId, env) {
-  return createHash('sha256').update(JSON.stringify([ownerId, datasetId, env.SAVEFLOW_ACCESS_CODE, env.CONTINUATION_TOKEN_SECRET])).digest('hex');
+  return createHash('sha256').update(JSON.stringify([ownerId, datasetId, env.FINEASE_ACCESS_CODE, env.CONTINUATION_TOKEN_SECRET])).digest('hex');
 }
 
 export function createRiskAssessmentStore({ scope, env = process.env, sql, now = Date.now }) {
-  const directory = resolve(env.SAVEFLOW_DEMO_DATA_DIR || '.commerce-mock', 'risk-assessments');
+  const directory = resolve(env.FINEASE_DEMO_DATA_DIR || '.commerce-mock', 'risk-assessments');
   const file = join(directory, `${scope}.json`);
   return {
     async getRiskAssessment() {

@@ -10,12 +10,12 @@ import { handleExecuteTrial } from '../server/transfer-execute-bridge.mjs';
 const port = Number(process.env.PORT || 3000);
 const app = next({ dev: true, hostname: '127.0.0.1', port });
 await app.prepare(); // Next loads .env.local into server environment.
-console.info(JSON.stringify({ event: 'banking_auth_config', ...bankingAuthConfigStatus(), trueforgeBillEnabled: process.env.SAVEFLOW_TRUEFORGE_BILL_ENABLED === 'true' }));
+console.info(JSON.stringify({ event: 'banking_auth_config', ...bankingAuthConfigStatus(), trueforgeBillEnabled: process.env.FINEASE_TRUEFORGE_BILL_ENABLED === 'true' }));
 const nextHandler = app.getRequestHandler();
 const visits = [];
 const server = http.createServer(async (req, res) => {
   const path = req.url?.split('?')[0];
-  const banking = path === '/api/banking' || (path === '/api/saveflow' && req.method === 'POST');
+  const banking = path === '/api/banking' || (path === '/api/finease' && req.method === 'POST');
   const bankingAgent = path === '/api/banking-agent';
   const executeTrial = path === '/api/execute-trial';
   const purchase = path === '/api/purchase';
@@ -33,5 +33,5 @@ const server = http.createServer(async (req, res) => {
     res.end(await response.text());
   } catch { res.writeHead(500); res.end('Agent service unavailable'); }
 });
-server.listen(port, '127.0.0.1', () => console.log(`SaveFlow + Qwen: http://127.0.0.1:${port} (provider calls require server credentials)`));
+server.listen(port, '127.0.0.1', () => console.log(`FinEase + Qwen: http://127.0.0.1:${port} (provider calls require server credentials)`));
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => { server.close(); app.close().finally(() => process.exit(0)); });

@@ -11,7 +11,7 @@ const port = Number(process.env.SAVINGS_QA_PORT || 3113);
 const app = next({ dev: true, hostname: '127.0.0.1', port });
 await app.prepare();
 const nextHandler = app.getRequestHandler();
-const env = { ...process.env, DASHSCOPE_API_KEY: '', SAVEFLOW_AGENT_DIAGNOSTICS: 'true' };
+const env = { ...process.env, DASHSCOPE_API_KEY: '', FINEASE_AGENT_DIAGNOSTICS: 'true' };
 const core = createBankingCore();
 let truncateNext = false, serial = 0;
 const state = { adviceCalls: 0, financialWrites: 0, diagnostics: [] };

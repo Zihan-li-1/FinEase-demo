@@ -95,5 +95,5 @@ export function buildSkillOverview(catalog) {
 
 export function capabilityIntroduction(catalog) {
   const available = catalog.filter(item => item.status === 'available_demo').map(item => item.description);
-  return `我是 SaveFlow，可以自然交流、解释金融概念和操作步骤。${available.length ? `当前可用的模拟功能：${available.join('、')}。` : '当前业务数据或运行服务尚未核验，暂不能承诺业务功能可用。'}资金和卡片写入均为模拟，需要正式预览、页面明确确认及必要验证。只能查询和分析订阅，不能取消真实会员；购物链接不代表下单，预算预留只是应用内记账。`;
+  return `我是 FinEase，可以自然交流、解释金融概念和操作步骤。${available.length ? `当前可用的模拟功能：${available.join('、')}。` : '当前业务数据或运行服务尚未核验，暂不能承诺业务功能可用。'}资金和卡片写入均为模拟，需要正式预览、页面明确确认及必要验证。只能查询和分析订阅，不能取消真实会员；购物链接不代表下单，预算预留只是应用内记账。`;
 }

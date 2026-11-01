@@ -1,9 +1,9 @@
 # Banking Agent 单轮语义理解专项检测报告
 
 - 检测日期：2026-10-28（Asia/Shanghai）
-- 目标入口：`saveflow-deploy/server/banking-agent.mjs`，按 `origin/main`（commit `3125eb1`）核对入口与合同。
+- 目标入口：`finease-deploy/server/banking-agent.mjs`，按 `origin/main`（commit `3125eb1`）核对入口与合同。
 - 检测范围：仓库当前未找到名为 A1—C5 的 20 条清单；为避免编造，本报告采用当前 main 中 `tests/fixtures/natural-language-cases.mjs` 的前 20 条，临时编号 A1—D5。编号映射仅为审计占位，需人工把原始 A1—C5 清单映射回来。
-- 执行状态：**20/20 未执行**。当前环境缺少 `TRUEFORGE_BASE_URL`、`TRUEFORGE_MODEL`、`SAVEFLOW_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`；未调用真实模型。历史 `docs/verification/natural-language/real-model.json`（2026-10-26）仅作背景证据，不能充当本轮输出。
+- 执行状态：**20/20 未执行**。当前环境缺少 `TRUEFORGE_BASE_URL`、`TRUEFORGE_MODEL`、`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`；未调用真实模型。历史 `docs/verification/natural-language/real-model.json`（2026-10-26）仅作背景证据，不能充当本轮输出。
 - 安全边界：没有调用真实写接口；本报告只读。
 
 ## 分类口径

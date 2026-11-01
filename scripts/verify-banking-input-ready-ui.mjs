@@ -40,7 +40,7 @@ async function send(text, expectedStatus) {
 }
 try {
   await page.goto(process.env.INPUT_READY_URL || 'http://127.0.0.1:3105');
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
   const transfer = await send('从活期账户给张三转500元', 'awaiting_confirmation');
   if (before) {

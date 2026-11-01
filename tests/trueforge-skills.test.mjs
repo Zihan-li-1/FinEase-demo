@@ -4,17 +4,17 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { startTrialMcpServer } from '../server/mcp/saveflow-trial.mjs';
+import { startTrialMcpServer } from '../server/mcp/finease-trial.mjs';
 import { createLowBalanceCore as createBankingCore } from './fixtures/low-balance-core.mjs';
 import { createTrueforgeSkillAdapter, routeTrueforgeSkill, validateSkillResult } from '../server/trueforge-skill-adapter.mjs';
 import { trialAgentSpec, createTrueforgeClient } from '../server/trueforge-client.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { handleBanking } from '../server/banking.mjs';
 import { createTokenBridge } from '../server/mcp/trueforge-token-bridge.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 
-const env = { SAVEFLOW_ACCESS_CODE: 'multi-test-access-code', CONTINUATION_TOKEN_SECRET: 'multi-test-token-secret',
-  TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'test/deepseek-v4-1-flash', TRUEFORGE_MCP_SERVER: 'sv-trial', SAVEFLOW_TRUEFORGE_READ_ENABLED: 'true' };
+const env = { FINEASE_ACCESS_CODE: 'multi-test-access-code', CONTINUATION_TOKEN_SECRET: 'multi-test-token-secret',
+  TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'test/deepseek-v4-1-flash', TRUEFORGE_MCP_SERVER: 'sv-trial', FINEASE_TRUEFORGE_READ_ENABLED: 'true' };
 const body = message => ({ message, consent: true, history: [] });
 function event(tool, args, result, isError = false) {
   return { turnId: 'turn-test', calls: [{ id: 'call-test', threadId: 'main', function: { name: tool, arguments: JSON.stringify(args) }, toolInfo: { type: 'mcp', name: tool, serverId: 'sv-trial', serverName: 'sv-trial' } }],
@@ -91,13 +91,13 @@ test('standalone MCP allowlist and phrase helpers never override the configured 
   for (const tool of ['card_get', 'subscription_list', 'product_list']) assert.deepEqual(trialAgentSpec(env, tool).mcpServers[0].enableTools, [tool]);
   assert.throws(() => trialAgentSpec(env, 'action.execute'));
   for (const msg of ['冻结我的卡', '给张三转500元', '查账单', '查询订阅并取消', '产品申购', '查看我的卡然后转账', '聊聊理财']) assert.equal(routeTrueforgeSkill(msg, env), undefined);
-  assert.equal(routeTrueforgeSkill('查询订阅', { ...env, SAVEFLOW_TRUEFORGE_READ_ENABLED: 'false' }), undefined);
-  const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': 'multi-disabled' }, body: JSON.stringify(body('查看娱乐虚拟卡')) });
-  const r = await handleBankingAgent(request, { env: { ...env, SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_TRUEFORGE_READ_ENABLED: 'false' }, core: createBankingCore(), trueforgeSkillAdapter: { handle: () => assert.fail('off') }, parseIntent: async () => ({ schemaVersion: '1.0.0', action: 'card.get', slots: { card_ref: '娱乐虚拟卡' }, missingSlots: [], status: 'ready_for_resolution' }) });
+  assert.equal(routeTrueforgeSkill('查询订阅', { ...env, FINEASE_TRUEFORGE_READ_ENABLED: 'false' }), undefined);
+  const request = new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': 'multi-disabled' }, body: JSON.stringify(body('查看娱乐虚拟卡')) });
+  const r = await handleBankingAgent(request, { env: { ...env, FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_TRUEFORGE_READ_ENABLED: 'false' }, core: createBankingCore(), trueforgeSkillAdapter: { handle: () => assert.fail('off') }, parseIntent: async () => ({ schemaVersion: '1.0.0', action: 'card.get', slots: { card_ref: '娱乐虚拟卡' }, missingSlots: [], status: 'ready_for_resolution' }) });
   assert.equal((await r.json()).data.data.card.id, 'CARD-ENT');
 });
 
-const transferEnv = { ...env, SAVEFLOW_TRUEFORGE_TRANSFER_ENABLED: 'true' };
+const transferEnv = { ...env, FINEASE_TRUEFORGE_TRANSFER_ENABLED: 'true' };
 test('bridge keeps Core failure as failure while binding its recovery alias to transfer only', async () => {
   const recovery = { ok: false, kind: 'core_error', action: 'transfer.create', error: { code: 'INSUFFICIENT_BALANCE' }, continuationToken: 'private-signed-core-state',
     recovery: { action: 'transfer.create', status: 'needs_clarification', slot: 'source_account_ref' } };
@@ -246,7 +246,7 @@ test('B: backend rejects preview IDs for decide/execute/status even with flags o
   const core = { decide: () => assert.fail('no decide'), execute: () => assert.fail('no execute'), getOperation: () => assert.fail('no status') };
   for (const action of ['action.decide', 'action.execute', 'action.status']) {
     const id = 'tfpreview:op_authentic-id';
-    const r = await handleBanking(new Request('http://localhost/api/banking', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': id },
+    const r = await handleBanking(new Request('http://localhost/api/banking', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'Idempotency-Key': id },
       body: JSON.stringify({ schema_version: '1.1.0', action, input: { operation_id: id, preview_hash: 'a'.repeat(64) } }) }), { env, core });
     assert.equal(r.status, 403); assert.equal((await r.json()).code, 'FORBIDDEN');
   }
@@ -298,7 +298,7 @@ test('SDK gate: exact arguments are approved once, repeated tool requests are de
   assert.equal(requests, 2);
 });
 
-const cardEnv = { ...transferEnv, SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED: 'true' };
+const cardEnv = { ...transferEnv, FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED: 'true' };
 const financialCards = core => core.repository.getCards().map(card => { const copy = { ...card }; delete copy.previewGeneration; return copy; });
 test('C: budget boundaries, edits, card changes and cancellation prepare without financial writes', async () => {
   await withMcp(async ({ factory, core, prepares }) => {

@@ -1,6 +1,6 @@
 // @ts-check
 import { transactionMatchesPeriod } from '../lib/calendar.mjs';
-import seed from '../data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../data/finease_mock_data.json' with { type: 'json' };
 import { assertFen, BankingError, seedYuanToFen } from './errors.mjs';
 
 /** Only this module reads seed JSON. Returns a read repository plus a private engine write port.

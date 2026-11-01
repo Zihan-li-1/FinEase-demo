@@ -1,6 +1,6 @@
 // Explicit low-balance fixture for insufficient-funds and legacy receipt tests.
 // Keep these scenarios independent of the funded interactive demo accounts.
-import seed from '../../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../../src/data/finease_mock_data.json' with { type: 'json' };
 import { createBankingCore } from '../../src/banking-core/core.mjs';
 import { createFinancialContext } from '../../src/banking-core/repository.mjs';
 

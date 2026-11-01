@@ -7,7 +7,7 @@ const directory = 'docs/verification/conversation-live-ui';
 const report = { testDate: '2026-10-26', understanding: 'real configured model; no injected output',
   core: 'in-memory simulated Banking Core', browser: 'Chrome headless', cases: [], passed: 0, failed: 0, skipped: 0, pageErrors: 0 };
 await mkdir(directory, { recursive: true });
-if (!process.env.TRUEFORGE_BASE_URL || !process.env.TRUEFORGE_MODEL || !process.env.SAVEFLOW_ACCESS_CODE) {
+if (!process.env.TRUEFORGE_BASE_URL || !process.env.TRUEFORGE_MODEL || !process.env.FINEASE_ACCESS_CODE) {
   report.skipped = 1;
   report.cases.push({ name: 'live browser acceptance', skipped: true, reason: 'MODEL_OR_ACCESS_NOT_CONFIGURED' });
 } else {
@@ -28,7 +28,7 @@ if (!process.env.TRUEFORGE_BASE_URL || !process.env.TRUEFORGE_MODEL || !process.
     await page.waitForFunction(() => !document.querySelector('.composer input')?.disabled);
   };
   const authorize = async () => {
-    await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+    await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
     await page.locator('.consent-control input').check();
   };
   const request = async action => {

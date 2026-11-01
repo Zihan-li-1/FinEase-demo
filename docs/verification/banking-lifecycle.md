@@ -8,9 +8,9 @@
 
 ## 修改
 
-- `src/lib/use-saveflow.ts`：所有 Agent 响应统一在 finally 中收尾；只在 generation 仍匹配且仍处于 analyzing 时发送 ANSWER。澄清和错误保留 CLARIFY / FAILED，不对预览发送 SUCCEEDED。
+- `src/lib/use-finease.ts`：所有 Agent 响应统一在 finally 中收尾；只在 generation 仍匹配且仍处于 analyzing 时发送 ANSWER。澄清和错误保留 CLARIFY / FAILED，不对预览发送 SUCCEEDED。
 - `src/lib/flow-machine.ts`：复用现有 Stage 定义独立 CoreOperationStage；集中定义哪些 Core 状态阻止输入。
-- `src/lib/use-saveflow.ts`：卡片、转账和理财共用 Core 操作入口；同步占用 busy 和 operationId，阻止重复确认及跨 Skill 并发。执行后的卡片/账户/交易/理财回执核验完成才进入 success；核验异常保留 unknown。取消、明确失败均撤销旧预览的执行权限。每次异步返回检查 generation，旧实例不写入新实例状态。
+- `src/lib/use-finease.ts`：卡片、转账和理财共用 Core 操作入口；同步占用 busy 和 operationId，阻止重复确认及跨 Skill 并发。执行后的卡片/账户/交易/理财回执核验完成才进入 success；核验异常保留 unknown。取消、明确失败均撤销旧预览的执行权限。每次异步返回检查 generation，旧实例不写入新实例状态。
 - `src/app/page.tsx`：输入与预览按钮统一考虑两类 busy，显示独立 Core 操作状态、原编号及只读查询入口。unknown 禁止新请求、重置和切换模式。
 - `src/app/BankingCardCards.tsx`、`BankingTransferPreview.tsx`、`BankingWealthCards.tsx`：展示执行、待核实及终态标签。
 - `src/lib/banking-agent-client.ts`：附加纯 UI 的 coreStage；旧试点执行桥连接失败、无效回执或未知错误均视为结果不确定。试点状态查询仅将原编号映射为 Core 编号进行只读查询，不重新决定或执行。
@@ -30,7 +30,7 @@ Windows 使用 npm.cmd 执行同名 npm scripts：
 | npm run lint | 通过 |
 | npm run build | 通过，生产构建与静态页面生成成功 |
 
-19 项新增测试挂载真实 useSaveflow 和首页，在进程内调用实际 Agent HTTP handler、Core HTTP handler、客户端及内存 Core；逐项断言输入框 disabled、发送按钮 disabled、Agent typing 提示、预览可确认性、操作状态和 execute 调用次数。覆盖：
+19 项新增测试挂载真实 useFinEase 和首页，在进程内调用实际 Agent HTTP handler、Core HTTP handler、客户端及内存 Core；逐项断言输入框 disabled、发送按钮 disabled、Agent typing 提示、预览可确认性、操作状态和 execute 调用次数。覆盖：
 
 1. 同页查询卡片 → 冻结 → 回执/重新查询 → 查询账单 → 解冻 → 查询卡片，并继续修改预算及交易权限。
 2. 所有当前接受的只读、场景、澄清、取消、不支持和预览状态均结束请求 loading。

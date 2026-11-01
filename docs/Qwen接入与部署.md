@@ -1,10 +1,10 @@
 # Qwen 接入与部署
 
-SaveFlow 已增加真实模型接口。默认模型为北京地域 `qwen-plus`，非思考模式、JSON 输出、单次最多1000个输出 Token。**模型推理可以是真实的，账单和资金操作仍为模拟**。本次交付不包含真实银行、支付或账户连接。
+FinEase 已增加真实模型接口。默认模型为北京地域 `qwen-plus`，非思考模式、JSON 输出、单次最多1000个输出 Token。**模型推理可以是真实的，账单和资金操作仍为模拟**。本次交付不包含真实银行、支付或账户连接。
 
 ## 本地启动
 
-需要 Node.js >=22.12。在 `saveflow-demo` 目录执行：
+需要 Node.js >=22.12。在 `finease-demo` 目录执行：
 
 ```powershell
 # 如已有 .env.local，请手动补充字段，不要覆盖原文件。
@@ -15,15 +15,15 @@ npm run dev:qwen
 启动前用编辑器填写 `.env.local`（已被 Git 忽略）：
 
 ```dotenv
-NEXT_PUBLIC_SAVEFLOW_API_MODE=mock
+NEXT_PUBLIC_FINEASE_API_MODE=mock
 DASHSCOPE_API_KEY=你的北京地域百炼密钥
 QWEN_MODEL=qwen-plus
 QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-SAVEFLOW_ACCESS_CODE=自己设置的至少16位演示访问码
+FINEASE_ACCESS_CODE=自己设置的至少16位演示访问码
 CONTINUATION_TOKEN_SECRET=另一个至少16位服务端续接密钥
 ```
 
-`DASHSCOPE_API_KEY` 只交给后端。`SAVEFLOW_ACCESS_CODE` 是另外设置的私人演示口令，在网页输入；它不等于百炼密钥。二者都不能加 `NEXT_PUBLIC_` 前缀，不能提交到仓库。演示访问码只保存在页面内存，刷新后需重输。
+`DASHSCOPE_API_KEY` 只交给后端。`FINEASE_ACCESS_CODE` 是另外设置的私人演示口令，在网页输入；它不等于百炼密钥。二者都不能加 `NEXT_PUBLIC_` 前缀，不能提交到仓库。演示访问码只保存在页面内存，刷新后需重输。
 
 打开终端提示的 `http://127.0.0.1:3000`，选择“Qwen 真实模型”，输入演示访问码，勾选发送对话和模拟账单摘要的授权，再提问。修改环境变量后重启服务。普通 `npm run dev` 仍仅启动前端；只有 `npm run dev:qwen` 同时启动模型接口。
 
@@ -47,9 +47,9 @@ Banking Core 已新增独立的模拟接口与确认流程，说明见 [Banking 
 
 1. 将项目推送到自己的仓库（排除 `.env.local`、密钥、node_modules）。
 2. 在现有 Netlify 项目的构建设置里连接该仓库，不新建站点。
-3. 如果仓库根目录就是项目目录，Base directory 留空；否则填 `saveflow-demo`。
+3. 如果仓库根目录就是项目目录，Base directory 留空；否则填 `finease-demo`。
 4. Build command 为 `npm run build`，Publish directory 为 `out`。仓库中的 `netlify.toml` 已配置 `netlify/functions` 为函数目录。
-5. 在项目 Environment variables 中增加 `DASHSCOPE_API_KEY`、`QWEN_MODEL`、`QWEN_BASE_URL`、`SAVEFLOW_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`，确保对 **Functions 运行时和 Production 部署**生效。业务接口模式保持默认 `mock`。
+5. 在项目 Environment variables 中增加 `DASHSCOPE_API_KEY`、`QWEN_MODEL`、`QWEN_BASE_URL`、`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`，确保对 **Functions 运行时和 Production 部署**生效。业务接口模式保持默认 `mock`。
 6. 触发部署，在部署结果中确认有 `agent` Function，查看日志确认限流规则成功生效。打开原网址，选择 Qwen、输入演示访问码并提问。
 
 ### 方式二：Netlify CLI 发布到原站点
@@ -80,9 +80,9 @@ netlify deploy --prod --dir=out --functions=netlify/functions
 
 - `server/qwen.mjs`：共享服务端处理器，固定支持北京地域官方域名；客户端不能指定模型地址、系统提示词或供应商密钥。仅发送模拟汇总，不发送原始账单文件。
 - `netlify/functions/agent.mjs`：生产 Function，映射 `/api/agent`，配置每 IP/域名每60秒10次的限流。部署日志必须确认规则生效；平台限流不是严格的全局费用封顶。
-- `scripts/dev-qwen.mjs`：本地同源服务，监听回环地址，同时启动 Next、`/api/agent`、`/api/banking` 和旧 POST `/api/saveflow`，本地每分钟最多10次请求。
+- `scripts/dev-qwen.mjs`：本地同源服务，监听回环地址，同时启动 Next、`/api/agent`、`/api/banking` 和旧 POST `/api/finease`，本地每分钟最多10次请求。
 - `src/lib/agent-client.ts`：前端调用和响应校验。消息上限500字，最多保留最近6条成功对话，上下文只在内存保留。
-- `src/lib/use-saveflow.ts`、`flow-machine.ts`：支持“等待补充信息”和“已回答”状态；回答类意图不会直接跳到计划确认。
+- `src/lib/use-finease.ts`、`flow-machine.ts`：支持“等待补充信息”和“已回答”状态；回答类意图不会直接跳到计划确认。
 - 每个请求只调用一次模型；服务端25秒超时，客户端30秒超时；不自动重试。即使超时，供应商已经处理的请求仍可能收费。
 - 页面显示最近一次输入/输出 Token。没有 usage 时显示0只是缺少计数，不代表免费；最终金额以百炼账单为准。
 - 数值上限、每月储蓄计算和现金流检查由程序执行，模型输出不能直接触发支付。模型提供的用户意图和参数仍可能有误，必须由用户核对确认。

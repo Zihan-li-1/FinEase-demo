@@ -222,8 +222,8 @@ test('logs/audit contain no secret arguments or thrown messages', async () => {
 
 test('API envelopes, authentication, missing params, HTTP failures, schema and probes', async () => {
   const fixture = setup(); const access = 'test-only-access-code';
-  const api = createAgentApi({ ...fixture, env: { SAVEFLOW_ACCESS_CODE: access } });
-  const call = (path, method = 'GET', body, auth = access) => api(new Request(`http://localhost${path}`, { method, headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': auth, 'Idempotency-Key': randomUUID() }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }));
+  const api = createAgentApi({ ...fixture, env: { FINEASE_ACCESS_CODE: access } });
+  const call = (path, method = 'GET', body, auth = access) => api(new Request(`http://localhost${path}`, { method, headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': auth, 'Idempotency-Key': randomUUID() }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }));
   for (const path of ['/health', '/ready', '/api/v1/skills', '/api/v1/skills/bill/schema']) {
     const response = await call(path); assert.equal(response.status, 200); assert.equal(AgentResponse.safeParse(await response.json()).success, true);
   }
@@ -240,8 +240,8 @@ test('API envelopes, authentication, missing params, HTTP failures, schema and p
 
 test('API timeout is HTTP 504 with unified error', async () => {
   const fixture = mockSetup({ invoke: async () => new Promise(() => {}) }); const access = 'test-only-access-code';
-  const api = createAgentApi({ ...fixture, env: { SAVEFLOW_ACCESS_CODE: access } });
-  const response = await api(new Request('http://localhost/api/v1/agent/runs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': access, 'Idempotency-Key': 'timeout' }, body: JSON.stringify(mockRequest('x')) }));
+  const api = createAgentApi({ ...fixture, env: { FINEASE_ACCESS_CODE: access } });
+  const response = await api(new Request('http://localhost/api/v1/agent/runs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': access, 'Idempotency-Key': 'timeout' }, body: JSON.stringify(mockRequest('x')) }));
   assert.equal(response.status, 504); assert.equal((await response.json()).error.code, 'SKILL_TIMEOUT');
 });
 

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 try { process.loadEnvFile('.env.local'); } catch { /* caller may supply credentials */ }
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const base = process.env.SAVEFLOW_VERIFY_URL || 'http://127.0.0.1:4300';
+const base = process.env.FINEASE_VERIFY_URL || 'http://127.0.0.1:4300';
 const output = process.env.SAVINGS_QA_OUTPUT || 'docs/verification/savings-month-choice';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const report = { base, cases: [], pageErrors: [], financialWrites: 0 };
@@ -27,7 +27,7 @@ try {
         return { data: payload.data, posted: response.request().postDataJSON() };
       }
       await page.goto(base);
-      await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+      await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
       await page.locator('.consent-control input').check();
       const initial = await call(async () => {
         await page.locator('.composer input').fill('我要在2026年12月31日前存够一万元');

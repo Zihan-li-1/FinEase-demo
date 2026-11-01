@@ -43,7 +43,7 @@ function toolResult(result) {
 // Repository injection is for local verification only; it is never an MCP argument.
 export function createTrialMcpServer(repository, { core = mockCore, env = trialEnv, now = Date.now, timezone = 'Asia/Shanghai', parseIntent } = {}) {
   repository ??= core.repository;
-  const server = new McpServer({ name: 'saveflow-trial', version: '0.2.0' });
+  const server = new McpServer({ name: 'finease-trial', version: '0.2.0' });
   server.registerTool('bill_summary', {
     description: '查询固定 Mock 用户的月账单汇总。month 格式 YYYY-MM；金额单位为人民币分；返回数据来源和截至日期。',
     // Optional here so a missing month reaches the explicit clarification result.
@@ -96,7 +96,7 @@ export function createTrialMcpServer(repository, { core = mockCore, env = trialE
         const result = await runBankingConversation(body, {
           // Only expose prepare to the shared workflow; no decision or execution capability.
           core: { prepare: core.prepare.bind(core) }, repository, env, now, timezone, initialIntent, expectedAction: action, origin: 'agent_suggested',
-          parseIntent: parseIntent ?? (env.SAVEFLOW_BANKING_RUNTIME === 'legacy-qwen' ? parseBankingIntent : parseTrueforgeBankingIntent),
+          parseIntent: parseIntent ?? (env.FINEASE_BANKING_RUNTIME === 'legacy-qwen' ? parseBankingIntent : parseTrueforgeBankingIntent),
         });
         const clarification = result.code === 'NEEDS_CLARIFICATION';
         return toolResult({
@@ -148,8 +148,8 @@ export function createTrialMcpServer(repository, { core = mockCore, env = trialE
 }
 
 export function startTrialMcpServer({
-  host = process.env.SAVEFLOW_MCP_HOST ?? '127.0.0.1',
-  port = Number(process.env.SAVEFLOW_MCP_PORT ?? 3333),
+  host = process.env.FINEASE_MCP_HOST ?? '127.0.0.1',
+  port = Number(process.env.FINEASE_MCP_PORT ?? 3333),
   core = mockCore,
   repository = core.repository,
   env = trialEnv,
@@ -198,7 +198,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   server.once('close', () => { void core.close(); });
   server.on('listening', () => {
     const address = server.address();
-    console.error(`SaveFlow trial MCP: http://${address.address}:${address.port}/mcp`);
+    console.error(`FinEase trial MCP: http://${address.address}:${address.port}/mcp`);
   });
   server.on('error', error => { console.error(error); process.exitCode = 1; });
   for (const signal of ['SIGINT', 'SIGTERM']) {

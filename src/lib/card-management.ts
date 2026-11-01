@@ -1,4 +1,4 @@
-import type { Message } from "./use-saveflow";
+import type { Message } from "./use-finease";
 
 export type ManagedCard = {
   id: string;

@@ -14,7 +14,7 @@ const { buildCapabilityCatalog, buildSkillOverview, publicCapabilityCatalog } = 
 const { buildParsedIntent } = require('../src/agent/clarification/merge-intent.mjs');
 const { askBankingAgent } = require('../src/lib/banking-agent-client.ts');
 const { saveBankingChat, restoreBankingChat } = require('../src/lib/banking-chat-storage.ts');
-const env = { SAVEFLOW_ACCESS_CODE: 'routing-test-access-1234', CONTINUATION_TOKEN_SECRET: 'routing-test-secret-1234', TRUEFORGE_MODEL: 'fixture-model', TRUEFORGE_BASE_URL: 'http://localhost:1' };
+const env = { FINEASE_ACCESS_CODE: 'routing-test-access-1234', CONTINUATION_TOKEN_SECRET: 'routing-test-secret-1234', TRUEFORGE_MODEL: 'fixture-model', TRUEFORGE_BASE_URL: 'http://localhost:1' };
 const messageRoute = (text, topic = 'general') => ({ schemaVersion: '1.0.0', kind: 'conversation_reply', text, topic });
 const business = continuation => ({ schemaVersion: '1.0.0', kind: 'business_intent', continuation });
 const control = (command, target = 'current') => ({ schemaVersion: '1.0.0', kind: 'task_control', control: { command, target } });
@@ -30,13 +30,13 @@ function fixture() {
     execute: () => { calls.execute++; assert.fail('Agent cannot execute'); },
   };
   const host = { store: createConversationStore({ now, readCoreOperation: id => actual.getOperation(id) }), busy: new Set() };
-  let proposal = messageRoute('你好，我是 SaveFlow。'); let intent = transfer();
+  let proposal = messageRoute('你好，我是 FinEase。'); let intent = transfer();
   const runtime = { async createSession() { return 'routing-fixture'; }, async cancel() {},
     async runTurn(_id, wire) { calls.router.push(JSON.parse(wire)); return typeof proposal === 'string' ? proposal : JSON.stringify(proposal); } };
   const options = { env, core, now, conversationHost: host, conversationRuntimeClient: runtime,
     parseIntent: async (message, context) => { calls.parser.push({ message, context }); return intent; } };
   const request = body => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-    'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `route-${++serial}`,
+    'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `route-${++serial}`,
   }, body: JSON.stringify(body) });
   const post = async body => { const r = await handleBankingAgent(request(body), options); return { httpStatus: r.status, ...await r.json() }; };
   return { calls, actual, core, host, options, post, request, now, advance: ms => { clock += ms; },
@@ -48,13 +48,13 @@ async function preview(f) { f.route(business('new')); const p = await f.post({ m
 async function browser(f, body) {
   const original = global.fetch;
   try { global.fetch = async (_url, init) => handleBankingAgent(f.request(JSON.parse(init.body)), f.options);
-    return await askBankingAgent(body, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal);
+    return await askBankingAgent(body, env.FINEASE_ACCESS_CODE, new AbortController().signal);
   } finally { global.fetch = original; }
 }
 
 const conversationalCases = [
-  [1, '你好。', '你好，我是 SaveFlow。', 'general'],
-  [2, '你是谁？', '我是 SaveFlow，可以解释金融概念。', 'general'],
+  [1, '你好。', '你好，我是 FinEase。', 'general'],
+  [2, '你是谁？', '我是 FinEase，可以解释金融概念。', 'general'],
   [3, '你能做什么？', '依据能力目录介绍。', 'capabilities'],
   [4, '你可以帮我取消视频会员吗？', '只能查询和分析订阅，不能直接取消真实会员，请到对应平台操作。', 'general'],
   [5, '什么是理财产品的流动性？', '流动性表示需要用钱时，将产品换成可用资金所需的时间。', 'general'],
@@ -182,18 +182,18 @@ test('[场景 19/20] HTTP 客户端接受四种规划状态，拒绝写工具和
     for (const status of ['completed', 'partial', 'needs_clarification', 'unsupported']) {
       const data = { status, conversation: actual.data.conversation, plan: { ...plan, status, ...(status === 'needs_clarification' ? { question: '请选择月份' } : {}) } };
       global.fetch = async () => Response.json({ code: 'OK', requestId: 'test-plan', reply: { text: '只读结果', style: 'concise', safetyNotices: [] }, data });
-      assert.equal((await askBankingAgent({ message: '分析' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal)).plan.status, status);
+      assert.equal((await askBankingAgent({ message: '分析' }, env.FINEASE_ACCESS_CODE, new AbortController().signal)).plan.status, status);
       data.operationId = 'op_forged';
-      await assert.rejects(askBankingAgent({ message: '分析' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+      await assert.rejects(askBankingAgent({ message: '分析' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
     }
     for (const mutate of [p => { p.steps[0].tool = 'transfer.create'; }, p => { p.steps[0].result.result.data.products[0].minimumAmountFen = -1; }, p => { p.steps[0].result.result.kind = 'receipt'; }, p => { p.operationId = 'op_forged'; }, p => { p.steps[0].result.result.evidence[0].source = 'untrusted'; }]) {
       const modified = structuredClone(plan); mutate(modified);
       global.fetch = async () => Response.json({ code: 'OK', requestId: 'bad-plan', reply: { text: '只读结果', style: 'concise', safetyNotices: [] }, data: { status: 'completed', conversation: actual.data.conversation, plan: modified } });
-      await assert.rejects(askBankingAgent({ message: '分析' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+      await assert.rejects(askBankingAgent({ message: '分析' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
     }
     for (const extra of [{ operationId: 'op_forged' }, { preview: {} }, { continuationToken: 'forged' }, { conversation: {} }, { action: 'transfer.create' }]) {
       global.fetch = async () => Response.json({ code: 'OK', requestId: 'test-chat', reply: { text: '你好', style: 'concise', safetyNotices: [] }, data: { status: 'conversation_reply', ...extra } });
-      await assert.rejects(askBankingAgent({ message: '你好' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+      await assert.rejects(askBankingAgent({ message: '你好' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
     }
   } finally { global.fetch = original; }
   assert.equal(f.calls.execute, 0);
@@ -205,7 +205,7 @@ test('[场景 20/20] Catalog 按运行端口与配置降级，不能承诺真实
   assert.equal(catalog.find(item => item.action === 'scenario.plan_purchase').status, 'available_demo');
   assert.equal(catalog.find(item => item.action === 'purchase.budget_reservation').status, 'unavailable');
   const down = await buildCapabilityCatalog({ env: {} }); assert.ok(down.every(item => ['unavailable', 'planning_only'].includes(item.status)));
-  const safe = JSON.stringify(publicCapabilityCatalog(catalog)); assert.ok(!safe.includes(env.SAVEFLOW_ACCESS_CODE)); assert.ok(!safe.includes(env.CONTINUATION_TOKEN_SECRET));
+  const safe = JSON.stringify(publicCapabilityCatalog(catalog)); assert.ok(!safe.includes(env.FINEASE_ACCESS_CODE)); assert.ok(!safe.includes(env.CONTINUATION_TOKEN_SECRET));
   const overview = buildSkillOverview(catalog); assert.equal(overview.groups.length, 6);
   assert.equal(overview.groups.find(group => group.id === 'subscriptions').examples.some(example => /取消/.test(example.prompt)), false);
   assert.ok(overview.groups.every(group => group.examples.every(example => ['available_demo', 'planning_only'].includes(example.status))));
@@ -256,7 +256,7 @@ test('路由故障不自动重试或触碰任务，规划故障结束当前只�
 
 test('真实 HTTP socket → 浏览器客户端接受纯对话，鉴权和请求大小保护仍生效', async t => {
   const http = require('node:http'); const { Readable } = require('node:stream');
-  const f = fixture(); f.route(messageRoute('你好，我是 SaveFlow。'));
+  const f = fixture(); f.route(messageRoute('你好，我是 FinEase。'));
   const server = http.createServer(async (req, res) => {
     const response = await handleBankingAgent(new Request(`http://${req.headers.host}/api/banking-agent`, { method: req.method, headers: req.headers, body: Readable.toWeb(req), duplex: 'half' }), f.options);
     res.writeHead(response.status, Object.fromEntries(response.headers)); res.end(await response.text());
@@ -266,9 +266,9 @@ test('真实 HTTP socket → 浏览器客户端接受纯对话，鉴权和请求
   const native = global.fetch; const url = `http://127.0.0.1:${server.address().port}`;
   try {
     global.fetch = (path, init) => native(url + path, init);
-    const a = await askBankingAgent({ message: '你好。' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal); assert.equal(a.status, 'conversation_reply');
+    const a = await askBankingAgent({ message: '你好。' }, env.FINEASE_ACCESS_CODE, new AbortController().signal); assert.equal(a.status, 'conversation_reply');
     await assert.rejects(askBankingAgent({ message: '你好。' }, 'wrong-access', new AbortController().signal), { code: 'UNAUTHORIZED' });
-    const oversized = await native(url + '/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE }, body: JSON.stringify({ message: 'x'.repeat(20000) }) });
+    const oversized = await native(url + '/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE }, body: JSON.stringify({ message: 'x'.repeat(20000) }) });
     assert.equal((await oversized.json()).code, 'REQUEST_TOO_LARGE'); assert.equal(f.calls.router.length, 1);
   } finally { global.fetch = native; }
 });
@@ -283,7 +283,7 @@ test('merged purchase past-date card accepts its intentional empty bubble while 
   const original = global.fetch;
   try {
     global.fetch = async () => Response.json({ code: 'OK', requestId: 'empty-chat', reply: { text: '', style: 'concise', safetyNotices: [] }, data: { status: 'conversation_reply' } });
-    await assert.rejects(askBankingAgent({ message: '你好' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+    await assert.rejects(askBankingAgent({ message: '你好' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
   } finally { global.fetch = original; }
 });
 

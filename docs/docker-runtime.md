@@ -13,15 +13,15 @@ database/skill readiness checks; `/health` remains a liveness check.
 From the repository root in PowerShell:
 
 ```powershell
-$env:SAVEFLOW_GIT_SHA = (git rev-parse HEAD).Trim()
-$env:SAVEFLOW_GIT_DIRTY = if (git status --porcelain) { 'true' } else { 'false' }
+$env:FINEASE_GIT_SHA = (git rev-parse HEAD).Trim()
+$env:FINEASE_GIT_DIRTY = if (git status --porcelain) { 'true' } else { 'false' }
 docker compose --env-file .env.local -f compose.yaml -f compose.postgres.yaml build web pilot-migrate
 docker compose --env-file .env.local -f compose.yaml -f compose.postgres.yaml up -d web mcp bridge
 node --env-file=.env.local scripts/verify-container.mjs
 Start-Process 'http://127.0.0.1:4300/'
 ```
 
-This reuses the existing `saveflow-local-check` project and Postgres volume.
+This reuses the existing `finease-local-check` project and Postgres volume.
 The smoke test checks page assets, legacy banking reads, dynamic Agent routes,
 authentication, and version metadata without executing financial operations.
 `gitDirty: "true"` in `/version` identifies local fixes on top of the reported SHA.

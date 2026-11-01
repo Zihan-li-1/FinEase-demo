@@ -19,14 +19,14 @@ for (const extension of ['.ts', '.tsx']) require.extensions[extension] = (module
 };
 require.extensions['.css'] = () => {};
 const agent = require('../src/lib/banking-agent-client.ts');
-const hook = require('../src/lib/use-saveflow.ts');
+const hook = require('../src/lib/use-finease.ts');
 const { ApiError } = require('../src/lib/api/contracts.ts');
-const realHook = hook.useSaveflow;
+const realHook = hook.useFinEase;
 const realAsk = agent.askBankingAgent;
 let flow, root, core, handleBanking, handleAgent, savingsAdviceFixture;
-hook.useSaveflow = () => { flow = realHook(); return flow; };
+hook.useFinEase = () => { flow = realHook(); return flow; };
 const Home = require('../src/app/page.tsx').default;
-const env = { SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
 const originalFetch = global.fetch;
 let intent, calls, intercept, naturalRoute, routedInputs, savingsRejectOnce, requestSequence = 0;
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
@@ -53,7 +53,7 @@ async function mount() {
     return intercept ? intercept(body, run) : run();
   };
   await act(async () => { root = create(React.createElement(Home)); });
-  await act(async () => { flow.setConsent(true); flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); flow.setInput('test'); });
+  await act(async () => { flow.setConsent(true); flow.setAccessCode(env.FINEASE_ACCESS_CODE); flow.setInput('test'); });
 }
 const cardIntent = action => ({ schemaVersion: '1.0.0', action, slots: { card_ref: '娱乐虚拟卡', ...(action === 'card.set_budget' ? { amount: { amount_minor: 100000, currency: 'CNY' } } : {}), ...(action === 'card.set_controls' ? { online_payments_enabled: false } : {}) }, missingSlots: [], status: 'ready_for_resolution' });
 async function start(action = 'card.get') {
@@ -144,7 +144,7 @@ test('chat history restores as language context while historical previews remain
   await mount(); naturalRoute = { schemaVersion: '1.0.0', kind: 'conversation_reply', topic: 'general', text: '理财筛选是按照用户要求比较产品。' };
   await act(async () => { await flow.startDemo('什么是理财筛选？'); });
   await act(async () => { root.unmount(); root = create(React.createElement(Home)); });
-  await act(async () => { flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); flow.setConsent(true); });
+  await act(async () => { flow.setAccessCode(env.FINEASE_ACCESS_CODE); flow.setConsent(true); });
   await act(async () => { await flow.startDemo('再解释一下。'); });
   assert.equal(routedInputs.at(-1).chatHistory[0].content, '什么是理财筛选？');
   assert.equal(flow.activeTransferOperationId, null); assert.equal(flow.bankingContinuation, null);
@@ -195,7 +195,7 @@ test('an authoritative invalid-continuation error still retires preview controls
   naturalRoute = { schemaVersion: '1.0.0', kind: 'conversation_reply', topic: 'general', text: '请核对预览后使用页面确认按钮。' };
   await act(async () => { await flow.startDemo('为什么确认？'); }); assert.equal(flow.activeTransferOperationId, p.operationId);
   naturalRoute = { schemaVersion: '1.0.0', kind: 'business_intent', continuation: 'current' };
-  intercept = body => handleAgent(new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `bad-continuation-${++requestSequence}` }, body: JSON.stringify({ ...body, continuationToken: 'forged' }) }), { env, core, routeConversation: async () => naturalRoute });
+  intercept = body => handleAgent(new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `bad-continuation-${++requestSequence}` }, body: JSON.stringify({ ...body, continuationToken: 'forged' }) }), { env, core, routeConversation: async () => naturalRoute });
   await act(async () => { await flow.startDemo('改成100元'); });
   assert.equal(flow.activeTransferOperationId, null); assert.equal(flow.bankingContinuation, null);
   assert.equal((await core.getOperation(p.operationId)).data.state, 'awaiting_confirmation'); assert.equal(calls.includes('action.execute'), false);
@@ -247,7 +247,7 @@ test('refresh resumes the separate Wealth screening without skipping its require
   assert.equal(task.action, 'wealth.recommend');
   assert.equal(flow.sessionTasks.find(item => item.taskId === task.taskId)?.canResume, true);
   await act(async () => { root.unmount(); root = create(React.createElement(Home)); });
-  await act(async () => { flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); flow.setConsent(true); });
+  await act(async () => { flow.setAccessCode(env.FINEASE_ACCESS_CODE); flow.setConsent(true); });
   await act(async () => { await flow.verifyBankingSession(); });
   assert.equal(flow.sessionTasks.find(item => item.taskId === task.taskId)?.canResume, true);
   await act(async () => { await flow.resumeBankingTask(task.taskId); });
@@ -437,7 +437,7 @@ test('unknown survives remount with query entry and no execution authority', asy
   await act(async () => { root.unmount(); });
   await act(async () => { root = create(React.createElement(Home)); });
   assert.equal(flow.coreOperations[data.operationId], 'unknown'); assert.equal(flow.canStart, true); assert.equal(flow.activeCardOperationId, null);
-  await act(async () => { flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); });
+  await act(async () => { flow.setAccessCode(env.FINEASE_ACCESS_CODE); });
   intercept = null;
   await act(async () => { await flow.checkCardOperation(data); }); ready();
   assert.equal(calls.filter(action => action === 'action.execute').length, 1);
@@ -596,9 +596,9 @@ test('ConversationState UI: refresh restores only an opaque token, then sync and
   intent = buildParsedIntent('transfer.create', { payee_ref: '张三', source_account_ref: '活期账户', amount: { amount_minor: 50000, currency: 'CNY' } });
   await act(async () => { await flow.startDemo('从活期账户给张三转500元'); });
   const original = preview(); const token = original.conversation.token;
-  const raw = sessionStorage.getItem('saveflow.banking-chat.v1');
+  const raw = sessionStorage.getItem('finease.banking-chat.v1');
   assert.equal(JSON.parse(raw).conversationToken, token);
-  assert.ok(!raw.includes(env.SAVEFLOW_ACCESS_CODE));
+  assert.ok(!raw.includes(env.FINEASE_ACCESS_CODE));
   assert.equal(JSON.parse(raw).accessCode, undefined);
   await act(async () => { root.unmount(); root = create(React.createElement(Home)); });
   assert.equal(flow.sessionPhase, 'unverified'); assert.equal(flow.activeTransferOperationId, null);
@@ -606,7 +606,7 @@ test('ConversationState UI: refresh restores only an opaque token, then sync and
   const before = calls.length;
   await act(async () => { await flow.confirmTransferOperation(preview()); });
   assert.equal(calls.length, before);
-  await act(async () => { flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); flow.setConsent(true); });
+  await act(async () => { flow.setAccessCode(env.FINEASE_ACCESS_CODE); flow.setConsent(true); });
   await act(async () => { await flow.verifyBankingSession(); });
   assert.equal(flow.sessionPhase, 'ready'); assert.equal(flow.activeTransferOperationId, null);
   await act(async () => { await flow.resumeBankingTask(original.conversation.currentTask.taskId); });
@@ -618,12 +618,12 @@ test('ConversationState UI: refresh restores only an opaque token, then sync and
 
 test('ConversationState UI: forged cached session is rejected and a new business works without clearing history', async () => {
   await mount(); await start('card.get');
-  const key = 'saveflow.banking-chat.v1';
+  const key = 'finease.banking-chat.v1';
   const snapshot = JSON.parse(sessionStorage.getItem(key));
   snapshot.conversationToken = `cs1.${'A'.repeat(43)}`;
   sessionStorage.setItem(key, JSON.stringify(snapshot));
   await act(async () => { root.unmount(); root = create(React.createElement(Home)); });
-  await act(async () => { flow.setAccessCode(env.SAVEFLOW_ACCESS_CODE); flow.setConsent(true); });
+  await act(async () => { flow.setAccessCode(env.FINEASE_ACCESS_CODE); flow.setConsent(true); });
   await act(async () => { await flow.verifyBankingSession(); });
   assert.equal(flow.sessionPhase, 'failed'); ready();
   const oldCount = flow.messages.length;

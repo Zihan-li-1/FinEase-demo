@@ -4,12 +4,12 @@ import { createBankingCore } from '../src/banking-core/core.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { validateParsedIntent } from '../src/agent/validate-parsed-intent.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
 let sequence = 0;
 const parsed = (action, slots) => ({ schemaVersion: '1.0.0', action, slots, missingSlots: [], status: 'ready_for_resolution' });
 async function send(core, intent) {
   const request = new Request('http://localhost/api/banking-agent', {
-    method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `wealth-${++sequence}` }, body: JSON.stringify({ message: '理财请求' }),
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `wealth-${++sequence}` }, body: JSON.stringify({ message: '理财请求' }),
   });
   const response = await handleBankingAgent(request, { env, core, parseIntent: async () => intent });
   return { status: response.status, body: await response.json() };

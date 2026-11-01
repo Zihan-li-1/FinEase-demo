@@ -1,10 +1,10 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import { createBankingCore } from '../src/banking-core/core.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { createPlanningRuntimeClient } from '../server/planning-runtime.mjs';
 
-const required = ['TRUEFORGE_BASE_URL', 'TRUEFORGE_MODEL', 'SAVEFLOW_ACCESS_CODE', 'CONTINUATION_TOKEN_SECRET'];
+const required = ['TRUEFORGE_BASE_URL', 'TRUEFORGE_MODEL', 'FINEASE_ACCESS_CODE', 'CONTINUATION_TOKEN_SECRET'];
 const missing = required.filter(name => !process.env[name]);
 if (missing.length) {
   console.error(`真实模型验证未执行：缺少 ${missing.join(', ')}。`);
@@ -29,7 +29,7 @@ if (missing.length) {
     },
   };
   const request = new Request('http://localhost/api/banking-agent', {
-    method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': process.env.SAVEFLOW_ACCESS_CODE },
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': process.env.FINEASE_ACCESS_CODE },
     body: JSON.stringify({ message: '8月支出增加是不是订阅造成的？不要执行任何修改。', planning: true }),
   });
   const response = await handleBankingAgent(request, { env: process.env, core, planningRuntimeClient: client });

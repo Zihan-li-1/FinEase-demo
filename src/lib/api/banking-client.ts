@@ -101,7 +101,7 @@ export function createBankingClient(options: Options = {}) {
       try {
         const response = await (options.fetchImpl ?? fetch)(`${baseUrl}/api/banking`, {
           method: "POST", credentials: "include", cache: "no-store", signal: controller.signal,
-          headers: { "Content-Type": "application/json", "X-Saveflow-Access": options.accessCode?.() ?? "", ...(write ? { "Idempotency-Key": (input as { operationId: string }).operationId } : {}) },
+          headers: { "Content-Type": "application/json", "X-FinEase-Access": options.accessCode?.() ?? "", ...(write ? { "Idempotency-Key": (input as { operationId: string }).operationId } : {}) },
           body: JSON.stringify({ schema_version: WIRE_VERSION, action, input: toWire(input) }),
         });
         const wire: unknown = await response.json();

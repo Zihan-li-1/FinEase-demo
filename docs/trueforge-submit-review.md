@@ -1,8 +1,8 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
 # TrueForge 试点提交审阅说明
 
-日期：2026-10-18；仓库：`saveflow-demo`；分支：`spike/trueforge-harness`。
+日期：2026-10-18；仓库：`finease-demo`；分支：`spike/trueforge-harness`。
 
 当前建议：可以整理本地修复提交供审阅，PR 应保留草稿/阻塞状态。PostgreSQL 自动化和 Core 恢复已通过，但网页与 Bridge 的续接状态仍在内存，尚不满足本次完整验收标准。没有执行 commit、push、merge 或部署。
 
@@ -16,7 +16,7 @@
 | --- | --- |
 | `src/banking-core/postgres-store.mjs` | JSONB 写入单次序列化；各读取路径兼容旧字符串；月份筛选不漏旧账单；保留幂等保护 |
 | `tests/postgres-persistence.test.mjs` | 新增 5 项真实 PostgreSQL 回归，包含旧格式与安全拒绝 |
-| `server/mcp/saveflow-trial.mjs` | 显式启用合成 PostgreSQL MCP Core；要求稳定密钥；维持只读/预览工具边界 |
+| `server/mcp/finease-trial.mjs` | 显式启用合成 PostgreSQL MCP Core；要求稳定密钥；维持只读/预览工具边界 |
 | `.env.example` | 补充服务端试点专用数据库变量，默认空值 |
 | `compose.postgres.yaml` | 新增带卷的分库本地验收配置与迁移依赖 |
 | `scripts/verify-docker-persistence.mjs` | 真实 MCP/HTTP、数据库容器重建、跨进程回执/账本验证及内存依赖证据 |

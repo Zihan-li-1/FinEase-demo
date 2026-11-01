@@ -5,10 +5,10 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createBankingCore } from '../src/banking-core/core.mjs';
 
-process.env.SAVEFLOW_ACCESS_CODE = randomUUID();
+process.env.FINEASE_ACCESS_CODE = randomUUID();
 delete process.env.DATABASE_URL;
 process.env.ALLOW_EPHEMERAL_BANKING = 'true';
-process.env.SAVEFLOW_STATIC_EXPORT = 'false';
+process.env.FINEASE_STATIC_EXPORT = 'false';
 const app = next({ dev: true, hostname: '127.0.0.1', port: 0 });
 await app.prepare();
 const server = http.createServer(app.getRequestHandler());
@@ -17,7 +17,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const checks = [];
 let exitCode = 0;
 async function call(path, body, key = randomUUID()) {
-  const response = await fetch(`${base}${path}`, { method: body === undefined ? 'GET' : 'POST', headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': key, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), signal: AbortSignal.timeout(60000) });
+  const response = await fetch(`${base}${path}`, { method: body === undefined ? 'GET' : 'POST', headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': key, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), signal: AbortSignal.timeout(60000) });
   const envelope = await response.json();
   assert.equal(response.status, 200, JSON.stringify(envelope));
   assert.deepEqual(Object.keys(envelope).sort(), ['data', 'error', 'request_id', 'run_id', 'state']);

@@ -7,13 +7,13 @@ const phase = process.argv[2] || 'A';
 const dir = `.next/trueforge-multi-${phase}`;
 await mkdir(dir, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const page = await browser.newPage({ baseURL: process.env.SAVEFLOW_UI_URL || 'http://127.0.0.1:3000', viewport: { width: 1440, height: 1000 } });
+const page = await browser.newPage({ baseURL: process.env.FINEASE_UI_URL || 'http://127.0.0.1:3000', viewport: { width: 1440, height: 1000 } });
 const report = { phase, realTrueforgeAndMcpAndUi: true, checks: [], requests: [] };
 async function setup() {
-  await page.goto(process.env.SAVEFLOW_UI_URL || 'http://127.0.0.1:3000');
+  await page.goto(process.env.FINEASE_UI_URL || 'http://127.0.0.1:3000');
   // Each scenario starts a new conversation explicitly. Reload now restores history.
   await page.getByTitle('重新开始演示', { exact: true }).click();
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
 }
 async function send(message, chooseLabel) {
@@ -50,9 +50,9 @@ try {
     await page.screenshot({ path: `${dir}/transfer.png`, fullPage: true }); report.checks.push('missing account, ambiguous payee, same session, real preview and changed amount');
     r = await send('确认'); assert.equal(r.code, 'PREVIEW_ONLY'); report.checks.push('chat confirmation rejected');
     r = await send('取消'); assert.equal(r.data.status, 'cancelled'); report.checks.push('local cancellation without execution');
-    const blocked = await page.request.post('/api/banking', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': id }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: id, preview_hash: firstHash } } }); assert.equal(blocked.status(), 403);
+    const blocked = await page.request.post('/api/banking', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': id }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: id, preview_hash: firstHash } } }); assert.equal(blocked.status(), 403);
     report.checks.push('direct backend execution rejected');
-    const stale = await page.request.post('/api/banking-agent', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE }, data: { history: [], consent: true, continuationToken: oldToken, message: '改成700元' } }); assert.equal((await stale.json()).code, 'CONTINUATION_STALE');
+    const stale = await page.request.post('/api/banking-agent', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE }, data: { history: [], consent: true, continuationToken: oldToken, message: '改成700元' } }); assert.equal((await stale.json()).code, 'CONTINUATION_STALE');
     await setup(); r = await send('从活期账户给张三转6000元'); assert.equal(r.code, 'INSUFFICIENT_BALANCE'); assert.equal(await page.locator('.banking-preview-card').count(), 0); report.checks.push('Core insufficient balance without a success card');
   } else if (phase === 'C') {
     await setup(); let r = await send('设置娱乐虚拟卡预算1000元'); assert.equal(r.data.preview.exactEffects[0].after.monthlyBudgetFen, 100000);

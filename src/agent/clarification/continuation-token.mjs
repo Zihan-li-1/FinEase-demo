@@ -4,7 +4,7 @@ const VERSION = 2;
 const ALGORITHM = 'aes-256-gcm';
 const IV_BYTES = 12;
 const AUTH_TAG_BYTES = 16;
-const AAD = Buffer.from('saveflow-continuation-v2', 'utf8');
+const AAD = Buffer.from('finease-continuation-v2', 'utf8');
 
 function keyFor(secret) {
   return createHash('sha256').update(secret, 'utf8').digest();

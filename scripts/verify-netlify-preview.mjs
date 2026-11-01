@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import nextEnv from '@next/env';
 nextEnv.loadEnvConfig(process.cwd(), true);
-const base = new URL(process.env.SAVEFLOW_PREVIEW_URL);
-if (base.protocol !== 'https:' || !/^deploy-preview-\d+--[a-z0-9-]+\.netlify\.app$/.test(base.hostname) || base.pathname !== '/' || base.search || base.hash) throw new Error('Set SAVEFLOW_PREVIEW_URL to the HTTPS PR Deploy Preview root');
+const base = new URL(process.env.FINEASE_PREVIEW_URL);
+if (base.protocol !== 'https:' || !/^deploy-preview-\d+--[a-z0-9-]+\.netlify\.app$/.test(base.hostname) || base.pathname !== '/' || base.search || base.hash) throw new Error('Set FINEASE_PREVIEW_URL to the HTTPS PR Deploy Preview root');
 const dir = 'docs/verification/netlify-preview';
 await mkdir(dir, { recursive: true });
 const report = { at: new Date().toISOString(), url: base.origin, checks: [], failures: [], requests: [], browserErrors: [], trueforgeObserved: false };
@@ -45,13 +45,13 @@ try {
   const response = await page.goto(base.origin);
   if (response.status() === 401 || response.status() === 403) {
     report.failures.push({ name: 'Netlify preview entry access', status: response.status(), netlifyRequestId: response.headers()['x-nf-request-id'],
-      classification: 'Netlify access protection before SaveFlow UI/API; business functions and continuation state not exercised' });
+      classification: 'Netlify access protection before FinEase UI/API; business functions and continuation state not exercised' });
     const blocked = new Error('PREVIEW_ENTRY_BLOCKED'); blocked.code = 'PREVIEW_ENTRY_BLOCKED'; throw blocked;
   }
   assert.equal(response.status(), 200);
   await page.locator('.composer input').waitFor();
   report.checks.push('preview page loads and hydrates');
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE || '');
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE || '');
   await page.locator('.consent-control input').check();
   let r = await send('查询2026年8月账单');
   if (r.status === 200 && r.data?.status === 'bill_result' && r.data.data.transactionCount === 12) { await page.locator('.bill-report').waitFor(); report.checks.push('bill query and original bill card'); } else failure('bill query/card', r);

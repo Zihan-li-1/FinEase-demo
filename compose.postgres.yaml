@@ -5,38 +5,38 @@ services:
   pilot-db:
     image: postgres:17-bookworm
     environment:
-      POSTGRES_USER: saveflow_web
+      POSTGRES_USER: finease_web
       POSTGRES_PASSWORD: local-synthetic-web-only
-      POSTGRES_DB: saveflow_web
+      POSTGRES_DB: finease_web
     volumes:
       - pilot-postgres:/var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U saveflow_web -d saveflow_web"]
+      test: [CMD-SHELL, "pg_isready -U finease_web -d finease_web"]
       interval: 3s
       timeout: 3s
       retries: 10
   pilot-migrate:
     # 独立迁移镜像：只带 migrations/ 与迁移脚本，依赖 web 构建缓存的依赖层。
-    image: saveflow-docker-migrate:local
+    image: finease-docker-migrate:local
     build:
       context: .
       target: migrate
     command: [node, scripts/migrate-banking.mjs]
     environment:
-      DATABASE_URL: postgresql://saveflow_web:local-synthetic-web-only@pilot-db:5432/saveflow_web
+      DATABASE_URL: postgresql://finease_web:local-synthetic-web-only@pilot-db:5432/finease_web
     depends_on:
       pilot-db:
         condition: service_healthy
   web:
     environment:
-      DATABASE_URL: postgresql://saveflow_web:local-synthetic-web-only@pilot-db:5432/saveflow_web
+      DATABASE_URL: postgresql://finease_web:local-synthetic-web-only@pilot-db:5432/finease_web
       ALLOW_EPHEMERAL_BANKING: "false"
     depends_on:
       pilot-migrate:
         condition: service_completed_successfully
   mcp:
     environment:
-      DATABASE_URL: postgresql://saveflow_web:local-synthetic-web-only@pilot-db:5432/saveflow_web
+      DATABASE_URL: postgresql://finease_web:local-synthetic-web-only@pilot-db:5432/finease_web
     depends_on:
       pilot-migrate:
         condition: service_completed_successfully

@@ -4,12 +4,12 @@ import { createBankingCore } from '../src/banking-core/core.mjs';
 import { buildParsedIntent } from '../src/agent/clarification/merge-intent.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 
-const baseEnv = { SAVEFLOW_BANKING_RUNTIME: 'trueforge', SAVEFLOW_AGENT_DIAGNOSTICS: 'true',
-  SAVEFLOW_ACCESS_CODE: 'audit-access-code-1234', CONTINUATION_TOKEN_SECRET: 'audit-continuation-secret-1234',
+const baseEnv = { FINEASE_BANKING_RUNTIME: 'trueforge', FINEASE_AGENT_DIAGNOSTICS: 'true',
+  FINEASE_ACCESS_CODE: 'audit-access-code-1234', CONTINUATION_TOKEN_SECRET: 'audit-continuation-secret-1234',
   TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'audit/model' };
 const url = 'https://audit.example/api/banking-agent';
 const makeRequest = body => new Request(url, { method: 'POST', headers: {
-  'content-type': 'application/json', 'x-saveflow-access': baseEnv.SAVEFLOW_ACCESS_CODE, origin: 'https://audit.example',
+  'content-type': 'application/json', 'x-finease-access': baseEnv.FINEASE_ACCESS_CODE, origin: 'https://audit.example',
 }, body: JSON.stringify(body) });
 
 function runtime(resolve) {

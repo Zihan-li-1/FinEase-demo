@@ -6,7 +6,7 @@ import { requestSavingsAdvice } from '../server/savings-advisor.mjs';
 import { createSavingsAdviceRuntimeClient } from '../server/trueforge-savings-runtime.mjs';
 import { savingsAdviceFixture, savingsSdkFixture } from './fixtures/savings-runtime.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'savings-test-access', CONTINUATION_TOKEN_SECRET: 'savings-test-secret-123', TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'test/deepseek-v4-1-flash' };
+const env = { FINEASE_ACCESS_CODE: 'savings-test-access', CONTINUATION_TOKEN_SECRET: 'savings-test-secret-123', TRUEFORGE_BASE_URL: 'http://localhost:8790', TRUEFORGE_MODEL: 'test/deepseek-v4-1-flash' };
 const now = () => Date.parse('2026-10-22T12:00:00+08:00');
 const intent = { schemaVersion: '1.0.0', action: 'orchestrator.goal', slots: { goal_text: '年底存够一万元', amount: { amount_minor: 1000000, currency: 'CNY' }, deadline: '2026-12-31' }, missingSlots: [], status: 'ready_for_resolution' };
 const expenses = { 房租: 300000, 餐饮: 145000, 交通: 40000, 通信: 10000, 日用品: 50000, 娱乐: 112000, 购物: 128000, 订阅: 9000, 其他: 52000 };
@@ -14,7 +14,7 @@ const planInputs = { saved_amount_minor: 0 };
 const manualOverride = { ...planInputs, month: '2026-09', income_minor: 1200000, category_expenses_minor: expenses };
 const advice = { observations: [], category_budgets: Object.entries(expenses).map(([category, suggested_minor]) => ({ category, suggested_minor, reason: '按近期支出暂作参考', evidence_refs: [`recent:${category}`] })), caveats: ['演示账单数据仅供参考'], self_review: { passed: true, data_coverage: true, category_evidence: true, fixed_costs: true, budget_totals: true, uncertainty: true, failed_items: [] } };
 let serial = 0;
-const request = data => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `savings-${++serial}` }, body: JSON.stringify({ history: [], consent: true, ...data }) });
+const request = data => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `savings-${++serial}` }, body: JSON.stringify({ history: [], consent: true, ...data }) });
 const options = { env, now, parseIntent: async () => intent, savingsAdvisor: async (facts, config) => {
   const sdk = savingsSdkFixture({ env, output: JSON.stringify(savingsAdviceFixture(facts)) });
   return requestSavingsAdvice(facts, { ...config, client: createSavingsAdviceRuntimeClient({ env, sdk }) });
@@ -193,7 +193,7 @@ test('generation or review failure performs no financial write and signed form c
 
 test('review diagnostics correlate with the HTTP error while preserving a manual signed retry', async () => {
   const diagnostics = [];
-  const config = { ...options, env: { ...env, SAVEFLOW_AGENT_DIAGNOSTICS: 'true' }, diagnosticSink: line => diagnostics.push(JSON.parse(line)) };
+  const config = { ...options, env: { ...env, FINEASE_AGENT_DIAGNOSTICS: 'true' }, diagnosticSink: line => diagnostics.push(JSON.parse(line)) };
   const initial = await (await handleBankingAgent(request({ message: '我要年底存够一万' }), config)).json();
   const token = initial.data.continuationToken;
   const failedResponse = await handleBankingAgent(request({ continuationToken: token, planInputs: { saved_amount_minor: 65000 } }), {

@@ -9,7 +9,7 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const page = await browser.newPage({ baseURL, viewport: { width: 1440, height: 1000 } });
 const report = { at: new Date().toISOString(), url: baseURL, actualDockerHttpMcpAndHostTrueforge: true, requests: [], checks: [], browserErrors: [] };
 page.on('pageerror', error => report.browserErrors.push(error.message));
-const authorize = async () => { await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE); await page.locator('.consent-control input').check(); };
+const authorize = async () => { await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE); await page.locator('.consent-control input').check(); };
 async function send(message, action, expectedStatus = 200) {
   const start = Date.now(), pending = page.waitForResponse(r => r.url().endsWith('/api/banking-agent') && r.request().method() === 'POST', { timeout: 30000 }); void pending.catch(() => {});
   if (action) await action(); else { await page.locator('.composer input').fill(message); await page.locator('.composer input').press('Enter'); }
@@ -46,7 +46,7 @@ try {
   const operationId = r.operationId, hash = r.preview.previewHash;
   report.checks.push('refresh restores history and original transfer continuation; new formal 300 yuan preview');
   await send('确认转账', undefined, 403);
-  const blocked = await page.request.post('/api/banking', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: operationId, preview_hash: hash } } }); assert.equal(blocked.status(), 403);
+  const blocked = await page.request.post('/api/banking', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: operationId, preview_hash: hash } } }); assert.equal(blocked.status(), 403);
   assert.equal((await send('取消')).status, 'cancelled'); report.checks.push('chat confirmation and direct Core execution refused; cancellation without execution');
   await page.locator('.banking-preview-card').last().scrollIntoViewIfNeeded(); await page.screenshot({ path: `${dir}/desktop.png`, fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: `${dir}/mobile.png`, fullPage: true });

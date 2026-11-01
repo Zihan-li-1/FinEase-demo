@@ -5,7 +5,7 @@ import { verifyContinuationToken } from '../../src/agent/clarification/continuat
 import { handleBankingAgent } from '../../server/banking-agent.mjs';
 import { createBankingRuntimeClient } from '../../server/trueforge-banking-runtime.mjs';
 import { fixedNow } from './natural-language-cases.mjs';
-import seed from '../../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../../src/data/finease_mock_data.json' with { type: 'json' };
 
 let sequence = 0;
 export async function exerciseLanguageCase(definition, { live = false, env = {} } = {}) {
@@ -20,7 +20,7 @@ export async function exerciseLanguageCase(definition, { live = false, env = {} 
     prepare: input => { prepares.push(input); return actualCore.prepare(input); },
     decide: () => assert.fail('understanding cannot confirm'), execute: () => assert.fail('understanding cannot execute'),
   };
-  const settings = { ...env, SAVEFLOW_ACCESS_CODE: 'synthetic-language-test-access', CONTINUATION_TOKEN_SECRET: 'synthetic-language-test-continuation', SAVEFLOW_BANKING_RUNTIME: 'trueforge' };
+  const settings = { ...env, FINEASE_ACCESS_CODE: 'synthetic-language-test-access', CONTINUATION_TOKEN_SECRET: 'synthetic-language-test-continuation', FINEASE_BANKING_RUNTIME: 'trueforge' };
   const real = live ? createBankingRuntimeClient({ env: settings }) : undefined;
   const client = {
     createSession: signal => live ? real.createSession(signal) : Promise.resolve('fixture-session'),
@@ -37,7 +37,7 @@ export async function exerciseLanguageCase(definition, { live = false, env = {} 
     },
   };
   const post = async body => {
-    const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': settings.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `language-${++sequence}` }, body: JSON.stringify(body) }), { env: settings, now, timezone: definition.timezone ?? 'Asia/Shanghai', core, trueforgeRuntimeClient: client });
+    const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': settings.FINEASE_ACCESS_CODE, 'x-forwarded-for': `language-${++sequence}` }, body: JSON.stringify(body) }), { env: settings, now, timezone: definition.timezone ?? 'Asia/Shanghai', core, trueforgeRuntimeClient: client });
     const result = await response.json();
     assert.equal(response.status, 200, `${result.code}: ${result.message}`);
     return result;

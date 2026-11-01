@@ -150,7 +150,7 @@ test('actual client and unified handler preserve reply/card separation across st
   const { createBankingCore } = await import('../src/banking-core/core.mjs');
   const { buildParsedIntent } = await import('../src/agent/clarification/merge-intent.mjs');
   const { BankingBillCard } = require('../src/app/BankingBillCard.tsx');
-  const env = { SAVEFLOW_ACCESS_CODE: 'client-test-access-code', CONTINUATION_TOKEN_SECRET: 'client-test-continuation-secret', SAVEFLOW_BANKING_RUNTIME: 'trueforge' };
+  const env = { FINEASE_ACCESS_CODE: 'client-test-access-code', CONTINUATION_TOKEN_SECRET: 'client-test-continuation-secret', FINEASE_BANKING_RUNTIME: 'trueforge' };
   const original = global.fetch; let seq = 0, proposal, seen = [], sent = [];
   const core = createBankingCore();
   const client = { createSession: async () => 'private', cancel: async () => {}, runTurn: async (_id, wire) => { seen.push(JSON.parse(wire)); return JSON.stringify(proposal); } };
@@ -162,7 +162,7 @@ test('actual client and unified handler preserve reply/card separation across st
     };
     proposal = buildParsedIntent('bill.summary', { month: '2026-08' });
     for (const replyStyle of ['concise', 'friendly', 'professional']) {
-      const answer = await askBankingAgent({ message: '查询2026年8月账单', replyStyle }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal);
+      const answer = await askBankingAgent({ message: '查询2026年8月账单', replyStyle }, env.FINEASE_ACCESS_CODE, new AbortController().signal);
       assert.equal(answer.reply.style, replyStyle); assert.equal(sent.at(-1).replyStyle, replyStyle);
       assert.equal(seen.at(-1).replyStyle, undefined); // Style never changes the understanding context.
       const { reply, requestId, conversation, ...data } = answer;
@@ -172,7 +172,7 @@ test('actual client and unified handler preserve reply/card separation across st
     }
     assert.equal(cards.size, 1); assert.equal(rendered.size, 1); assert.equal(bubbles.size, 3);
     proposal = buildParsedIntent('transfer.create', { source_account_ref: '储蓄账户', payee_ref: '张三', amount: { amount_minor: 999999999, currency: 'CNY' } });
-    await assert.rejects(askBankingAgent({ message: '从储蓄账户给张三转9999999.99元', replyStyle: 'professional' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), e => {
+    await assert.rejects(askBankingAgent({ message: '从储蓄账户给张三转9999999.99元', replyStyle: 'professional' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), e => {
       assert.ok(e instanceof BankingAgentError); assert.equal(e.code, 'INSUFFICIENT_BALANCE');
       assert.equal(e.recovery.reply.style, 'professional'); assert.ok(e.recovery.reply.text.includes('张三'));
       assert.ok(e.recovery.reply.text.includes('可用余额')); assert.equal(e.recovery.status, 'needs_clarification');

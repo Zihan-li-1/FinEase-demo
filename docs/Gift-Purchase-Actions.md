@@ -10,7 +10,7 @@
 4. 用户可用 `scenario.purchase.update` 切换问答搭配与商品自选，或补充鲜花颜色、花材、蛋糕口味和人数等偏好。页面按品类和偏好生成购物平台**搜索链接**，用户在平台自行挑选商品、核对价格、库存、运费、配送与过敏原，并自行创建订单和付款。搜索链接不代表已核实的商品或推荐承诺。
    预算保存后若在别处花过钱，可自行填写最新可用余额和待付义务，用 `purchase.balance_check` 复核。它只报告 `enough` 或 `shortfall` 及差额，不改预算或银行账务。
 5. `order_on` 的提醒时间是用户指定时间窗起点；`deliver_on` 在期望送达前三天提醒（若不足三天则立即生成到期待办）。worker 只生成应用内待办；用户需要打开页面查看。实际送达日期由购物平台确认。
-6. 用户可经 `purchase.cancel_preview` 和 `scenario.purchase.cancel` 释放尚未占用的应用预算。外部平台订单需要用户在平台自行管理；SaveFlow 不读取或取消它。
+6. 用户可经 `purchase.cancel_preview` 和 `scenario.purchase.cancel` 释放尚未占用的应用预算。外部平台订单需要用户在平台自行管理；FinEase 不读取或取消它。
 
 ## 当前公开动作
 

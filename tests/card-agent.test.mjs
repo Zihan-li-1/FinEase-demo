@@ -8,7 +8,7 @@ import { bankingIntentSystemPrompt, parseBankingIntent } from '../server/banking
 import { handleBanking } from '../server/banking.mjs';
 import { toWire } from '../src/banking-core/wire.mjs';
 
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234', DASHSCOPE_API_KEY: 'fake-key' };
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234', DASHSCOPE_API_KEY: 'fake-key' };
 let requestNumber = 0;
 const card = (action, slots = {}) => {
   const required = action === 'card.set_budget' ? ['card_ref', 'amount'] : ['card_ref'];
@@ -16,7 +16,7 @@ const card = (action, slots = {}) => {
   return { schemaVersion: '1.0.0', action, slots, missingSlots, status: missingSlots.length ? 'needs_clarification' : 'ready_for_resolution' };
 };
 const request = body => new Request('http://localhost/api/banking-agent', {
-  method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `card-agent-${++requestNumber}` }, body: JSON.stringify(body),
+  method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `card-agent-${++requestNumber}` }, body: JSON.stringify(body),
 });
 const send = async (body, options) => (await handleBankingAgent(request(body), { env, now: () => 1000, parseIntent: continuationModel, ...options })).json();
 
@@ -153,7 +153,7 @@ test('natural language card budget reaches Core through Agent preview and dedica
   assert.equal(core.repository.getCard('CARD-ENT').monthlyBudgetFen, 80000);
   const call = async (action, input, key) => {
     const response = await handleBanking(new Request('http://localhost/api/banking', {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, ...(key ? { 'Idempotency-Key': key } : {}) },
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, ...(key ? { 'Idempotency-Key': key } : {}) },
       body: JSON.stringify({ schema_version: '1.1.0', action, input: toWire(input) }),
     }), { env, core });
     return { status: response.status, body: await response.json() };

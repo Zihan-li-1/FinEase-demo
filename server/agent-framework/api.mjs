@@ -30,7 +30,7 @@ export function createAgentApi({ orchestrator, registry, repository, env = proce
     try {
       const path = new URL(request.url).pathname.replace(/\/$/, ''); const method = request.method;
       if (path === '/health' && method === 'GET') return reply({ status: 'alive' });
-      const expected = env.SAVEFLOW_ACCESS_CODE; const actual = request.headers.get('X-Saveflow-Access') ?? '';
+      const expected = env.FINEASE_ACCESS_CODE; const actual = request.headers.get('X-FinEase-Access') ?? '';
       if (!expected || expected.length < 16) fail('NOT_READY');
       if (Buffer.byteLength(expected) !== Buffer.byteLength(actual) || !timingSafeEqual(Buffer.from(expected), Buffer.from(actual))) fail('UNAUTHORIZED');
       if (request.headers.get('origin') && request.headers.get('origin') !== new URL(request.url).origin) fail('FORBIDDEN');

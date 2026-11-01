@@ -1,6 +1,6 @@
 # Banking Agent 联调与验证
 
-本轮工作目录为 `saveflow-demo`。当前合同见 [Banking Agent API](Banking-Agent-API.md)。本轮改造在本地实施，未提交、部署或修改既有公共站点。
+本轮工作目录为 `finease-demo`。当前合同见 [Banking Agent API](Banking-Agent-API.md)。本轮改造在本地实施，未提交、部署或修改既有公共站点。
 
 ## 2026-10-22 自然语言金额与日期第一阶段
 

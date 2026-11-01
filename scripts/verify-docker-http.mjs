@@ -4,11 +4,11 @@ import nextEnv from '@next/env';
 nextEnv.loadEnvConfig(process.cwd(), true);
 const base = 'http://127.0.0.1:4300';
 const report = { at: new Date().toISOString(), url: base, checks: [] };
-const headers = { 'Content-Type': 'application/json', 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE };
+const headers = { 'Content-Type': 'application/json', 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE };
 async function check(name, path, init, status) {
   const response = await fetch(base + path, init), text = await response.text();
   assert.equal(response.status, status, name);
-  assert.ok(!text.includes(process.env.SAVEFLOW_ACCESS_CODE));
+  assert.ok(!text.includes(process.env.FINEASE_ACCESS_CODE));
   report.checks.push({ name, status: response.status });
 }
 try {
@@ -19,7 +19,7 @@ try {
   const path = '/api/banking-agent';
   await check('POST method required', path, {}, 405);
   await check('missing access code', path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }, 401);
-  await check('incorrect access code', path, { method: 'POST', headers: { ...headers, 'X-Saveflow-Access': 'incorrect-test-access-code' }, body: '{}' }, 401);
+  await check('incorrect access code', path, { method: 'POST', headers: { ...headers, 'X-FinEase-Access': 'incorrect-test-access-code' }, body: '{}' }, 401);
   await check('cross origin refused', path, { method: 'POST', headers: { ...headers, Origin: 'https://invalid.example' }, body: '{}' }, 403);
   await check('JSON content type required', path, { method: 'POST', headers: { ...headers, 'Content-Type': 'text/plain' }, body: '{}' }, 415);
   await check('16KiB body limit', path, { method: 'POST', headers, body: JSON.stringify({ message: 'x'.repeat(17000) }) }, 413);

@@ -17,7 +17,7 @@
     "websitePostgresConfigured": true,
     "hashes": {
       "src/banking-core/postgres-store.mjs": "f6675916cdb7bda10c39e6c438233963713455cdb97732f21efa348f44a0ed2d",
-      "server/mcp/saveflow-trial.mjs": "6c3e36525778d797d072e2706c186391a1a10ce3cc0607adee4205dc8c8ef1c3"
+      "server/mcp/finease-trial.mjs": "6c3e36525778d797d072e2706c186391a1a10ce3cc0607adee4205dc8c8ef1c3"
     },
     "sourceHashMatches": true
   },
@@ -732,7 +732,7 @@
       "generated": false
     },
     {
-      "path": "netlify/functions/saveflow.mjs",
+      "path": "netlify/functions/finease.mjs",
       "generated": false
     },
     {
@@ -880,7 +880,7 @@
       "generated": false
     },
     {
-      "path": "server/mcp/saveflow-trial.mjs",
+      "path": "server/mcp/finease-trial.mjs",
       "generated": false
     },
     {
@@ -984,7 +984,7 @@
       "generated": false
     },
     {
-      "path": "src/app/api/saveflow/route.ts",
+      "path": "src/app/api/finease/route.ts",
       "generated": false
     },
     {
@@ -1068,7 +1068,7 @@
       "generated": false
     },
     {
-      "path": "src/data/saveflow_mock_data.json",
+      "path": "src/data/finease_mock_data.json",
       "generated": false
     },
     {
@@ -1120,7 +1120,7 @@
       "generated": false
     },
     {
-      "path": "src/lib/saveflow-mock.ts",
+      "path": "src/lib/finease-mock.ts",
       "generated": false
     },
     {
@@ -1132,7 +1132,7 @@
       "generated": false
     },
     {
-      "path": "src/lib/use-saveflow.ts",
+      "path": "src/lib/use-finease.ts",
       "generated": false
     },
     {
@@ -1288,7 +1288,7 @@
       "generated": false
     },
     {
-      "path": "tests/saveflow-trial.test.mjs",
+      "path": "tests/finease-trial.test.mjs",
       "generated": false
     },
     {
@@ -1327,7 +1327,7 @@
   "sourceHashes": {
     "src/banking-core/postgres-store.mjs": "f6675916cdb7bda10c39e6c438233963713455cdb97732f21efa348f44a0ed2d",
     "tests/postgres-persistence.test.mjs": "0259ae01802e77c9bbb77ec6d2a84b08b8313b76a0bde81fd09b895c262aae77",
-    "server/mcp/saveflow-trial.mjs": "6c3e36525778d797d072e2706c186391a1a10ce3cc0607adee4205dc8c8ef1c3",
+    "server/mcp/finease-trial.mjs": "6c3e36525778d797d072e2706c186391a1a10ce3cc0607adee4205dc8c8ef1c3",
     "compose.yaml": "4a735dff4c477bc9df2ab574a6fdec389ee35815fdd4779d6734e4b38d2b32de",
     "compose.postgres.yaml": "7fee1a8a2b27f934292f523af01a613dec43de175dda0b5b5e0a60b8b1e81087"
   }

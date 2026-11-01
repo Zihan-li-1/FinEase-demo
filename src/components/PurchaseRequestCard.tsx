@@ -62,7 +62,7 @@ export function PurchaseRequestCard({ slots = {}, cards = [] }: {
   const [preview, setPreview] = useState<BrowserReminder>();
   const [receipt, setReceipt] = useState<{ key: string; value: BrowserReminder }>();
   const [error, setError] = useState('');
-  const storageKey = `saveflow.purchase.browser.v1:${JSON.stringify({ items: items.map(item => item.category), date: slots.date_expression, meaning: slots.date_meaning })}`;
+  const storageKey = `finease.purchase.browser.v1:${JSON.stringify({ items: items.map(item => item.category), date: slots.date_expression, meaning: slots.date_meaning })}`;
   const subscribe = useCallback((notify: () => void) => {
     if (typeof window === 'undefined') return () => {};
     window.addEventListener('storage', notify);

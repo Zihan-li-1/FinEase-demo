@@ -18,7 +18,7 @@ export async function request<A extends Action>(action: A, input: RequestMap[A],
   try {
     const response = await fetch(`${apiConfig.baseUrl}${apiConfig.endpoint}`, {
       method: "POST", credentials: "include", cache: "no-store", signal: controller.signal,
-      headers: { "Content-Type": "application/json", "X-Request-ID": requestId, ...(options.accessCode ? { "X-Saveflow-Access": options.accessCode } : {}), ...(write ? { "Idempotency-Key": operationId } : {}) },
+      headers: { "Content-Type": "application/json", "X-Request-ID": requestId, ...(options.accessCode ? { "X-FinEase-Access": options.accessCode } : {}), ...(write ? { "Idempotency-Key": operationId } : {}) },
       body: JSON.stringify({ action, ...input }),
     });
     const payload = await response.json() as Envelope<ResultMap[A]>;

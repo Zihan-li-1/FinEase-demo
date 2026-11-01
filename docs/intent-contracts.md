@@ -5,7 +5,7 @@
 本轮落地范围、名称对照与成员确认见 [目标动作—当前实现—本轮状态](intent-action-status.md)。
 订阅接入属于合同预备，前两条主链路验收及 B、C、D 接口确认后再新增解析器动作枚举；E 不作为前置确认人。当前服务仍采用单意图 `schemaVersion: "1.0.0"`。
 
-> 状态：面向新版 SaveFlow Demo 的目标合同，尚未由现有代码实现；适用于 IM 输入、意图识别器、Orchestrator、六类 Skill、Financial Context、Risk & Action Engine。  
+> 状态：面向新版 FinEase Demo 的目标合同，尚未由现有代码实现；适用于 IM 输入、意图识别器、Orchestrator、六类 Skill、Financial Context、Risk & Action Engine。
 > 范围：定义“用户想做什么、已说清什么、还缺什么”；不授权银行操作。演示数据与银行接口均可为 Mock，但确认、状态与审计链路按真实系统设计。
 
 ## 0. 一句话边界
@@ -262,7 +262,7 @@ interface UserDecision {
 
 **迭代顺序：** 先冻结 v1.1 action ID、通用槽位、状态和确认语义；用样例 JSON 跑通 `识别 → 解析 → 计划 → 预览 → 确认 → Mock 执行`；随后分别替换识别技术与银行工具。现有单意图输出在入口做过渡 adapter；不能映射的动作保持 `unsupported` 或转入追问，不让六个 Skill 分别适配六套意图格式。
 
-## 8. 与 2026-09-22 新版 SaveFlow Demo 的对接说明
+## 8. 与 2026-09-22 新版 FinEase Demo 的对接说明
 
 **结论：可复用前端入口、Qwen 服务端调用、合成账单和“草稿→确认→结果待核实”的交互骨架；目前尚未实现本合同的 `ParsedIntentEnvelope`、六类 Skill、跨能力规划和统一执行门。** 本节以压缩包中的源码为准，不将规划项写成已完成功能。
 
@@ -270,9 +270,9 @@ interface UserDecision {
 |---|---|---|
 | `server/qwen.mjs` → `intent=create_plan/analyze_bills/subscriptions/clarify/unsupported` | 单一旧枚举，另带 `reply`、`plan`、`analysis`；模型解析与业务计划部分混在 `interpret()` | 在服务端新增 Parser 输出 v1.1 envelope；`analyze_bills` 可映射 `bill.analyze`，`subscriptions` 只有查询意图时可映射 `subscription.list`；`clarify` 是交互状态，不能作为 action |
 | `create_plan` 和 `AgentPlan` | 普通目标金额与每月储蓄金额；消费比例规则请求返回 `unsupported` | 不映射 `wealth.subscribe`、`card.set_budget`、`scenario.create_rule`；若保留普通目标储蓄，另注册 `goal.create`，只创建目标/提醒，不自动消费扣划。消费比例规则从比赛主链路下线 |
-| `src/lib/api/contracts.ts` 的 `analyze/create-plan/operation-status` | SaveFlow 专用业务 API，`confirmed:true`、`Idempotency-Key`、操作回执 | 作为过渡实现保留；新 Skill 使用独立 action 注册和逐步回执。`confirmed:true` 只供旧模拟计划使用，不能成为转账/申购等动作的授权凭证 |
-| `flow-machine.ts` 与 `use-saveflow.ts` | 单张储蓄计划的状态与写后查询，Qwen 读请求可以追问/回答 | UI 状态骨架可复用；扩展为每个 `step_id` 的预览、确认、执行、待核实和部分失败。禁止把一个 `success` 表示多步骤全部成功 |
-| `saveflow_mock_data.json` | 用户、2 账户、36 笔交易、3 个月汇总、2 卡、2 订阅、1 目标、2 预算 | 可支撑部分账单/卡片/订阅查询演示；缺收款人及收款账户、授权代扣、理财产品/持仓/测评、未来事件/待扣款/订单、能力注册与审计记录，不能直接演示其操作成功 |
+| `src/lib/api/contracts.ts` 的 `analyze/create-plan/operation-status` | FinEase 专用业务 API，`confirmed:true`、`Idempotency-Key`、操作回执 | 作为过渡实现保留；新 Skill 使用独立 action 注册和逐步回执。`confirmed:true` 只供旧模拟计划使用，不能成为转账/申购等动作的授权凭证 |
+| `flow-machine.ts` 与 `use-finease.ts` | 单张储蓄计划的状态与写后查询，Qwen 读请求可以追问/回答 | UI 状态骨架可复用；扩展为每个 `step_id` 的预览、确认、执行、待核实和部分失败。禁止把一个 `success` 表示多步骤全部成功 |
+| `finease_mock_data.json` | 用户、2 账户、36 笔交易、3 个月汇总、2 卡、2 订阅、1 目标、2 预算 | 可支撑部分账单/卡片/订阅查询演示；缺收款人及收款账户、授权代扣、理财产品/持仓/测评、未来事件/待扣款/订单、能力注册与审计记录，不能直接演示其操作成功 |
 
 ### 8.1 对接时必须统一的口径
 

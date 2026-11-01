@@ -20,7 +20,7 @@
 
 ## 真实模型验证状态
 
-最初仅检查此目录配置时没有发现可用环境，原脚本记录为未执行。后续沿部署脚本找到 `../saveflow-demo/.env.local` 回退配置，已用隔离的内存模拟 Core 实测统一路由与自动规划。逐轮工具和实际状态见 `docs/evidence/conversation-routing-live.json`；未保存凭据或模型会话 ID。
+最初仅检查此目录配置时没有发现可用环境，原脚本记录为未执行。后续沿部署脚本找到 `../finease-demo/.env.local` 回退配置，已用隔离的内存模拟 Core 实测统一路由与自动规划。逐轮工具和实际状态见 `docs/evidence/conversation-routing-live.json`；未保存凭据或模型会话 ID。
 
 ## 当前限制
 

@@ -13,7 +13,7 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const { askBankingAgent } = require('../src/lib/banking-agent-client.ts');
 const { BankingBillCard } = require('../src/app/BankingBillCard.tsx');
-const env = { SAVEFLOW_ACCESS_CODE: 'synthetic-bill-test-access', CONTINUATION_TOKEN_SECRET: 'synthetic-bill-test-secret' };
+const env = { FINEASE_ACCESS_CODE: 'synthetic-bill-test-access', CONTINUATION_TOKEN_SECRET: 'synthetic-bill-test-secret' };
 const now = () => Date.parse('2026-10-22T04:00:00Z');
 const period = (start_date = '2026-06-01', end_date = '2026-09-30', timezone = 'Asia/Shanghai') => ({ start_date, end_date, timezone, label: `${start_date}至${end_date}` });
 const intent = slots => ({ schemaVersion: '1.0.0', action: 'bill.summary', slots, missingSlots: [], status: 'ready_for_resolution' });
@@ -26,7 +26,7 @@ async function backend(slots = { period: period() }, message = '查看今年六�
   const repository = { ...core.repository, getTransactions: filter => { queries.push(filter); return core.repository.getTransactions(filter); } };
   const real = live ? (await import('../server/trueforge-banking-runtime.mjs')).createBankingRuntimeClient({ env: process.env }) : undefined;
   const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', {
-    method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `bill-contract-${++sequence}` },
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `bill-contract-${++sequence}` },
     body: JSON.stringify({ message, history: [], consent: true }),
   }), { env, core, repository, now, timezone, trueforgeRuntimeClient: {
     createSession: signal => live ? real.createSession(signal) : Promise.resolve('fixture-session'),
@@ -40,7 +40,7 @@ async function client(payload, options) {
   const original = global.fetch;
   try {
     global.fetch = async () => payload instanceof Response ? payload : Response.json(payload);
-    return await askBankingAgent({ message: '查看今年六到九月的账单' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal, options);
+    return await askBankingAgent({ message: '查看今年六到九月的账单' }, env.FINEASE_ACCESS_CODE, new AbortController().signal, options);
   } finally { global.fetch = original; }
 }
 const render = data => renderToStaticMarkup(React.createElement(BankingBillCard, { data })).replace(/<[^>]*>/g, '');
@@ -193,13 +193,13 @@ test('client sends original text/history without adding a continuation and consu
         assert.equal(value, message); return intent({ period: period() });
       } });
     };
-    const result = await askBankingAgent({ message, history }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal);
+    const result = await askBankingAgent({ message, history }, env.FINEASE_ACCESS_CODE, new AbortController().signal);
     assert.equal(result.status, 'bill_result');
     assert.equal(render(result).includes('缺数据：9月'), false);
   } finally { global.fetch = original; }
 });
 
-test('LIVE TrueForge -> real HTTP -> real client -> bill card with unmodified seed', { skip: process.env.SAVEFLOW_VERIFY_LIVE_BILL !== 'true' }, async () => {
+test('LIVE TrueForge -> real HTTP -> real client -> bill card with unmodified seed', { skip: process.env.FINEASE_VERIFY_LIVE_BILL !== 'true' }, async () => {
   const { payload, queries } = await backend(undefined, undefined, undefined, { live: true });
   assert.deepEqual(queries, [{ startDate: '2026-06-01', endDate: '2026-09-30', timezone: 'Asia/Shanghai' }]);
   assert.notEqual(payload.data.data.monthlyBreakdown.at(-1).status, 'unavailable');

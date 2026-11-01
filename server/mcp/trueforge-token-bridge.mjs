@@ -48,8 +48,8 @@ export function createTokenBridge({ upstream, now = Date.now, ttlMs = 300000, ca
   };
 }
 
-export async function startTokenBridge({ upstreamUrl = process.env.SAVEFLOW_BRIDGE_UPSTREAM_URL ?? 'http://127.0.0.1:3333/mcp', port = 3334, host = process.env.SAVEFLOW_BRIDGE_HOST ?? '127.0.0.1' } = {}) {
-  const upstream = new Client({ name: 'saveflow-local-token-bridge', version: '1.0.0' });
+export async function startTokenBridge({ upstreamUrl = process.env.FINEASE_BRIDGE_UPSTREAM_URL ?? 'http://127.0.0.1:3333/mcp', port = 3334, host = process.env.FINEASE_BRIDGE_HOST ?? '127.0.0.1' } = {}) {
+  const upstream = new Client({ name: 'finease-local-token-bridge', version: '1.0.0' });
   await upstream.connect(new StreamableHTTPClientTransport(new URL(upstreamUrl)));
   const list = await upstream.listTools();
   const allowed = list.tools.filter(t => tools.has(t.name));
@@ -57,7 +57,7 @@ export async function startTokenBridge({ upstreamUrl = process.env.SAVEFLOW_BRID
   const http = createServer(async (request, response) => {
     if (request.url !== '/mcp') { response.writeHead(404).end(); return; }
     if (request.method !== 'POST') { response.writeHead(405).end(); return; }
-    const server = new Server({ name: 'saveflow-token-bridge', version: '1.0.0' }, { capabilities: { tools: {} } });
+    const server = new Server({ name: 'finease-token-bridge', version: '1.0.0' }, { capabilities: { tools: {} } });
     server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: allowed }));
     server.setRequestHandler(CallToolRequestSchema, async req => bridge.call(req.params.name, req.params.arguments));
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });

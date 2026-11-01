@@ -42,13 +42,13 @@ export function billClarificationQuestion(message) {
 }
 
 export const skillPolicies = Object.freeze({
-  card_get: { action: 'card.get', kind: 'card_result', flag: 'SAVEFLOW_TRUEFORGE_READ_ENABLED' },
-  subscription_list: { action: 'subscription.list', kind: 'subscription_result', flag: 'SAVEFLOW_TRUEFORGE_READ_ENABLED' },
-  product_list: { action: 'product.list', kind: 'product_result', flag: 'SAVEFLOW_TRUEFORGE_READ_ENABLED' },
-  transfer_preview: { action: 'transfer.create', kind: 'awaiting_confirmation', flag: 'SAVEFLOW_TRUEFORGE_TRANSFER_ENABLED', preview: true },
-  card_budget_preview: { action: 'card.set_budget', kind: 'awaiting_confirmation', flag: 'SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
-  card_freeze_preview: { action: 'card.freeze', kind: 'awaiting_confirmation', flag: 'SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
-  card_unfreeze_preview: { action: 'card.unfreeze', kind: 'awaiting_confirmation', flag: 'SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
+  card_get: { action: 'card.get', kind: 'card_result', flag: 'FINEASE_TRUEFORGE_READ_ENABLED' },
+  subscription_list: { action: 'subscription.list', kind: 'subscription_result', flag: 'FINEASE_TRUEFORGE_READ_ENABLED' },
+  product_list: { action: 'product.list', kind: 'product_result', flag: 'FINEASE_TRUEFORGE_READ_ENABLED' },
+  transfer_preview: { action: 'transfer.create', kind: 'awaiting_confirmation', flag: 'FINEASE_TRUEFORGE_TRANSFER_ENABLED', preview: true },
+  card_budget_preview: { action: 'card.set_budget', kind: 'awaiting_confirmation', flag: 'FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
+  card_freeze_preview: { action: 'card.freeze', kind: 'awaiting_confirmation', flag: 'FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
+  card_unfreeze_preview: { action: 'card.unfreeze', kind: 'awaiting_confirmation', flag: 'FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED', preview: true },
 });
 
 function moneyInput(raw, allowZero = false) {
@@ -67,7 +67,7 @@ export function routeTrueforgeSkill(message, env) {
   const cardState = value.match(/^(?:请|帮我)?\s*(解冻|解除冻结|冻结)\s*(.*?)$/);
   const budget = value.match(/^(?:设置|调整|修改)\s*(.*?)(?:的)?(?:月消费|月)?预算(?:为|到|成)?\s*(.*?)$/) ||
     value.match(/^(?:把|将)?\s*(.*?)(?:的)?(?:月消费|月)?预算(?:设置为|调整为|调整到|改成|改为|设为)\s*(.*?)$/);
-  if (env.SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED === 'true' && (cardState || budget)) {
+  if (env.FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED === 'true' && (cardState || budget)) {
     const ref = (cardState ? cardState[2] : budget[1]).trim();
     if ((ref && !/(?:卡|卡片)$/.test(ref)) || /并|然后|转账|执行|确认|取消|订阅|产品/.test(ref)) return undefined;
     if (budget && /并|然后|转账|执行|确认|取消|订阅|产品/.test(budget[2])) return undefined;
@@ -79,7 +79,7 @@ export function routeTrueforgeSkill(message, env) {
   const payeeFirst = value.match(/^(?:请|帮我)?\s*(?:从(.+?)\s*)?给([^，。,；;!?！？]{1,128}?)\s*转(?:账)?\s*([^，。,；;!?！？]*)$/);
   const amountFirst = value.match(/^(?:请|帮我)?\s*从([^，。,；;!?！？]{1,128}?)\s*转账\s*([^，。,；;!?！？]+?)\s*给([^，。,；;!?！？]{1,128})$/);
   const transfer = payeeFirst || (amountFirst && [amountFirst[0], amountFirst[1], amountFirst[3], amountFirst[2]]);
-  if (env.SAVEFLOW_TRUEFORGE_TRANSFER_ENABLED === 'true' && (transfer || value === '转账')) {
+  if (env.FINEASE_TRUEFORGE_TRANSFER_ENABLED === 'true' && (transfer || value === '转账')) {
     tool = 'transfer_preview'; args = {};
     if (transfer) {
       if ([transfer[1], transfer[2]].some(ref => /并|然后|转账|执行|确认|取消|冻结|预算|账单|订阅|产品/.test(ref || '')) || /并|然后|执行|确认|取消/.test(transfer[3])) return undefined;
@@ -99,7 +99,7 @@ export function routeTrueforgeSkill(message, env) {
   return tool && env[skillPolicies[tool].flag] === 'true' ? { tool, args } : undefined;
 }
 
-const allSkills = { SAVEFLOW_TRUEFORGE_READ_ENABLED: 'true', SAVEFLOW_TRUEFORGE_TRANSFER_ENABLED: 'true', SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED: 'true' };
+const allSkills = { FINEASE_TRUEFORGE_READ_ENABLED: 'true', FINEASE_TRUEFORGE_TRANSFER_ENABLED: 'true', FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED: 'true' };
 // This selects a UI task boundary, never grants tool permissions. The server
 // independently checks its private flags, token scope/action and tool arguments.
 export function bankingTaskBoundary(message, currentAction, pendingSlot) {

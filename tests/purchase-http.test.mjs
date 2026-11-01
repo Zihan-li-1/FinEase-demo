@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { handlePurchaseRequest } from '../server/purchase-api.mjs';
 import { createPurchaseSkill } from '../src/skills/scenario/purchase-skill.mjs';
 import { createPurchaseTestStore } from './fixtures/purchase-memory-store.mjs';
-const env = { SAVEFLOW_ACCESS_CODE: 'purchase-access-code', CONTINUATION_TOKEN_SECRET: 'purchase-session-secret-at-least-32-characters' };
-const request = (body, cookie, extra = {}) => new Request('https://saveflow.test/api/purchase', { method: 'POST', headers: {
-  origin: 'https://saveflow.test', 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, ...(cookie ? { cookie } : {}), ...extra }, body: JSON.stringify({ consent: true, ...body }) });
+const env = { FINEASE_ACCESS_CODE: 'purchase-access-code', CONTINUATION_TOKEN_SECRET: 'purchase-session-secret-at-least-32-characters' };
+const request = (body, cookie, extra = {}) => new Request('https://finease.test/api/purchase', { method: 'POST', headers: {
+  origin: 'https://finease.test', 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, ...(cookie ? { cookie } : {}), ...extra }, body: JSON.stringify({ consent: true, ...body }) });
 test('purchase HTTP requires access, consent, same origin and ignores no body owner fields', async () => {
-  for (const [body, headers, status] of [[{}, { 'x-saveflow-access': 'wrong' }, 401], [{ consent: false }, {}, 403], [{}, { origin: 'https://other.test' }, 403], [{ action: 'purchase.read', owner: 'other' }, {}, 400]]) {
+  for (const [body, headers, status] of [[{}, { 'x-finease-access': 'wrong' }, 401], [{ consent: false }, {}, 403], [{}, { origin: 'https://other.test' }, 403], [{ action: 'purchase.read', owner: 'other' }, {}, 400]]) {
     const response = await handlePurchaseRequest(request(body, '', headers), { env }); assert.equal(response.status, status);
   }
 });
@@ -108,8 +108,8 @@ test('unconfigured production persistence fails explicitly without creating a me
 });
 test('configured HTTPS public origin works behind an HTTP reverse proxy and cookies remain Secure', async () => {
   const skill = createPurchaseSkill({ store: createPurchaseTestStore() });
-  const req = new Request('http://internal:3000/api/purchase', { method: 'POST', headers: { origin: 'https://public.test', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE }, body: JSON.stringify({ action: 'scenario.plan_purchase', input: {}, consent: true }) });
-  const response = await handlePurchaseRequest(req, { env: { ...env, SAVEFLOW_PUBLIC_ORIGIN: 'https://public.test' }, getSkill: async () => skill });
+  const req = new Request('http://internal:3000/api/purchase', { method: 'POST', headers: { origin: 'https://public.test', 'x-finease-access': env.FINEASE_ACCESS_CODE }, body: JSON.stringify({ action: 'scenario.plan_purchase', input: {}, consent: true }) });
+  const response = await handlePurchaseRequest(req, { env: { ...env, FINEASE_PUBLIC_ORIGIN: 'https://public.test' }, getSkill: async () => skill });
   assert.equal(response.status, 200); assert.match(response.headers.get('set-cookie'), /Secure/);
 });
 test('dormant users recover the same workflow after session expiry without exposing recovery codes to models', async () => {

@@ -7,7 +7,7 @@
       "name": "Netlify preview entry access",
       "status": 401,
       "netlifyRequestId": "01M57A5ETQXK56ZKVBPW5DXEAZ",
-      "classification": "Netlify access protection before SaveFlow UI/API; business functions and continuation state not exercised"
+      "classification": "Netlify access protection before FinEase UI/API; business functions and continuation state not exercised"
     }
   ],
   "requests": [],

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createBankingCore } from '../src/banking-core/core.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 
 test('interactive demo accounts start with 30000 and 10000 yuan as integer fen', () => {
   const core = createBankingCore();

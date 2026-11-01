@@ -35,7 +35,7 @@ export function isTrueforgeTaskSwitch(body) {
     (isExtendedBillPeriodQuery(body.message) || (!isBillTask(body.message) && (isCardTask(body.message) || isTransferTask(body.message))));
 }
 export function shouldRouteTrueforgeBill(body, env) {
-  return env.SAVEFLOW_TRUEFORGE_BILL_ENABLED === 'true' && object(body) &&
+  return env.FINEASE_TRUEFORGE_BILL_ENABLED === 'true' && object(body) &&
     ((isTrueforgeContinuation(body.continuationToken) && !isTrueforgeTaskSwitch(body)) || (body.continuationToken === undefined && !isExtendedBillPeriodQuery(body.message) && !!matchBillQuery(body.message)));
 }
 
@@ -78,7 +78,7 @@ export function createTrueforgeBillAdapter({ env = process.env, client, now = Da
   const secret = env.CONTINUATION_TOKEN_SECRET;
   if (typeof secret !== 'string' || secret.length < 16) throw trueforgeError('CONTINUATION_CONFIG_ERROR', '澄清续接服务未配置。', 503);
   const states = new Map();
-  const mac = nonce => createHmac('sha256', secret).update(`saveflow-trueforge-bill-v1:${nonce}`).digest('base64url');
+  const mac = nonce => createHmac('sha256', secret).update(`finease-trueforge-bill-v1:${nonce}`).digest('base64url');
   const errorReply = error => {
     const safe = error?.userMessage ? error : trueforgeError('TRUEFORGE_UNAVAILABLE', '账单试点服务暂时不可用。');
     return { httpStatus: safe.status, code: safe.code, message: safe.userMessage, data: { status: 'error', error: { code: safe.code, message: safe.userMessage } } };

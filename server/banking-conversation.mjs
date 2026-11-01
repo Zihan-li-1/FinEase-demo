@@ -16,7 +16,7 @@ function error(code, message = '会话状态不匹配，请重新选择或开始
 function hostStore(core, env, now) {
   let entries = stores.get(core);
   if (!entries) { entries = new Map(); stores.set(core, entries); }
-  const scope = createHash('sha256').update(`${env.SAVEFLOW_ACCESS_CODE}:${env.CONTINUATION_TOKEN_SECRET}`).digest('hex');
+  const scope = createHash('sha256').update(`${env.FINEASE_ACCESS_CODE}:${env.CONTINUATION_TOKEN_SECRET}`).digest('hex');
   let host = entries.get(scope);
   if (!host) {
     host = { now, busy: new Set() };

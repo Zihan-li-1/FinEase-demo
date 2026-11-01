@@ -1,10 +1,10 @@
 # 自然语言金额与日期接入：第一阶段
 
-工作目录 `saveflow-demo`，分支 `feat/unified-trueforge-banking-runtime`。读取 README、CLAUDE.md 及现行 API/代码；工作目录、上级目录和仓库内未找到 AGENTS.md（CLAUDE.md 仅引用该缺失文件）。第一阶段保留了开始时已有的四个文件修改，后续按用户要求提交为 `d53a16f` 并合并最新主分支；未发布或部署。最新合并验收见 [合并记录](Merge-Natural-Language-Phase1.md)，下表保留第一阶段提交前的验收结果。
+工作目录 `finease-demo`，分支 `feat/unified-trueforge-banking-runtime`。读取 README、CLAUDE.md 及现行 API/代码；工作目录、上级目录和仓库内未找到 AGENTS.md（CLAUDE.md 仅引用该缺失文件）。第一阶段保留了开始时已有的四个文件修改，后续按用户要求提交为 `d53a16f` 并合并最新主分支；未发布或部署。最新合并验收见 [合并记录](Merge-Natural-Language-Phase1.md)，下表保留第一阶段提交前的验收结果。
 
 ## 原因与现行流程
 
-- 前端 `use-saveflow.ts` 的 Banking 入口已统一发往 `/api/banking-agent`，未发现句式分流拦截。旧句式辅助文件仍供独立试点/历史测试使用，不用于当前 Banking 理解。
+- 前端 `use-finease.ts` 的 Banking 入口已统一发往 `/api/banking-agent`，未发现句式分流拦截。旧句式辅助文件仍供独立试点/历史测试使用，不用于当前 Banking 理解。
 - `server/trueforge-banking-runtime.mjs` 已把原始输入交给无工具 Agent，但 `validateIntentGrounding` 的金额、年月原文匹配否决中文/混合金额与相对日期；本轮删除该限制，保留实体引用/候选的服务端验证。
 - TrueForge 首轮没有当前时钟，Qwen Banking 解析器会用 `resolveBillPeriod` 覆盖模型结果。旧 Qwen/MCP 补参则依赖固定解析。本轮统一首轮、补充和修改的模型理解，模型失败不作后端回退。
 - 已有账单 ParsedIntent 支持范围，无需另造意图体系。Repository 查询仅有月份，PostgreSQL 还按 UTC 月份过滤。本轮贯通范围与时区查询，保留查询范围和数据覆盖提示。
@@ -12,7 +12,7 @@
 
 当前流程：原始输入及近期对话 → 当前配置的 TrueForge（默认）或 Qwen 理解器，携带服务端当前日历、财务日期和签名草稿 → ParsedIntent 数值/日期/权限校验 → 现有 Resolver/Skill → Repository 查询或 Core 正式预览。模型每轮理解一次；结构化按钮直接核对选项，不调用模型。确认和执行仍走原机制。
 
-新增 `server/understanding-context.mjs`、`src/lib/calendar.mjs`；理解/编排文件为 `server/banking-agent.mjs`、`banking-intent-parser.mjs`、`trueforge-banking-runtime.mjs`、`banking-orchestrator.mjs`、`qwen.mjs`、`mcp/saveflow-trial.mjs`。契约、两个账单 Handler、内存/PostgreSQL Repository、客户端和续接令牌同步调整；账单卡片仅补覆盖提示/缺数据标签，未改版。
+新增 `server/understanding-context.mjs`、`src/lib/calendar.mjs`；理解/编排文件为 `server/banking-agent.mjs`、`banking-intent-parser.mjs`、`trueforge-banking-runtime.mjs`、`banking-orchestrator.mjs`、`qwen.mjs`、`mcp/finease-trial.mjs`。契约、两个账单 Handler、内存/PostgreSQL Repository、客户端和续接令牌同步调整；账单卡片仅补覆盖提示/缺数据标签，未改版。
 
 接口细节见 [API 合同](Banking-Agent-API.md#金额日历和目标参数第一阶段)。时间支持 1900–2099 年，账单最长 366 个日历日；起止本地日期均含全天。用户时区由宿主注入，默认 Asia/Shanghai；HTTP 请求不能更改时钟。
 

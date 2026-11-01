@@ -35,7 +35,7 @@ try {
   assert.ok(selectedModel && /deepseek/i.test(selectedModel.model_id), 'configured model must resolve to DeepSeek');
   report.resolvedModel = { name: selectedModel.name, modelId: selectedModel.model_id, provider: selectedModel.provider.name };
   await page.goto(url);
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
   const initial = await request(async () => {
     await page.locator('.composer input').fill('我要在2026年12月31日前存够一万元');

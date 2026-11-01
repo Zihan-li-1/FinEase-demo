@@ -21,7 +21,7 @@ async function send(message, action, status = 200) {
 const choice = (data, text) => { const c = data.choices.find(c => c.label.includes(text)); assert.ok(c); return send(`选择${c.label}`, () => page.getByRole('button', { name: c.label, exact: true }).click()); };
 try {
   await page.goto('http://127.0.0.1:3000');
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
   let r = await send('给王先生转500元');
   assert.ok(r.choices.some(c => c.label.includes('5000.00'))); assert.ok(r.choices.some(c => c.label.includes('0.00')));
@@ -49,7 +49,7 @@ try {
   report.checks.push('余额恢复后仍能跨Skill查询卡片并返回修改，历史卡片完整');
   const id = r.operationId, hash = r.preview.previewHash;
   await send('确认转账', undefined, 403);
-  const blocked = await page.request.post('/api/banking', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': id }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: id, preview_hash: hash } } }); assert.equal(blocked.status(), 403);
+  const blocked = await page.request.post('/api/banking', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': id }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: id, preview_hash: hash } } }); assert.equal(blocked.status(), 403);
   r = await send('取消'); assert.equal(r.status, 'cancelled');
   assert.equal(await page.locator('.banking-preview-card').count(), 3); assert.deepEqual(report.browserErrors, []);
   report.checks.push('三张真实历史预览保留；聊天确认和受控端点均不允许执行，取消不转账');

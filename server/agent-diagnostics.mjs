@@ -3,7 +3,7 @@ import { savingsFailureDiagnostic } from './savings-advice-contract.mjs';
 const UUID = /^[0-9a-f-]{36}$/i;
 
 export function createAgentDiagnostics(env = process.env, requestId, sink = console.warn) {
-  const enabled = env.SAVEFLOW_AGENT_DIAGNOSTICS === 'true';
+  const enabled = env.FINEASE_AGENT_DIAGNOSTICS === 'true';
   const emit = (event, fields = {}) => {
     const supplied = event && typeof event === 'object' ? event : { event, ...fields };
     const savingsReview = supplied.event === 'savings_advice_review';

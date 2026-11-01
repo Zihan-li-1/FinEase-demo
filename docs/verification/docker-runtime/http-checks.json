@@ -1,7 +1,7 @@
 ﻿{
   "base": "http://127.0.0.1:4300",
   "version": {
-    "service": "saveflow",
+    "service": "finease",
     "gitSha": "6040c1bf94d97a4eb2fadb2dcee1caef11f4d013",
     "gitDirty": "true",
     "nodeEnv": "production"
@@ -11,7 +11,7 @@
     "GET /_next/static/chunks/3ngusfqtcqrew.css: 200",
     "GET /shopping: 200",
     "GET /shopping/product: 200",
-    "GET /api/saveflow: 200",
+    "GET /api/finease: 200",
     "GET /healthz: 200",
     "GET /version: 200",
     "GET /health: 200",

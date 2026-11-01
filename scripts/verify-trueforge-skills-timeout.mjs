@@ -19,7 +19,7 @@ const proxy = http.createServer(async (req, res) => {
 });
 await new Promise(resolve => proxy.listen(0, '127.0.0.1', resolve));
 try {
-  const env = { ...process.env, TRUEFORGE_BASE_URL: `http://127.0.0.1:${proxy.address().port}`, SAVEFLOW_TRUEFORGE_READ_ENABLED: 'true' };
+  const env = { ...process.env, TRUEFORGE_BASE_URL: `http://127.0.0.1:${proxy.address().port}`, FINEASE_TRUEFORGE_READ_ENABLED: 'true' };
   const adapter = createTrueforgeSkillAdapter({ env, clientFactory: tool => createTrueforgeClient({ env, tool }) });
   const start = Date.now(); const reply = await adapter.handle({ message: '查看娱乐虚拟卡', consent: true, history: [] }, { scope: 'native-http-timeout-fault' });
   const report = { realSdkAndHttp: true, modelOrMcpEndToEnd: false, fault: 'stalled SSE before tool execution', elapsedMs: Date.now() - start, stalled, cancelRequests, code: reply.code, httpStatus: reply.httpStatus };

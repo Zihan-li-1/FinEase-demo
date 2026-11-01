@@ -3,16 +3,16 @@ services:
   web:
     environment:
       PURCHASE_WORKER_ENABLED: "true"
-      SAVEFLOW_PUBLIC_ORIGIN: ${SAVEFLOW_PUBLIC_ORIGIN:-http://localhost:4300}
+      FINEASE_PUBLIC_ORIGIN: ${FINEASE_PUBLIC_ORIGIN:-http://localhost:4300}
     depends_on:
       purchase-worker:
         condition: service_started
   purchase-worker:
-    image: saveflow-docker-test:local
+    image: finease-docker-test:local
     command: [node, scripts/purchase-worker.mjs]
     init: true
     environment:
-      DATABASE_URL: postgresql://saveflow_web:local-synthetic-web-only@pilot-db:5432/saveflow_web
+      DATABASE_URL: postgresql://finease_web:local-synthetic-web-only@pilot-db:5432/finease_web
       PURCHASE_WORKER_ENABLED: "true"
     depends_on:
       pilot-migrate:

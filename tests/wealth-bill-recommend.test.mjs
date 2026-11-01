@@ -5,7 +5,7 @@ import { createWealthSkill } from '../src/skills/wealth/wealth-skill.mjs';
 import { buildFinancialAnalysisContext } from '../server/financial-analysis-context.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'test-access-code-1234', CONTINUATION_TOKEN_SECRET: 'test-continuation-secret-1234' };
 const NOW = () => Date.parse('2026-10-26T04:00:00Z');
 
 test('bill-driven recommend includes explainable bill_basis and never treats cash flow as investable', async () => {
@@ -46,7 +46,7 @@ test('orchestrator wires bill analysis into wealth.recommend end-to-end without 
   const intent = { schemaVersion: '1.0.0', action: 'wealth.recommend', slots: { goal: '根据账单流水推荐', max_risk_level: 'R2', horizon_days: 180, liquidity_requirement: 'T+1' }, missingSlots: [], status: 'ready_for_resolution' };
   const request = new Request('http://localhost/api/banking-agent', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': 'bill-recommend-1' },
+    headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': 'bill-recommend-1' },
     body: JSON.stringify({ message: '根据我的账单流水推荐一些理财产品' }),
   });
   const response = await handleBankingAgent(request, { env, core, now: NOW, parseIntent: async () => intent });
@@ -72,7 +72,7 @@ test('阶段3（mock 传输层）：理解服务把「根据我的账单流水�
   };
   const request = new Request('http://localhost/api/banking-agent', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': 'bill-recommend-clarify' },
+    headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': 'bill-recommend-clarify' },
     body: JSON.stringify({ message: '根据我的账单流水推荐一些理财产品' }),
   });
   const response = await handleBankingAgent(request, { env, core, now: NOW, trueforgeRuntimeClient });

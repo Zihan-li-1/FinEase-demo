@@ -1,4 +1,4 @@
-# SaveFlow 本地 Docker 运行检测报告
+# FinEase 本地 Docker 运行检测报告
 
 ## 2026-10-18 提交前修复与复验（当前结论）
 
@@ -31,7 +31,7 @@ Docker lint、Next typegen、typecheck 均通过，见数据库全量日志末�
 
 本轮实际使用 `compose.yaml + compose.postgres.yaml`，网页和试点 MCP 均启用真实 PostgreSQL。新增 `pilot-db` 和 `pilot-web-db` 两个隔离的合成数据库及独立命名卷，数据库不发布宿主机端口。原 `test-db` 仍只供自动化，使用 tmpfs。普通 `compose.yaml` 默认仍是内存模式，不能把默认启动误认成持久化验收模式。
 
-MCP 仅在明确设置 `SAVEFLOW_TRIAL_DATABASE_URL` 时使用 PostgreSQL，仍固定 Mock 用户和合成数据；稳定的续接密钥为必需项，不继承通用 `DATABASE_URL`，不增加任何 Skill 参数或确认/执行工具。网页 Core 与试点 MCP 分库，避免 `tfpreview:` 前缀被移除后访问同一条可执行记录。真实 HTTP 已验证：带前缀执行被 403 拒绝；移除前缀后在网页库找不到该操作，也不能执行。
+MCP 仅在明确设置 `FINEASE_TRIAL_DATABASE_URL` 时使用 PostgreSQL，仍固定 Mock 用户和合成数据；稳定的续接密钥为必需项，不继承通用 `DATABASE_URL`，不增加任何 Skill 参数或确认/执行工具。网页 Core 与试点 MCP 分库，避免 `tfpreview:` 前缀被移除后访问同一条可执行记录。真实 HTTP 已验证：带前缀执行被 403 拒绝；移除前缀后在网页库找不到该操作，也不能执行。
 
 真实链路仍为：浏览器 → Docker 网页/API → 宿主机 TrueForge 0.3.1/已有模型 → Docker MCP/Bridge → PostgreSQL 合成 Core → 原网页卡片。
 
@@ -60,7 +60,7 @@ TrueForge Session 由独立宿主机服务管理；实测网页、MCP、Bridge �
 ### 复跑命令
 
 ```powershell
-# 项目目录 saveflow-demo；宿主机已有 TrueForge 须监听 127.0.0.1:8790
+# 项目目录 finease-demo；宿主机已有 TrueForge 须监听 127.0.0.1:8790
 docker compose --env-file .env.local --profile test build tests web
 docker compose --env-file .env.local --profile test run --rm tests
 docker compose --env-file .env.local --profile test run --rm tests sh -c 'unset DATABASE_URL BANKING_TEST_DATABASE_URL; npm test'
@@ -79,7 +79,7 @@ node scripts/audit-trial-submission.mjs
 
 ## 历史记录：2026-10-17（修复前）
 
-检测日期：2026-10-17；项目：`D:\金科国际\saveflow-demo`；分支：`spike/trueforge-harness`。构建使用当前工作区代码，包含已有未提交修改，没有提交 Git、创建 PR 或部署。
+检测日期：2026-10-17；项目：`D:\金科国际\finease-demo`；分支：`spike/trueforge-harness`。构建使用当前工作区代码，包含已有未提交修改，没有提交 Git、创建 PR 或部署。
 
 **结论：容器构建、内存 Mock Core 的网页/HTTP/真实 TrueForge 试点链路可用；PostgreSQL 持久化检测不通过，不能据此认定持久化模式可上线。**
 
@@ -104,7 +104,7 @@ TrueForge 不在本项目 Docker 镜像中；完整调用链是：浏览器 → 
 
 - Docker Engine **29.8.2**，Compose **5.5.1**，Docker Desktop Linux/WSL2，x86_64。
 - Node **v24.22.0**，基础镜像 node:24-bookworm-slim；隔离数据库 **PostgreSQL 17.11**。
-- `saveflow-docker-test:local` 约 **1.02GB**，镜像 ID、关键源码与宿主机的 SHA256 对比见 [环境证据](verification/docker-check/environment.json)。三项核对的源码完全一致。
+- `finease-docker-test:local` 约 **1.02GB**，镜像 ID、关键源码与宿主机的 SHA256 对比见 [环境证据](verification/docker-check/environment.json)。三项核对的源码完全一致。
 - Docker 内 `npm ci` 和 `npm run build` 成功，生成生产静态导出。[构建日志](verification/docker-check/build.log)。
 - 原 next.config.ts 使用 output=export，不能仅用 next start 提供原 API。新增 Node 容器入口提供 out 静态文件并调用现有 API handlers；没有改 UI 卡片契约、意图/Skill/Core 架构。
 - 运行容器使用 node 用户（UID1000）、只读根文件系统、临时/tmp、cap_drop=ALL。`.env.local` 不进入镜像，运行时仅注入所需配置。17个网页静态文件中未检出已配置的访问码/私密值。[镜像边界证据](verification/docker-check/image-boundary.json)。这不是完整镜像漏洞审计。
@@ -157,7 +157,7 @@ HTTP 检测包含健康页、首页、禁止读取.env.local、编码路径穿�
 - compose.yaml：网页、MCP、Bridge及隔离测试数据库/测试profile；运行中的网页DATABASE_URL明确为空，仍用内存Mock Core。
 - scripts/serve-container.mjs：静态导出与原API统一入口，保留鉴权/来源/大小/限流。
 - server/mcp/trueforge-token-bridge.mjs：只增加监听host和上游URL的服务端配置，默认本机行为不变。
-- scripts/configure-trueforge-docker.mjs：建立 saveflow-docker-mcp / saveflow-docker-bridge 两个本地connector，不修改旧connector或billtest。
+- scripts/configure-trueforge-docker.mjs：建立 finease-docker-mcp / finease-docker-bridge 两个本地connector，不修改旧connector或billtest。
 - scripts/verify-docker-ui.mjs、scripts/verify-docker-http.mjs：可复跑的真实网页和HTTP检测。
 - 本报告及 docs/verification/docker-check/：测试日志、截图和实际工具证据。
 

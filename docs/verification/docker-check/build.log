@@ -1,11 +1,11 @@
-docker :  Image saveflow-docker-test:local Building 
+docker :  Image finease-docker-test:local Building
 At line:2 char:129
 + ... ig --quiet; docker compose --env-file .env.local build web tests *> . ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ( Image saveflow...local Building :String) [], RemoteException
+    + CategoryInfo          : NotSpecified: ( Image finease...local Building :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
- Image saveflow-docker-tests:local Building 
+ Image finease-docker-tests:local Building
 #1 [internal] load local bake definitions
 #1 reading from stdin 1.03kB 0.0s done
 #1 DONE 0.0s
@@ -82,7 +82,7 @@ At line:2 char:129
 
 #13 [web build 1/1] RUN npm run build
 #13 0.426 
-#13 0.426 > saveflow-demo@0.1.0 build
+#13 0.426 > finease-demo@0.1.0 build
 #13 0.426 > next build
 #13 0.426 
 #13 0.752 ▲ Next.js 16.3.5 (Turbopack)
@@ -103,7 +103,7 @@ At line:2 char:129
 #13 8.565 Route (app)
 #13 8.565 ┌ ○ /
 #13 8.565 ├ ○ /_not-found
-#13 8.565 └ ○ /api/saveflow
+#13 8.565 └ ○ /api/finease
 #13 8.565 
 #13 8.565 
 #13 8.566 ○  (Static)  prerendered as static content
@@ -120,9 +120,9 @@ At line:2 char:129
 #12 exporting attestation manifest sha256:203338541eeae6611d1d4f469da28abf838a14505539df91092977a6015827b6 0.0s done
 #12 exporting manifest list sha256:52c33f775dc99980e55c9982524189d4b8ccc72c446e72c29b1225d01f585409
 #12 exporting manifest list sha256:52c33f775dc99980e55c9982524189d4b8ccc72c446e72c29b1225d01f585409 0.0s done
-#12 naming to docker.io/library/saveflow-docker-tests:local done
-#12 unpacking to docker.io/library/saveflow-docker-tests:local
-#12 unpacking to docker.io/library/saveflow-docker-tests:local 8.2s done
+#12 naming to docker.io/library/finease-docker-tests:local done
+#12 unpacking to docker.io/library/finease-docker-tests:local
+#12 unpacking to docker.io/library/finease-docker-tests:local 8.2s done
 #12 DONE 30.5s
 
 #11 [web production-dependencies 1/1] RUN npm prune --omit=dev --no-audit --no-fund
@@ -161,13 +161,13 @@ At line:2 char:129
 #21 exporting config sha256:9ef2945d8d49ccc0e59b036aa244293536367a661ae019cc21c12ac20a1e6d18 0.0s done
 #21 exporting attestation manifest sha256:727c3e2c8dc40840905f43ed7c663a8c3cab2b614f7cc1e22ad59a2f18d6a799 0.0s done
 #21 exporting manifest list sha256:1d023caf929ed3500ca5d9f4b1034865bc74577983709e024b19a6483cd28be5 0.0s done
-#21 naming to docker.io/library/saveflow-docker-test:local
-#21 naming to docker.io/library/saveflow-docker-test:local done
-#21 unpacking to docker.io/library/saveflow-docker-test:local
-#21 unpacking to docker.io/library/saveflow-docker-test:local 4.5s done
+#21 naming to docker.io/library/finease-docker-test:local
+#21 naming to docker.io/library/finease-docker-test:local done
+#21 unpacking to docker.io/library/finease-docker-test:local
+#21 unpacking to docker.io/library/finease-docker-test:local 4.5s done
 #21 DONE 18.4s
 
 #22 [web] resolving provenance for metadata file
 #22 DONE 0.0s
- Image saveflow-docker-test:local Built 
- Image saveflow-docker-tests:local Built 
+ Image finease-docker-test:local Built
+ Image finease-docker-tests:local Built

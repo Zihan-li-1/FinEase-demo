@@ -16,7 +16,7 @@ await new Promise(resolve => commerceServer.listen(0, '127.0.0.1', resolve));
 const store = createPurchaseTestStore();
 const skill = createPurchaseSkill({ store, now, schedulerEnabled: true,
   commerce: createCommerceClient({ baseUrl: `http://127.0.0.1:${commerceServer.address().port}`, token }) });
-const env = { SAVEFLOW_ACCESS_CODE: 'purchase-ui-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-ui-test-secret-longer-than-32-characters' };
+const env = { FINEASE_ACCESS_CODE: 'purchase-ui-test-access', CONTINUATION_TOKEN_SECRET: 'purchase-ui-test-secret-longer-than-32-characters' };
 const root = resolve('out'), types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.txt': 'text/plain', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
 const server = http.createServer(async (req, res) => {
   try {

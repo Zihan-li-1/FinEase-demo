@@ -9,7 +9,7 @@ import { runBankingConversation } from '../server/banking-orchestrator.mjs';
 import { issueContinuationToken } from '../src/agent/clarification/continuation-token.mjs';
 
 const epoch = Date.parse('2026-10-28T00:00:00Z');
-const env = { SAVEFLOW_ACCESS_CODE: 'test-access', CONTINUATION_TOKEN_SECRET: 'a'.repeat(32) };
+const env = { FINEASE_ACCESS_CODE: 'test-access', CONTINUATION_TOKEN_SECRET: 'a'.repeat(32) };
 const transfer = slots => buildParsedIntent('transfer.create', slots);
 
 test('trusted task summary is bounded and never exposes task or operation identifiers', async () => {

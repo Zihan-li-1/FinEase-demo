@@ -10,9 +10,9 @@ const directory = 'docs/verification/bill-card';
 const report = { realHttpChecks: [], fixtureChecks: [], screenshots: [] };
 await mkdir(directory, { recursive: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
-async function setup(target = page, access = process.env.SAVEFLOW_ACCESS_CODE) {
+async function setup(target = page, access = process.env.FINEASE_ACCESS_CODE) {
   assert.ok(access, 'Local access configuration is required');
-  await target.goto(process.env.SAVEFLOW_UI_URL || 'http://127.0.0.1:3000');
+  await target.goto(process.env.FINEASE_UI_URL || 'http://127.0.0.1:3000');
   await target.getByLabel('演示访问码', { exact: true }).fill(access);
   await target.locator('.consent-control input').check();
 }

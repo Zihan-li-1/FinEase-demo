@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 import { createFinancialContext } from '../src/banking-core/repository.mjs';
 import { validateAgentProposalV2, AgentProposalV2Error } from '../server/agent-proposal-v2.mjs';
 import { createReadOnlyToolGateway } from '../server/read-only-tool-gateway.mjs';
@@ -158,7 +158,7 @@ test('banking API exposes planning mode without entering the existing write path
   const core = createBankingCore({ source: seed });
   const guardedCore = { ...core, prepare() { throw new Error('planning called Core.prepare'); }, decide() { throw new Error('planning called Core.decide'); }, execute() { throw new Error('planning called Core.execute'); } };
   const balanceBefore = core.repository.getAccount('ACC-CHECKING').balanceFen;
-  const env = { SAVEFLOW_ACCESS_CODE: 'planning-test-access', CONTINUATION_TOKEN_SECRET: 'planning-test-secret', SAVEFLOW_BANKING_RUNTIME: 'trueforge' };
+  const env = { FINEASE_ACCESS_CODE: 'planning-test-access', CONTINUATION_TOKEN_SECRET: 'planning-test-secret', FINEASE_BANKING_RUNTIME: 'trueforge' };
   const planningRuntimeClient = {
     async createSession() { return 'planning-session'; }, async cancel() {},
     async runTurn(_session, wire) {
@@ -170,7 +170,7 @@ test('banking API exposes planning mode without entering the existing write path
   };
   const request = new Request('http://localhost/api/banking-agent', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': 'planning-api-test' },
+    headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': 'planning-api-test' },
     body: JSON.stringify({ message: '分析可选理财产品', planning: true }),
   });
   const response = await handleBankingAgent(request, { env, core: guardedCore, planningRuntimeClient, now: () => Date.parse('2026-10-22T04:00:00Z') });

@@ -1,6 +1,6 @@
-# SaveFlow 自然对话与统一路由交付记录
+# FinEase 自然对话与统一路由交付记录
 
-工作目录：`D:\金科国际\saveflow-deploy`。验收日期：2026-10-29（Asia/Shanghai）。保留本目录已有的规划阶段改动，未修改 Banking Core、替换 TrueForge 或新增写权限。本次为本地代码交付，没有重新部署网站或改动运行中的账本。
+工作目录：`D:\金科国际\finease-deploy`。验收日期：2026-10-29（Asia/Shanghai）。保留本目录已有的规划阶段改动，未修改 Banking Core、替换 TrueForge 或新增写权限。本次为本地代码交付，没有重新部署网站或改动运行中的账本。
 
 ## 审计结论与现有链路
 
@@ -16,7 +16,7 @@
 | banking-reply | 普通对话保留校验后的模型文字；业务提示和风险信息继续用原可信结果生成。 |
 | parsed-intent / validate-parsed-intent | schemaVersion 仍为 1.0.0。补齐 TypeScript `product.list` 及其独立联合分支，TS Dispatcher 明确与运行时一致：单项业务暂不支持，仅规划网关提供。 |
 | banking-agent-client / banking-conversation-contract | 保留原业务白名单；增加无业务字段的普通回复、独立任务控制，以及严格绑定会话的规划结果校验。原会话校验继续使用。 |
-| use-saveflow / banking-chat-storage | 移除请求开始时的预览和选项清理；普通回答提前返回，不覆盖 continuation、任务焦点、预览引用或流程映射。历史上下文独立有界保存。 |
+| use-finease / banking-chat-storage | 移除请求开始时的预览和选项清理；普通回答提前返回，不覆盖 continuation、任务焦点、预览引用或流程映射。历史上下文独立有界保存。 |
 
 默认生产调用不注入测试依赖。现有业务专项宿主可以注入 `parseIntent` 或 `trueforgeRuntimeClient` 继续只测业务边界；要测统一路由同时注入 `conversationRuntimeClient` 或 `routeConversation`。这些能力只属于服务端 options，HTTP 请求不能选择或注入。
 
@@ -81,7 +81,7 @@
 | # | 场景 | 自动化结果 | 最新实模组 |
 | --- | --- | --- | --- |
 | 1 | 你好 | 通过：普通回复，无任务/写调用 | 通过（conversation_reply） |
-| 2 | 你是谁 | 通过：SaveFlow 自我介绍 | 通过（conversation_reply） |
+| 2 | 你是谁 | 通过：FinEase 自我介绍 | 通过（conversation_reply） |
 | 3 | 你能做什么 | 通过：服务端 Catalog 介绍 | 通过（conversation_reply） |
 | 4 | 咨询能否取消视频会员 | 通过：解释限制，无订阅取消 | 通过（conversation_reply） |
 | 5 | 流动性概念 | 通过：普通解释 | 通过（conversation_reply） |
@@ -101,7 +101,7 @@
 | 19 | 自动规划 HTTP/客户端/显示 | 通过：成功、部分、澄清、不支持及真实卡片内容；拒绝写工具、负金额、错误来源和多余执行字段 | 通过（completed） |
 | 20 | 不可用能力不能冒充已实现 | 通过：运行条件降级、真实取消及下单限制 | 通过（conversation_reply） |
 
-真实 TrueForge 使用部署脚本已有的 `../saveflow-demo/.env.local` 配置回退，测试另建内存模拟 Core 并禁用执行方法。没有复制凭据、读取真实账本或修改已部署环境。首轮实测暴露输出字段混用、规划输出不符合 V2 schema；保留 [首轮记录](evidence/conversation-routing-live-initial.json)。补充精确分支示例和工具参数后，保留 [第二轮记录](evidence/conversation-routing-live-round2.json)。连续上下文复测曾出现假设流程否定表述的误拦截，记录于 [复测记录](evidence/conversation-routing-live-followup-history.json)，随后已修复条件/否定语义检查。最新实模组 **20/20 通过、0 失败、0 未验证**；第 9/19 项均完成正式账单及订阅两步读取，执行方法调用为 0。最终结果见 [逐项真实模型报告](evidence/conversation-routing-live.json)。
+真实 TrueForge 使用部署脚本已有的 `../finease-demo/.env.local` 配置回退，测试另建内存模拟 Core 并禁用执行方法。没有复制凭据、读取真实账本或修改已部署环境。首轮实测暴露输出字段混用、规划输出不符合 V2 schema；保留 [首轮记录](evidence/conversation-routing-live-initial.json)。补充精确分支示例和工具参数后，保留 [第二轮记录](evidence/conversation-routing-live-round2.json)。连续上下文复测曾出现假设流程否定表述的误拦截，记录于 [复测记录](evidence/conversation-routing-live-followup-history.json)，随后已修复条件/否定语义检查。最新实模组 **20/20 通过、0 失败、0 未验证**；第 9/19 项均完成正式账单及订阅两步读取，执行方法调用为 0。最终结果见 [逐项真实模型报告](evidence/conversation-routing-live.json)。
 
 真实模型第 17 项允许安全拒绝包含伪造授权的聊天历史；若返回 MODEL_FORMAT_ERROR，则记录为 safe_rejection_of_untrusted_history，不将其描述为成功的自然问答。第 9/19 项必须取得至少一个完成的正式只读结果，空步骤的 partial 不算通过。
 
@@ -115,7 +115,7 @@ npm.cmd test
 npm.cmd run typecheck
 npm.cmd run lint
 npm.cmd run build
-node --env-file=../saveflow-demo/.env.local scripts/verify-conversation-routing-live.mjs
+node --env-file=../finease-demo/.env.local scripts/verify-conversation-routing-live.mjs
 ```
 
 实模脚本在 `.env.local` 或进程环境缺少配置时把 20 项全部写为 unverified 并返回退出码 2；模型失败或断言失败返回 1。不得把跳过或 partial 空结果视为实模验收成功。
@@ -124,7 +124,7 @@ node --env-file=../saveflow-demo/.env.local scripts/verify-conversation-routing-
 
 新增：`server/conversation-route.mjs`（语义合同、模型规格和普通输出校验）、`server/agent-capability-catalog.mjs`（运行时能力及脱敏）、`tests/conversation-routing.test.cjs`（20 场景与安全/HTTP测试）、`scripts/verify-conversation-routing-live.mjs`（独立实模验收）、本文件及 `docs/evidence/conversation-routing-*`。
 
-主要修改：`banking-agent.mjs`（统一入口）、`banking-conversation.mjs`（只读摘要及恢复目标）、`trueforge-banking-runtime.mjs`（复用受控无工具 SDK 客户端）、`banking-reply.mjs`（保留普通回答）、`planning-runtime.mjs/read-only-planner.mjs`（精确 V2 输出、日历和中断）、`parsed-intent.ts/dispatcher.ts`（product.list 合同一致性）、`banking-agent-client.ts`（严格响应）、`use-saveflow.ts`（任务与聊天隔离）、`banking-chat-storage.ts`（有界历史）、`agent-error-policy.mjs`（拒绝文字确认时保留上下文）、`page.tsx/BankingPlanCard.tsx`（自动路由和规划展示）、页面生命周期测试、package scripts 和 API/README 文档。
+主要修改：`banking-agent.mjs`（统一入口）、`banking-conversation.mjs`（只读摘要及恢复目标）、`trueforge-banking-runtime.mjs`（复用受控无工具 SDK 客户端）、`banking-reply.mjs`（保留普通回答）、`planning-runtime.mjs/read-only-planner.mjs`（精确 V2 输出、日历和中断）、`parsed-intent.ts/dispatcher.ts`（product.list 合同一致性）、`banking-agent-client.ts`（严格响应）、`use-finease.ts`（任务与聊天隔离）、`banking-chat-storage.ts`（有界历史）、`agent-error-policy.mjs`（拒绝文字确认时保留上下文）、`page.tsx/BankingPlanCard.tsx`（自动路由和规划展示）、页面生命周期测试、package scripts 和 API/README 文档。
 
 未发现本次自动化覆盖内未解决的任务/预览冲突。仍有这些边界：会话 Store 是现有的进程内实现，多实例/服务重启后的长期任务恢复不在本次改造范围；理财规划仍要求显式 planningConstraints；产品列表单项 Dispatcher 尚未实现；购物预算持久化/工作进程、PostgreSQL 跨实例及生产部署没有新增验收。新路由为业务请求增加一次模型调用，路由上限 12 秒，原业务理解或规划上限 25 秒，浏览器超时调整为 45 秒。实模报告含每项耗时，这不是负载或长时间并发性能测试。
 

@@ -6,7 +6,7 @@ const searchTerms = {
 };
 const allowed = (value, field) => words(value).map(word => searchTerms[field][word]).filter(Boolean);
 
-/** Search links contain only shopping preferences. No account, budget, address or recipient leaves SaveFlow. */
+/** Search links contain only shopping preferences. No account, budget, address or recipient leaves FinEase. */
 export function shoppingSearchLinks(slots = {}) {
   const preferences = slots.preferences ?? {};
   return (slots.items ?? []).filter(item => ['flowers', 'cake', 'headphones'].includes(item.category)).map(item => {

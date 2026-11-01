@@ -57,7 +57,7 @@ test('执行桥：幂等——重复执行返回同一回执，只扣一次款',
 function httpRequest(trialOperationId, previewHash, accessCode = 'x'.repeat(16)) {
   return new Request('http://localhost/api/execute-trial', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': accessCode },
+    headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': accessCode },
     body: JSON.stringify({ trialOperationId, previewHash }),
   });
 }
@@ -65,7 +65,7 @@ function httpRequest(trialOperationId, previewHash, accessCode = 'x'.repeat(16))
 test('执行桥 HTTP：授权后执行试点转账并返回回执，扣款一次', async () => {
   const core = createBankingCore();
   const prepared = await preview(core, 50000);
-  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, prepared.preview.previewHash), { env: { SAVEFLOW_ACCESS_CODE: 'x'.repeat(16) }, core });
+  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, prepared.preview.previewHash), { env: { FINEASE_ACCESS_CODE: 'x'.repeat(16) }, core });
   assert.equal(response.status, 200);
   const payload = await response.json();
   assert.equal(payload.code, 'OK');
@@ -77,7 +77,7 @@ test('执行桥 HTTP：授权后执行试点转账并返回回执，扣款一次
 test('执行桥 HTTP：访问码错误拒绝，不扣款', async () => {
   const core = createBankingCore();
   const prepared = await preview(core, 50000);
-  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, prepared.preview.previewHash, 'wrong'), { env: { SAVEFLOW_ACCESS_CODE: 'x'.repeat(16) }, core });
+  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, prepared.preview.previewHash, 'wrong'), { env: { FINEASE_ACCESS_CODE: 'x'.repeat(16) }, core });
   assert.equal(response.status, 401);
   assert.equal(balance(core), 3000000);
 });
@@ -85,7 +85,7 @@ test('执行桥 HTTP：访问码错误拒绝，不扣款', async () => {
 test('执行桥 HTTP：篡改哈希被拒绝，不扣款', async () => {
   const core = createBankingCore();
   const prepared = await preview(core, 50000);
-  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, 'f'.repeat(64)), { env: { SAVEFLOW_ACCESS_CODE: 'x'.repeat(16) }, core });
+  const response = await handleExecuteTrial(httpRequest(`tfpreview:${prepared.operationId}`, 'f'.repeat(64)), { env: { FINEASE_ACCESS_CODE: 'x'.repeat(16) }, core });
   assert.equal(response.status, 409);
   assert.equal(balance(core), 3000000);
 });
@@ -147,7 +147,7 @@ test('执行桥：试点验证入口拒绝非试点编号', async () => {
 function trialHttpRequest(body) {
   return new Request('http://localhost/api/execute-trial', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': 'x'.repeat(16) },
+    headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': 'x'.repeat(16) },
     body: JSON.stringify(body),
   });
 }
@@ -157,7 +157,7 @@ test('执行桥 HTTP：高风险试点转账经 verification.start/verify 后执
   const prepared = await preview(core, 200000);
   const trialId = `tfpreview:${prepared.operationId}`;
   const hash = prepared.preview.previewHash;
-  const options = { env: { SAVEFLOW_ACCESS_CODE: 'x'.repeat(16) }, core };
+  const options = { env: { FINEASE_ACCESS_CODE: 'x'.repeat(16) }, core };
 
   const startRes = await handleExecuteTrial(trialHttpRequest({ action: 'verification.start', trialOperationId: trialId, previewHash: hash }), options);
   assert.equal(startRes.status, 200);
@@ -177,7 +177,7 @@ test('执行桥 HTTP：高风险试点转账经 verification.start/verify 后执
 test('执行桥 HTTP：高风险试点转账未验证即执行被拒（409）且不扣款', async () => {
   const core = createBankingCore({ demoOtpCode: '123456' });
   const prepared = await preview(core, 200000);
-  const options = { env: { SAVEFLOW_ACCESS_CODE: 'x'.repeat(16) }, core };
+  const options = { env: { FINEASE_ACCESS_CODE: 'x'.repeat(16) }, core };
   const res = await handleExecuteTrial(trialHttpRequest({ action: 'execute', trialOperationId: `tfpreview:${prepared.operationId}`, previewHash: prepared.preview.previewHash }), options);
   assert.equal(res.status, 409);
   assert.equal((await res.json()).code, 'VERIFICATION_REQUIRED');

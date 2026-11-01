@@ -6,8 +6,8 @@
 
 **试点分支已推送，Draft PR #13 已创建，Netlify Deploy Preview 构建成功；实际业务验收被 Netlify 登录保护拦截，尚不能确认线上 Demo 可演示。** 没有合并 PR、修改/推送 main、关闭站点保护或开放真实资金执行。
 
-- 分支：[spike/trueforge-harness](https://github.com/Zihan-li-1/saveflow-demo/tree/spike/trueforge-harness)
-- Draft PR：[PR #13](https://github.com/Zihan-li-1/saveflow-demo/pull/13)
+- 分支：`spike/trueforge-harness`
+- Draft PR：仓库 PR #13
 - 预览：[deploy-preview-13](https://deploy-preview-13--startling-flan-ed8dcb.netlify.app)
 - 实际部署日志入口：[Netlify deploy 6ad4a3ebf7b8f5ab5b5f1b17](https://app.netlify.com/projects/startling-flan-ed8dcb/deploys/6ad4a3ebf7b8f5ab5b5f1b17)
 
@@ -52,10 +52,10 @@ Git 的 github.com HTTPS 连接多次失败，但 GitHub API 可用。使用本�
 | 路径 | HTTP | 响应类型 | 结论 |
 | --- | ---: | --- | --- |
 | `/` | 401 | `text/html`，标题 `Login Redirect` | 预览入口登录保护 |
-| `/api/banking-agent` | 401 | `text/html` | 请求未进入 SaveFlow Agent |
+| `/api/banking-agent` | 401 | `text/html` | 请求未进入 FinEase Agent |
 | `/api/banking` | 401 | `text/html` | 请求未进入 Core API |
 
-这是 Netlify 入口访问保护，**不是 SaveFlow JSON `UNAUTHORIZED`，也不是 `CONTINUATION_INVALID`**。浏览器尚未加载原应用，业务 POST 数量为 0。[入口证据及请求 ID](verification/netlify-preview/preview-access-report.json)、[浏览器验收记录](verification/netlify-preview/preview-ui-report.json)。
+这是 Netlify 入口访问保护，**不是 FinEase JSON `UNAUTHORIZED`，也不是 `CONTINUATION_INVALID`**。浏览器尚未加载原应用，业务 POST 数量为 0。[入口证据及请求 ID](verification/netlify-preview/preview-access-report.json)、[浏览器验收记录](verification/netlify-preview/preview-ui-report.json)。
 
 因此以下项目明确为**未验收**：线上原卡片 UI、账单/卡片查询、账户选择、收款人选择、修改金额、预览与取消、聊天确认拒绝、跨请求多轮续接、实际 TrueForge/MCP 网络连接与实际数据库连接。不能把登录保护的 401 当成业务安全测试通过。
 

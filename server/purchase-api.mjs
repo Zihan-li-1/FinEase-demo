@@ -48,11 +48,12 @@ export async function configuredPurchaseSkill({ env = process.env, now = Date.no
 }
 function sessionCookie(owner, secret, now, origin) {
   const value = `${owner}.${now + 7 * 86400000}`, signature = createHmac('sha256', secret).update(value).digest('base64url');
-  return `saveflow_purchase=${value}.${signature}; HttpOnly; SameSite=Strict; Path=/; Max-Age=604800${new URL(origin).protocol === 'https:' ? '; Secure' : ''}`;
+  return `finease_purchase=${value}.${signature}; HttpOnly; SameSite=Strict; Path=/; Max-Age=604800${new URL(origin).protocol === 'https:' ? '; Secure' : ''}`;
 }
 function recoveryCode(owner, secret) { return `${owner}.${createHmac('sha256', secret).update(`purchase-recovery/v1:${owner}`).digest('base64url')}`; }
 function session(request, secret, now, origin) {
-  const existing = request.headers.get('cookie')?.split(';').map(s => s.trim()).find(s => s.startsWith('saveflow_purchase='))?.slice(18);
+  const cookiePrefix = 'finease_purchase=';
+  const existing = request.headers.get('cookie')?.split(';').map(s => s.trim()).find(s => s.startsWith(cookiePrefix))?.slice(cookiePrefix.length);
   const sign = value => createHmac('sha256', secret).update(value).digest('base64url');
   if (existing) {
     const [id, expires, signature, extra] = existing.split('.');
@@ -77,9 +78,9 @@ export async function handlePurchaseRequest(request, options = {}) {
     ...(data ? { data } : {}) }, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(cookie ? { 'Set-Cookie': cookie } : {}) } });
   try {
     if (request.method !== 'POST') return reply(405, 'METHOD_NOT_ALLOWED');
-    if (!env.SAVEFLOW_ACCESS_CODE || env.SAVEFLOW_ACCESS_CODE.length < 16 || !env.CONTINUATION_TOKEN_SECRET || env.CONTINUATION_TOKEN_SECRET.length < 32) return reply(503, 'ACCESS_NOT_CONFIGURED');
-    if (!equal(request.headers.get('x-saveflow-access') ?? '', env.SAVEFLOW_ACCESS_CODE)) return reply(401, 'UNAUTHORIZED');
-    const publicOrigin = new URL(env.SAVEFLOW_PUBLIC_ORIGIN || request.url).origin;
+    if (!env.FINEASE_ACCESS_CODE || env.FINEASE_ACCESS_CODE.length < 16 || !env.CONTINUATION_TOKEN_SECRET || env.CONTINUATION_TOKEN_SECRET.length < 32) return reply(503, 'ACCESS_NOT_CONFIGURED');
+    if (!equal(request.headers.get('x-finease-access') ?? '', env.FINEASE_ACCESS_CODE)) return reply(401, 'UNAUTHORIZED');
+    const publicOrigin = new URL(env.FINEASE_PUBLIC_ORIGIN || request.url).origin;
     if (request.headers.get('origin') !== publicOrigin) return reply(403, 'FORBIDDEN');
     const body = await readBody(request);
     if (body?.consent !== true) return reply(403, 'CONSENT_REQUIRED');
@@ -111,7 +112,7 @@ export async function handlePurchaseRequest(request, options = {}) {
       if (body.action === 'purchase.understand') {
         const wf = input.workflow_ref ? await skill.read(current.owner, input.workflow_ref) : undefined;
         if (wf && wf.version !== input.expected_version) fail('VERSION_CONFLICT');
-        const parseIntent = options.parseIntent ?? (env.SAVEFLOW_BANKING_RUNTIME === 'legacy-qwen' ? parseBankingIntent : parseTrueforgeBankingIntent);
+        const parseIntent = options.parseIntent ?? (env.FINEASE_BANKING_RUNTIME === 'legacy-qwen' ? parseBankingIntent : parseTrueforgeBankingIntent);
         // Send the user's raw message and existing business slots to the model.
         // Never attach stored address objects, order previews, confirmation credentials,
         // account balances or browser history. User-typed private text is not filtered.

@@ -6,8 +6,8 @@ import { handleBankingAgent } from '../server/banking-agent.mjs';
 // 验证 banking-agent 端点（自然语言 → 意图 → 转账预览）的「会算账」上下文与「权限分级」。
 // 通过注入 mock parseIntent，避免依赖真实大模型，保证测试确定性。
 
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen',
-  SAVEFLOW_ACCESS_CODE: 'banking-agent-test-access-1234',
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen',
+  FINEASE_ACCESS_CODE: 'banking-agent-test-access-1234',
   CONTINUATION_TOKEN_SECRET: 'continuation-test-secret-123456',
 };
 
@@ -26,7 +26,7 @@ function transferIntent(amountMinor) {
 function request(message) {
   return new Request(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, Origin: 'https://demo.example' },
+    headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': env.FINEASE_ACCESS_CODE, Origin: 'https://demo.example' },
     body: JSON.stringify({ message, history: [], consent: true }),
   });
 }

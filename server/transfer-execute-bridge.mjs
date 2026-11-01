@@ -102,9 +102,9 @@ export async function handleExecuteTrial(request, { env = process.env, core: pro
   const reply = (status, code, message, data) => Response.json({ code, message, requestId, ...(data !== undefined ? { data } : {}) }, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
   try {
     if (request.method !== 'POST') return reply(405, 'METHOD_NOT_ALLOWED', '仅支持 POST');
-    const expected = env.SAVEFLOW_ACCESS_CODE;
+    const expected = env.FINEASE_ACCESS_CODE;
     if (!expected || expected.length < 16) return reply(503, 'ACCESS_NOT_CONFIGURED', '请配置服务端演示访问码');
-    const access = request.headers.get('X-Saveflow-Access') ?? '';
+    const access = request.headers.get('X-FinEase-Access') ?? '';
     if (Buffer.byteLength(access) !== Buffer.byteLength(expected) || !timingSafeEqual(Buffer.from(access), Buffer.from(expected))) return reply(401, 'UNAUTHORIZED', '演示访问码无效');
     const origin = request.headers.get('Origin');
     if (origin && origin !== new URL(request.url).origin) return reply(403, 'FORBIDDEN', '不允许跨来源请求');

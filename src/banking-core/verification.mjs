@@ -22,7 +22,7 @@ export function generateCode() {
 /** 仅存验证码的 per-challenge 哈希，绑定 challengeId 防跨操作重放。
  * @param {string} challengeId @param {string} code @returns {string} */
 export function hashCode(challengeId, code) {
-  return createHash('sha256').update(`saveflow-otp-v1:${challengeId}:${code}`).digest('hex');
+  return createHash('sha256').update(`finease-otp-v1:${challengeId}:${code}`).digest('hex');
 }
 
 /** 生成一条挑战。返回 `state`（仅含哈希，用于持久化）与明文 `code`（仅交给投递渠道）。

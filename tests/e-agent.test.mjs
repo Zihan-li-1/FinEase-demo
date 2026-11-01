@@ -4,9 +4,9 @@ import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { createInMemoryScenarioStore, createScenarioSkill } from '../src/skills/scenario/scenario-skill.mjs';
 import { createBankingCore } from '../src/banking-core/core.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'e-test-access-code', CONTINUATION_TOKEN_SECRET: 'e-test-continuation-secret', DASHSCOPE_API_KEY: 'unused' };
+const env = { FINEASE_ACCESS_CODE: 'e-test-access-code', CONTINUATION_TOKEN_SECRET: 'e-test-continuation-secret', DASHSCOPE_API_KEY: 'unused' };
 let requestNumber = 0;
-const request = body => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `e-test-${++requestNumber}` }, body: JSON.stringify({ history: [], consent: true, ...body }) });
+const request = body => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `e-test-${++requestNumber}` }, body: JSON.stringify({ history: [], consent: true, ...body }) });
 const intent = (action, slots) => ({ schemaVersion: '1.0.0', action, slots, missingSlots: [], status: 'ready_for_resolution' });
 const body = response => response.json();
 

@@ -6,7 +6,7 @@ const goal = repository.getSavingGoal();
 const cards = repository.getCards();
 const subscriptions = repository.getSubscriptions();
 // Yuan fields are presentation-only compatibility fields, never Core write inputs.
-export const saveflowMock = {
+export const fineaseMock = {
   currentMonth: context.currentMonth, previousMonth: context.previousMonth, asOf: context.asOf,
   analysis: {
     totalExpense: context.totalExpenseFen / 100, momIncrease: context.expenseIncreaseFen / 100,
@@ -36,4 +36,4 @@ export const saveflowMock = {
     version: card.version,
   })),
 } as const;
-export type SaveflowMock = typeof saveflowMock;
+export type FinEaseMock = typeof fineaseMock;

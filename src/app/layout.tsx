@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SaveFlow · 智能财务助理",
-  description: "SaveFlow Banking Agent 合成数据演示",
+  title: "FinEase · 智能财务助理",
+  description: "FinEase Banking Agent 合成数据演示",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -2,9 +2,9 @@
 // node --env-file=.env.local scripts/verify-container.mjs
 import assert from 'node:assert/strict';
 
-const base = process.env.SAVEFLOW_VERIFY_URL || 'http://127.0.0.1:4300';
-assert.ok(process.env.SAVEFLOW_ACCESS_CODE, 'SAVEFLOW_ACCESS_CODE is required');
-const headers = { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE };
+const base = process.env.FINEASE_VERIFY_URL || 'http://127.0.0.1:4300';
+assert.ok(process.env.FINEASE_ACCESS_CODE, 'FINEASE_ACCESS_CODE is required');
+const headers = { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE };
 const checks = [];
 async function request(path, options = {}, expected = 200) {
   const response = await fetch(new URL(path, base), { ...options, signal: AbortSignal.timeout(15000) });
@@ -16,10 +16,10 @@ const html = await (await request('/')).text();
 const asset = html.match(/(?:src|href)="([^" ]*\/_next\/static\/[^" ]+\.(?:js|css))"/);
 assert.ok(asset, 'home page must contain a built Next.js asset');
 await request(asset[1]);
-for (const path of ['/shopping', '/shopping/product', '/api/saveflow', '/healthz', '/version', '/health']) await request(path);
+for (const path of ['/shopping', '/shopping/product', '/api/finease', '/healthz', '/version', '/health']) await request(path);
 const version = await (await request('/version')).json();
 assert.notEqual(version.gitSha, 'unknown');
-if (process.env.SAVEFLOW_GIT_SHA) assert.equal(version.gitSha, process.env.SAVEFLOW_GIT_SHA);
+if (process.env.FINEASE_GIT_SHA) assert.equal(version.gitSha, process.env.FINEASE_GIT_SHA);
 await request('/ready', {}, 401);
 await request('/api/v1/skills', {}, 401);
 const ready = await (await request('/ready', { headers })).json();

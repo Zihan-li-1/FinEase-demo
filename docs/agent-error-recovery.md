@@ -6,7 +6,7 @@
 
 `card-skill.mjs` 在解冻正常卡片时返回 `INVALID_STATE: 卡片当前未冻结`，Core 也独立执行相同状态校验。这是合法的业务拒绝，并非网络错误。原 Card Handler 将其传为 `card_error`，HTTP 使用错误响应；客户端只为余额不足支持恢复，其他错误变成普通 ApiError。
 
-前端 `use-saveflow.ts` 将这些错误统一送入 FAILED/error，页面只看 stage/error 和 failure/analysis，因而无条件显示“重试本次请求”，点击后重发完全相同的消息/选择。发送前旧澄清按钮已被清空；失败后没有新选项或新续接。状态机虽允许 error→START，但输入框、发送按钮及选项回调的白名单没有包含 error，造成只能重试或清空聊天的死胡同。另有部分正常订阅、理财、规则、预览分支没有结束 analyzing，也会锁住后续输入。
+前端 `use-finease.ts` 将这些错误统一送入 FAILED/error，页面只看 stage/error 和 failure/analysis，因而无条件显示“重试本次请求”，点击后重发完全相同的消息/选择。发送前旧澄清按钮已被清空；失败后没有新选项或新续接。状态机虽允许 error→START，但输入框、发送按钮及选项回调的白名单没有包含 error，造成只能重试或清空聊天的死胡同。另有部分正常订阅、理财、规则、预览分支没有结束 analyzing，也会锁住后续输入。
 
 执行确认还有一个独立风险：Card/Transfer 的 HTTP 执行响应丢失后，确认按钮仍可能被再次激活，且新请求会删除历史转账预览，使原操作查询入口消失。本次把不确定结果的确认停用和历史查询入口一起保留下来。
 
@@ -51,13 +51,13 @@
 | `src/agent/runtime.mjs` | 已知业务异常保留原代码，不笼统降级为 skill_error。 |
 | `src/agent/handlers/card-handler.mjs` | 选择失败给出重新选择提示；传递服务端已解析的卡片引用，供可信状态解释。 |
 | `src/lib/banking-agent-client.ts` | 校验和处理通用 recovery，校验策略与代码匹配；拒绝非法恢复槽位或携带执行字段的恢复信息。 |
-| `src/lib/use-saveflow.ts` | 统一释放 loading、恢复选项、控制重试；无清空聊天的业务重启；不确定写结果先查询，保留预览和互斥。 |
+| `src/lib/use-finease.ts` | 统一释放 loading、恢复选项、控制重试；无清空聊天的业务重启；不确定写结果先查询，保留预览和互斥。 |
 | `src/lib/banking-chat-storage.ts` | 保留待核实记录、查询上下文及理财消息类型；恢复不授予执行权限。 |
 | `src/app/page.tsx` | 按结构化策略显示重试或业务重启；复用已有组件和样式。 |
 | `src/app/BankingCardCards.tsx`、`src/app/BankingTransferPreview.tsx` | 不确定结果显示待核实，确认停用，查询入口保留；旧执行桥同样先查询原 Core 编号。 |
 | `src/app/BankingReadCards.tsx` | 为已有规则预览增加页面独立确认、取消、查询；新增可选 props，原调用保持兼容。 |
 | `src/lib/api/banking-client.ts` | 校验规则回执，恢复 HTTP 字段转换后的原规则结构；不改变 Skill 或 Core 公共接口。 |
-| `tests/agent-recovery.test.cjs`、`tests/fixtures/saveflow-hook.cjs` | 16 项稳定恢复/安全回归及 1 项可单独启用的真实模型连续交互测试。Hook 测试替换 React 调度，HTTP、客户端、Skill、Core 均使用真实实现。 |
+| `tests/agent-recovery.test.cjs`、`tests/fixtures/finease-hook.cjs` | 16 项稳定恢复/安全回归及 1 项可单独启用的真实模型连续交互测试。Hook 测试替换 React 调度，HTTP、客户端、Skill、Core 均使用真实实现。 |
 | `tests/e-agent.test.mjs`、`tests/trueforge-preview-client.test.cjs`、`package.json` | 同步页面确认与状态查询预期，将恢复测试纳入默认测试。 |
 | `docs/verification/agent-recovery/*` | 保留安全的响应摘录、检查结果及前阶段浏览器截图；不记录密钥、完整模型输出或访问码。 |
 
@@ -70,8 +70,8 @@
 | `npm run lint` | 通过。 |
 | `npm run build` | 通过。 |
 | `npm run verify:natural-language` | 已配置的真实 TrueForge，31/31 通过；固定日历与其他边界日期由用例明确注入。 |
-| `$env:SAVEFLOW_VERIFY_LIVE_RECOVERY='true'; node --env-file=.env.local --test tests/agent-recovery.test.cjs` | 17/17 通过。其中 16 项为稳定注入理解/技术故障的合同测试，最后 1 项为真实 TrueForge→HTTP→真实 Hook 的连续恢复测试，不能将其余 16 项称为真实模型测试。 |
-| `$env:SAVEFLOW_VERIFY_LIVE_BILL='true'; node --env-file=.env.local --test tests/banking-bill-contract.test.cjs` | 8/8 通过，其中最后 1 项为真实模型账单全链路，原多月修复不回归。 |
+| `$env:FINEASE_VERIFY_LIVE_RECOVERY='true'; node --env-file=.env.local --test tests/agent-recovery.test.cjs` | 17/17 通过。其中 16 项为稳定注入理解/技术故障的合同测试，最后 1 项为真实 TrueForge→HTTP→真实 Hook 的连续恢复测试，不能将其余 16 项称为真实模型测试。 |
+| `$env:FINEASE_VERIFY_LIVE_BILL='true'; node --env-file=.env.local --test tests/banking-bill-contract.test.cjs` | 8/8 通过，其中最后 1 项为真实模型账单全链路，原多月修复不回归。 |
 
 恢复用例覆盖：解冻正常卡片、有/无可用候选、无效序号及伪造选项、模糊名称、多轮无法理解后继续、过期 token、非法金额修正、风控拒绝、临时网络错误、写操作响应丢失/重复点击、失败后新查询、候选状态变化、其他 Skill 错误、待核实记录的重启/刷新、规则独立确认及查询回执。
 

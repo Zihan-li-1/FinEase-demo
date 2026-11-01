@@ -33,7 +33,7 @@
 
 - 身份沿用项目固定演示 owner，按 owner、dataset、演示访问码和续接密钥生成存储范围；IP 和 LLM 提供的身份都不参与授权。切换凭据或数据集进入新的隔离范围。
 - 数据库环境使用 `banking_demo_risk_assessments`。部署前设置 `DATABASE_URL` 并运行 `npm run db:migrate`，其中包含新迁移 `009_demo_risk_assessments.sql`。同一范围只维护一份最新有效记录，不保留未提交草稿。
-- 本地环境在忽略版本控制的 `.commerce-mock/risk-assessments` 中原子写文件，重建适配器或进程后可重读；可用 `SAVEFLOW_DEMO_DATA_DIR` 指定持久卷目录。更换数据目录即使用另一份本地数据。重置当前本地演示生命周期时可由维护者清理该子目录。
+- 本地环境在忽略版本控制的 `.commerce-mock/risk-assessments` 中原子写文件，重建适配器或进程后可重读；可用 `FINEASE_DEMO_DATA_DIR` 指定持久卷目录。更换数据目录即使用另一份本地数据。重置当前本地演示生命周期时可由维护者清理该子目录。
 - Netlify 不使用临时文件保存测评，必须配置数据库才能提交。容器重建需挂载上述持久目录或使用数据库。
 - 配置后的业务 Core 不再把固定 R2 样例当作已完成记录。固定样例仅保留在无持久化适配器的旧测试工厂中，以兼容已有注入式测试。
 - 模拟测评不能成为真实银行的认证。问卷和 Wealth Action 要求合成数据环境，Core 再检查合成上下文与合成产品；有效模拟记录不能解锁真实交易。
@@ -44,7 +44,7 @@
 - 路由与合同：`server/banking-intent-parser.mjs`、`src/agent/validate-parsed-intent.mjs`、`server/banking-orchestrator.mjs`、`server/banking-agent.mjs`、`src/agent/handlers/wealth-handler.mjs`、`schemas/wealth-actions.schema.json`、`schemas/wealth-resolved-actions.schema.json`。
 - 测评与存储：`src/skills/wealth/risk-assessment.mjs`（新增）、`server/risk-questionnaire.mjs`（新增）、`server/risk-assessment-store.mjs`（新增）、`src/skills/wealth/mock-ports.mjs`、`src/banking-core/postgres-store.mjs`、`migrations/009_demo_risk_assessments.sql`（新增）、`scripts/migrate-banking.mjs`。
 - 业务检查：`src/skills/wealth/wealth-skill.mjs`、`src/skills/wealth/wealth-action-skill.mjs`、`src/banking-core/core.mjs`、`server/read-only-tool-gateway.mjs`。
-- 界面：`src/app/BankingReadCards.tsx`、`src/app/BankingWealthCards.tsx`、`src/app/page.tsx`、`src/lib/banking-agent-client.ts`。已核查 `src/lib/use-saveflow.ts`：既有 `wealth_result` 分发可直接复用，无需改动 Hook。
+- 界面：`src/app/BankingReadCards.tsx`、`src/app/BankingWealthCards.tsx`、`src/app/page.tsx`、`src/lib/banking-agent-client.ts`。已核查 `src/lib/use-finease.ts`：既有 `wealth_result` 分发可直接复用，无需改动 Hook。
 - 验证：`tests/risk-assessment-demo.test.mjs`、`tests/risk-assessment-ui.test.cjs`（新增），`tests/wealth-action-skill.test.mjs`（将 portfolio 的旧预期更新为兼容别名），`package.json`（将新测试纳入默认测试）。
 
 本次未修改工作区原有的储蓄卡片、Docker 等未提交变更。

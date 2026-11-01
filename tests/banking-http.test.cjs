@@ -7,18 +7,18 @@ require.extensions['.ts'] = (module, filename) => {
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createBankingClient } = require('../src/lib/api/banking-client.ts');
-const env = { SAVEFLOW_ACCESS_CODE: 'banking-test-access-1234' };
+const env = { FINEASE_ACCESS_CODE: 'banking-test-access-1234' };
 const input = { fromAccountId: 'ACC-CHECKING', payeeId: 'payee_001', amountFen: 50000, currency: 'CNY' };
 const url = 'https://demo.example/api/banking';
 function req(action, input, extra = {}) {
-  return new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, Origin: 'https://demo.example', ...extra }, body: JSON.stringify({ schema_version: '1.1.0', action, input }) });
+  return new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': env.FINEASE_ACCESS_CODE, Origin: 'https://demo.example', ...extra }, body: JSON.stringify({ schema_version: '1.1.0', action, input }) });
 }
 async function setup() {
   const { handleBanking } = await import('../server/banking.mjs');
   const { createLowBalanceCore: createBankingCore } = await import('./fixtures/low-balance-core.mjs');
   const core = createBankingCore();
   const fetchImpl = async (url, init) => handleBanking(new Request(url, init), { core, env });
-  const client = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.SAVEFLOW_ACCESS_CODE, fetchImpl });
+  const client = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.FINEASE_ACCESS_CODE, fetchImpl });
   return { handleBanking, core, client, fetchImpl };
 }
 async function confirmed(client) {
@@ -65,7 +65,7 @@ test('B HTTP: card budget, freeze and unfreeze require the dedicated decision an
 test('B HTTP: lost execute response is uncertain, no retry; original ID lookup recovers single debit', async () => {
   const { client, core, fetchImpl } = await setup(); const p = await confirmed(client);
   let calls = 0;
-  const broken = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.SAVEFLOW_ACCESS_CODE, fetchImpl: async (...args) => { calls++; await fetchImpl(...args); throw new Error('response lost'); } });
+  const broken = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.FINEASE_ACCESS_CODE, fetchImpl: async (...args) => { calls++; await fetchImpl(...args); throw new Error('response lost'); } });
   await assert.rejects(broken.request('action.execute', { operationId: p.operationId, previewHash: p.preview.previewHash }), { uncertain: true, code: 'NETWORK_ERROR' });
   assert.equal(calls, 1);
   assert.equal((await client.request('action.status', { operationId: p.operationId })).status, 'succeeded');
@@ -75,7 +75,7 @@ test('B HTTP: lost execute response is uncertain, no retry; original ID lookup r
 
 test('B HTTP: auth, origin, schema, action allowlist and idempotency header enforced', async () => {
   const { handleBanking, core } = await setup(); const options = { env, core };
-  assert.equal((await handleBanking(req('account.list', {}, { 'X-Saveflow-Access': 'bad' }), options)).status, 401);
+  assert.equal((await handleBanking(req('account.list', {}, { 'X-FinEase-Access': 'bad' }), options)).status, 401);
   assert.equal((await handleBanking(req('account.list', {}, { Origin: 'https://evil.example' }), options)).status, 403);
   assert.equal((await handleBanking(req('account.list', {}), { core, env: {} })).status, 503);
   for (const [action, body] of [['unknown', {}], ['account.list', { user_id: 'another_user' }], ['transfer.prepare', { ...input, confirmed: true }], ['transaction.list', { month: '2026-99' }], ['action.execute', { operation_id: 'missing', preview_hash: 'bad' }]]) {
@@ -98,10 +98,10 @@ test('B HTTP: payload cannot change approved amount during execution', async () 
 test('B HTTP: client rejects forged receipts, nonterminal success, altered previews and mismatched IDs', async () => {
   const { client, fetchImpl } = await setup(); const p = await confirmed(client);
   for (const mutate of [d => { d.operation_id = 'other'; }, d => { d.effects = []; }, d => { d.status = 'pending'; }]) {
-    const fake = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.SAVEFLOW_ACCESS_CODE, fetchImpl: async (...args) => { const response = await fetchImpl(...args); const body = await response.json(); mutate(body.data); return Response.json(body); } });
+    const fake = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.FINEASE_ACCESS_CODE, fetchImpl: async (...args) => { const response = await fetchImpl(...args); const body = await response.json(); mutate(body.data); return Response.json(body); } });
     await assert.rejects(fake.request('action.execute', { operationId: p.operationId, previewHash: p.preview.previewHash }), { code: 'INVALID_RESPONSE', uncertain: true });
   }
-  const fakePreview = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.SAVEFLOW_ACCESS_CODE, fetchImpl: async (...args) => { const body = await (await fetchImpl(...args)).json(); body.data.preview.exact_effects[0].payee_id = 'other'; return Response.json(body); } });
+  const fakePreview = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.FINEASE_ACCESS_CODE, fetchImpl: async (...args) => { const body = await (await fetchImpl(...args)).json(); body.data.preview.exact_effects[0].payee_id = 'other'; return Response.json(body); } });
   await assert.rejects(fakePreview.request('transfer.prepare', input), { code: 'INVALID_RESPONSE', uncertain: false });
 });
 
@@ -111,7 +111,7 @@ test('B HTTP: client timeout does not retry writes; legacy HTTP shares the Core 
   await assert.rejects(client.request('action.execute', { operationId: 'op_test', previewHash: 'hash' }), { code: 'TIMEOUT', uncertain: true });
   assert.equal(calls, 1);
   const { handleBanking, core } = await setup();
-  const response = await handleBanking(new Request('https://demo.example/api/saveflow', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': 'legacy_http' }, body: JSON.stringify({ action: 'create-plan', confirmed: true, monthlySavingFen: 250000 }) }), { env, core });
+  const response = await handleBanking(new Request('https://demo.example/api/finease', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': env.FINEASE_ACCESS_CODE, 'Idempotency-Key': 'legacy_http' }, body: JSON.stringify({ action: 'create-plan', confirmed: true, monthlySavingFen: 250000 }) }), { env, core });
   assert.equal(response.status, 200);
   const payload = await response.json(); assert.equal(payload.data.status, 'succeeded');
   assert.equal((await core.getOperation('legacy_http')).data.receipt.action, 'legacy.create-plan');
@@ -129,7 +129,7 @@ test('B HTTP: 高风险转账经 verification.start/verify 验证后执行，验
   const { handleBanking } = await import('../server/banking.mjs');
   const { createBankingCore } = await import('../src/banking-core/core.mjs');
   const core = createBankingCore({ demoOtpCode: '123456' });
-  const wire = (action, input, headers = {}) => new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, Origin: 'https://demo.example', ...headers }, body: JSON.stringify({ schema_version: '1.1.0', action, input }) });
+  const wire = (action, input, headers = {}) => new Request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': env.FINEASE_ACCESS_CODE, Origin: 'https://demo.example', ...headers }, body: JSON.stringify({ schema_version: '1.1.0', action, input }) });
   const balance = () => core.repository.getAccount('ACC-CHECKING').availableBalanceFen;
 
   const p = await (await handleBanking(wire('transfer.prepare', { source_account_id: 'ACC-CHECKING', payee_id: 'payee_001', amount_minor: 200000, currency: 'CNY' }), { env, core })).json();
@@ -161,7 +161,7 @@ test('B HTTP: 类型化客户端走正常路径 verification.start/verify（回�
   const { createBankingCore } = await import('../src/banking-core/core.mjs');
   const core = createBankingCore({ demoOtpCode: '123456' });
   const fetchImpl = async (url, init) => handleBanking(new Request(url, init), { core, env });
-  const client = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.SAVEFLOW_ACCESS_CODE, fetchImpl });
+  const client = createBankingClient({ mode: 'http', baseUrl: 'https://demo.example', accessCode: () => env.FINEASE_ACCESS_CODE, fetchImpl });
 
   const p = await client.request('transfer.prepare', { fromAccountId: 'ACC-CHECKING', payeeId: 'payee_001', amountFen: 200000, currency: 'CNY' });
   assert.equal(p.risk.requiredVerification, 'otp');

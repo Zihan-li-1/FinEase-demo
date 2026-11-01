@@ -19,7 +19,7 @@ const compose = ['compose', '--env-file', '.env.local', '-f', 'compose.yaml', '-
 const runFile = promisify(execFile);
 async function docker(...args) { return (await runFile('docker', [...compose, ...args], { timeout: 90000, maxBuffer: 2 * 1024 * 1024 })).stdout; }
 async function coreEval(code) { return JSON.parse(await docker('exec', '-T', 'mcp', 'node', '--input-type=module', '-e', code)); }
-const coreImports = `import seed from './src/data/saveflow_mock_data.json' with { type: 'json' }; import { createPostgresBankingCore } from './src/banking-core/postgres-store.mjs'; import postgres from 'postgres'; const connectionString = process.env.SAVEFLOW_TRIAL_DATABASE_URL; const value = r => { if (!r.ok) throw new Error(r.error.code); return r.data; };`;
+const coreImports = `import seed from './src/data/finease_mock_data.json' with { type: 'json' }; import { createPostgresBankingCore } from './src/banking-core/postgres-store.mjs'; import postgres from 'postgres'; const connectionString = process.env.FINEASE_TRIAL_DATABASE_URL; const value = r => { if (!r.ok) throw new Error(r.error.code); return r.data; };`;
 async function call(port, name, args = {}) {
   const client = new Client({ name: 'docker-persistence-acceptance', version: '1' });
   try {
@@ -29,7 +29,7 @@ async function call(port, name, args = {}) {
 }
 async function post(path, body, extraHeaders = {}) {
   const response = await fetch(`http://127.0.0.1:4300${path}`, { method: 'POST', headers: {
-    'Content-Type': 'application/json', 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, ...extraHeaders,
+    'Content-Type': 'application/json', 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, ...extraHeaders,
   }, body: JSON.stringify(body) });
   return { status: response.status, json: await response.json() };
 }
@@ -93,7 +93,7 @@ try {
   assert.equal(committed.receipt.dataSource, 'synthetic_demo_only'); assert.deepEqual(committed.duplicate, committed.receipt);
 
   // Agent sessions live in the separate TrueForge service, not the web Core DB.
-  const tfEnv = { ...process.env, TRUEFORGE_BASE_URL: 'http://127.0.0.1:8790', TRUEFORGE_MCP_SERVER: 'saveflow-docker-mcp', TRUEFORGE_SKILL_MCP_SERVER: 'saveflow-docker-bridge' };
+  const tfEnv = { ...process.env, TRUEFORGE_BASE_URL: 'http://127.0.0.1:8790', TRUEFORGE_MCP_SERVER: 'finease-docker-mcp', TRUEFORGE_SKILL_MCP_SERVER: 'finease-docker-bridge' };
   const sessionId = await createTrueforgeClient({ env: tfEnv, tool: 'transfer_preview' }).createSession();
   await docker('up', '-d', '--force-recreate', '--no-deps', 'pilot-db');
   await docker('up', '-d', '--wait', 'pilot-db');

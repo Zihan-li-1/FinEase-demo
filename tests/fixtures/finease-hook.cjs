@@ -3,7 +3,7 @@ const Module = require('node:module');
 
 // Runs the production hook, replacing only React's scheduling primitives.
 // HTTP, clients, intent validation, Skills and Core are supplied separately by tests.
-function mountSaveflow() {
+function mountFinEase() {
   const values = []; let cursor = 0;
   const hooks = {
     useState(initial) {
@@ -15,15 +15,15 @@ function mountSaveflow() {
     useEffect() { /* Hydration and storage are tested separately; no timers in this host. */ },
   };
   const load = Module._load;
-  delete require.cache[require.resolve('../../src/lib/use-saveflow.ts')];
+  delete require.cache[require.resolve('../../src/lib/use-finease.ts')];
   try {
     Module._load = function (name, parent, ...rest) {
-      return name === 'react' && parent?.filename.endsWith('use-saveflow.ts') ? hooks : load.call(this, name, parent, ...rest);
+      return name === 'react' && parent?.filename.endsWith('use-finease.ts') ? hooks : load.call(this, name, parent, ...rest);
     };
-    const { useSaveflow } = require('../../src/lib/use-saveflow.ts');
-    const host = { current: undefined, render() { cursor = 0; return this.current = useSaveflow(); } };
+    const { useFinEase } = require('../../src/lib/use-finease.ts');
+    const host = { current: undefined, render() { cursor = 0; return this.current = useFinEase(); } };
     host.render(); host.current.setConsent(true); host.current.setAccessCode('recovery-test-access-1234'); host.render();
     return host;
   } finally { Module._load = load; }
 }
-module.exports = { mountSaveflow };
+module.exports = { mountFinEase };

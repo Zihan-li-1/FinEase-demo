@@ -11,7 +11,7 @@ for (const extension of ['.ts', '.tsx']) require.extensions[extension] = (module
 require.extensions['.css'] = () => {};
 const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
-const { mountSaveflow } = require('./fixtures/saveflow-hook.cjs');
+const { mountFinEase } = require('./fixtures/finease-hook.cjs');
 const { createBankingCore } = require('../src/banking-core/core.mjs');
 const { handleBankingAgent } = require('../server/banking-agent.mjs');
 const { handleBanking } = require('../server/banking.mjs');
@@ -22,7 +22,7 @@ const { agentErrorPolicy } = require('../src/lib/agent-error-policy.mjs');
 const { validRecoverySlot } = require('../src/lib/agent-error-policy.mjs');
 const { buildParsedIntent } = require('../src/agent/clarification/merge-intent.mjs');
 const { verifyContinuationToken } = require('../src/agent/clarification/continuation-token.mjs');
-const env = { SAVEFLOW_ACCESS_CODE: 'recovery-test-access-1234', CONTINUATION_TOKEN_SECRET: 'recovery-test-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'recovery-test-access-1234', CONTINUATION_TOKEN_SECRET: 'recovery-test-secret-1234' };
 let sequence = 0;
 const bill = () => buildParsedIntent('bill.summary', { month: '2026-08' });
 const card = (action, card_ref = '我的卡') => buildParsedIntent(action, { card_ref });
@@ -47,7 +47,7 @@ function app(t, { parseIntent = async () => bill(), source, changeCore } = {}) {
     return response;
   };
   t.after(() => { global.fetch = original; });
-  return { core: actual, posts, responses, hook: mountSaveflow(), setOffline: v => { offline = v; }, loseNextExecute: () => { loseExecute = true; }, expire: () => { time += 300001; }, setCore: value => { core = value; } };
+  return { core: actual, posts, responses, hook: mountFinEase(), setOffline: v => { offline = v; }, loseNextExecute: () => { loseExecute = true; }, expire: () => { time += 300001; }, setCore: value => { core = value; } };
 }
 const last = hook => hook.current.messages.at(-1);
 const choices = hook => last(hook).banking.choices;
@@ -55,7 +55,7 @@ async function send(hook, text) { await hook.current.startDemo(text); return hoo
 async function choose(hook, choice) { await hook.current.chooseBankingOption(choice.optionId, choice.label); return hook.render(); }
 
 test('unfreeze active card: no retry, fresh eligible choices, preserved context and usable composer', async t => {
-  const source = structuredClone(require('../src/data/saveflow_mock_data.json')); source.cards[0].status = 'frozen';
+  const source = structuredClone(require('../src/data/finease_mock_data.json')); source.cards[0].status = 'frozen';
   const a = app(t, { source, parseIntent: async () => card('card.unfreeze', '娱乐虚拟卡') });
   const h = a.hook;
   const oldToken = h.current.bankingContinuation;
@@ -96,7 +96,7 @@ test('nonexistent ordinal and forged option renew choices from current repositor
   assert.ok(choices(h).every(c => !oldChoices.includes(c.optionId)));
   assert.notEqual(h.current.bankingContinuation, oldToken);
   // A forged button cannot be rendered, and direct HTTP cannot select an entity with it.
-  const response = await global.fetch('/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE }, body: JSON.stringify({ continuationToken: h.current.bankingContinuation, choice: { optionId: 'forged' } }) });
+  const response = await global.fetch('/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE }, body: JSON.stringify({ continuationToken: h.current.bankingContinuation, choice: { optionId: 'forged' } }) });
   const result = await response.json();
   assert.equal(result.code, 'INVALID_CHOICE'); assert.equal(result.data.error.retryable, false);
   assert.ok(result.data.recovery.choices.length > 0);
@@ -145,7 +145,7 @@ test('invalid amount repairs missing amount while retaining payee/account; no pr
 });
 
 test('risk rejection cannot retry or execute; fresh independent request works', async t => {
-  const source = structuredClone(require('../src/data/saveflow_mock_data.json')); source.cards[1].status = 'frozen';
+  const source = structuredClone(require('../src/data/finease_mock_data.json')); source.cards[1].status = 'frozen';
   const a = app(t, { source, parseIntent: async text => text === '查八月账单' ? bill() : card('card.unfreeze', '娱乐虚拟卡'), changeCore: core => ({ ...core,
     prepare: async () => ({ ok: false, error: { code: 'FORBIDDEN', message: '银行风控禁止此操作', uncertain: false } }),
     execute: () => assert.fail('risk rejection must never execute'),
@@ -193,7 +193,7 @@ test('execute commits but response is lost: double click/Agent retry cannot repe
 });
 
 test('selection made stale by another trusted operation is rechecked, and options are regenerated with current eligibility', async t => {
-  const source = structuredClone(require('../src/data/saveflow_mock_data.json')); source.cards.forEach(c => { c.status = 'frozen'; });
+  const source = structuredClone(require('../src/data/finease_mock_data.json')); source.cards.forEach(c => { c.status = 'frozen'; });
   const a = app(t, { source, parseIntent: async () => card('card.unfreeze') }); const h = a.hook;
   await send(h, '解冻我的卡');
   const stale = choices(h)[0], oldIds = choices(h).map(c => c.optionId);
@@ -238,7 +238,7 @@ test('all normal read Skill responses release composer and malicious retry polic
   await send(a.hook, '查看订阅'); assert.ok(a.hook.current.canStart); assert.equal(a.hook.current.stage, 'answered');
   const original = global.fetch;
   global.fetch = async () => Response.json({ code: 'INVALID_STATE', requestId: 'r1', message: '业务冲突', data: { status: 'error', error: { code: 'INVALID_STATE', ...agentErrorPolicy('INVALID_STATE'), retryable: true } } }, { status: 409 });
-  await assert.rejects(askBankingAgent({ message: 'test' }, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
+  await assert.rejects(askBankingAgent({ message: 'test' }, env.FINEASE_ACCESS_CODE, new AbortController().signal), { code: 'BANKING_AGENT_RESPONSE_ERROR' });
   global.fetch = original;
 });
 
@@ -268,7 +268,7 @@ test('rule save uses dedicated page confirmation, and a lost response recovers b
   const html = renderToStaticMarkup(React.createElement(BankingReadCard, { data: preview, active: true, busy: false, onConfirm() {}, onReject() {}, onCheck() {} }));
   assert.ok(html.includes('确认并保存规则')); assert.ok(html.includes('查询操作状态'));
   // Even a valid old signed continuation cannot authorize chat confirmation.
-  const response = await global.fetch('/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE }, body: JSON.stringify({ continuationToken: preview.continuationToken, message: '确认保存' }) });
+  const response = await global.fetch('/api/banking-agent', { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE }, body: JSON.stringify({ continuationToken: preview.continuationToken, message: '确认保存' }) });
   assert.equal((await response.json()).code, 'CONFIRMATION_REQUIRED'); assert.equal(await a.core.getScenarioRule(ruleId), undefined);
   a.loseNextExecute(); await h.current.confirmCardOperation(preview); h.render();
   assert.ok(await a.core.getScenarioRule(ruleId), JSON.stringify({ lastMessage: last(h).text, statuses: a.responses.map(p => ({ code: p.code, status: p.data?.status })) }));
@@ -280,7 +280,7 @@ test('rule save uses dedicated page confirmation, and a lost response recovers b
   assert.equal(a.posts.filter(p => p.action === 'action.execute').length, 1);
 });
 
-test('LIVE TrueForge: state conflict, invalid ordinal, valid selection and a new bill request all recover', { skip: process.env.SAVEFLOW_VERIFY_LIVE_RECOVERY !== 'true' }, async t => {
+test('LIVE TrueForge: state conflict, invalid ordinal, valid selection and a new bill request all recover', { skip: process.env.FINEASE_VERIFY_LIVE_RECOVERY !== 'true' }, async t => {
   const { parseTrueforgeBankingIntent } = await import('../server/trueforge-banking-runtime.mjs');
   const modelFetch = global.fetch; // SDK traffic must not enter the in-process browser HTTP adapter.
   const a = app(t, { parseIntent: (text, context) => parseTrueforgeBankingIntent(text, { ...context, env: process.env, fetchImpl: modelFetch }) });

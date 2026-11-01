@@ -10,7 +10,7 @@ Wealth Skill 只接收 A 解析并由服务端补全实体后的 `ResolvedIntent
 - 查询与适配规则是确定性的；LLM 不决定适当性，也不按收益率选“最佳产品”。
 - `expectedYield` 只是合成 BPS 展示值，必须展示“不保证收益”。
 - 申购、赎回只生成 L3 `action_request`。确认和执行归 B 的 Action Engine；当前测试端口不进入生产代码。
-- 本实现不修改 `src/agent`、`src/banking-core` 或 `saveflow_mock_data.json`。
+- 本实现不修改 `src/agent`、`src/banking-core` 或 `finease_mock_data.json`。
 
 ## 2. 动作一览
 

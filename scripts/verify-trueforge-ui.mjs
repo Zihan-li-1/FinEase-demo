@@ -3,15 +3,15 @@
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const baseUrl = process.env.SAVEFLOW_UI_URL || 'http://127.0.0.1:3000';
-if (!process.env.SAVEFLOW_ACCESS_CODE) throw new Error('Set the local demo access code');
+const baseUrl = process.env.FINEASE_UI_URL || 'http://127.0.0.1:3000';
+if (!process.env.FINEASE_ACCESS_CODE) throw new Error('Set the local demo access code');
 const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || 'chrome', headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const report = { realServices: true, checks: [], requests: [] };
-const expectedError = process.env.SAVEFLOW_UI_EXPECTED_ERROR;
+const expectedError = process.env.FINEASE_UI_EXPECTED_ERROR;
 async function setup() {
   await page.goto(baseUrl);
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
 }
 async function send(message) {

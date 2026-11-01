@@ -125,7 +125,7 @@ export function createTrueforgeSkillAdapter({ env = process.env, clientFactory =
   const states = new Map();
   const secret = env.CONTINUATION_TOKEN_SECRET;
   if (!text(secret) || secret.length < 16) throw trueforgeError('CONTINUATION_CONFIG_ERROR', '试点续接服务未配置。', 503);
-  const mac = nonce => createHmac('sha256', secret).update(`saveflow-multi-skill-v1:${nonce}`).digest('base64url');
+  const mac = nonce => createHmac('sha256', secret).update(`finease-multi-skill-v1:${nonce}`).digest('base64url');
   function lookup(token, scope) {
     for (const [key, s] of states) if (s.expiresAt <= now()) states.delete(key);
     const parts = typeof token === 'string' ? token.split('.') : [];

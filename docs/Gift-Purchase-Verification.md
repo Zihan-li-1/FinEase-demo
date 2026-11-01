@@ -4,7 +4,7 @@
 
 ## 运行条件
 
-需要 Node >=22.12、项目依赖、PostgreSQL、演示访问码、稳定的会话密钥和单独运行的提醒 worker。服务端配置：`SAVEFLOW_ACCESS_CODE`（至少 16 字符）、`CONTINUATION_TOKEN_SECRET`（至少 32 字符）、`DATABASE_URL`、`PURCHASE_WORKER_ENABLED=true`；反向代理部署需设置精确的 `SAVEFLOW_PUBLIC_ORIGIN`。无需 Commerce Mock 凭据或服务。
+需要 Node >=22.12、项目依赖、PostgreSQL、演示访问码、稳定的会话密钥和单独运行的提醒 worker。服务端配置：`FINEASE_ACCESS_CODE`（至少 16 字符）、`CONTINUATION_TOKEN_SECRET`（至少 32 字符）、`DATABASE_URL`、`PURCHASE_WORKER_ENABLED=true`；反向代理部署需设置精确的 `FINEASE_PUBLIC_ORIGIN`。无需 Commerce Mock 凭据或服务。
 
 先运行 `npm run db:migrate`，再运行 `npm run worker:purchase` 与应用。也可在现有 Compose 文件上叠加 `compose.purchase.yaml` 启动 `web` 和 `purchase-worker`。worker 的近期数据库心跳是保存提醒的前提；若失联超过两分钟，预览返回 `SCHEDULER_UNAVAILABLE`。Netlify 的 API 函数本身不是常驻 worker。
 
@@ -14,7 +14,7 @@
 
 1. 输入 1000 元、账户称谓、预算月份、未来日期与时间窗、鲜花/蛋糕；填可用余额和待付义务。确认前检查预览中的金额、来源和提醒时间，保存恢复码，再确认。
 2. 重新打开页面或使用恢复码读取同一流程。核对“本月预留 1000 元”“银行余额不变”和“不要挪用”提示。该金额是规划数据，不能阻止账户其他消费。
-3. 切换问答/自选，补充颜色、花材、口味和禁忌。页面应给出对应品类的外部搜索入口；打开新标签后由用户自行挑选、核对总价、配送和过敏原并在平台创建订单。SaveFlow 不收集配送地址、不展示模拟订单确认按钮、不代用户下单或付款。
+3. 切换问答/自选，补充颜色、花材、口味和禁忌。页面应给出对应品类的外部搜索入口；打开新标签后由用户自行挑选、核对总价、配送和过敏原并在平台创建订单。FinEase 不收集配送地址、不展示模拟订单确认按钮、不代用户下单或付款。
 4. 尝试公开调用 `commerce.order.execute` 或 `purchase.address`，应得到 `CAPABILITY_UNAVAILABLE`。修改偏好可以；使用旧候选/地址字段修改生效计划应被拒绝。
 5. 到期后运行 worker 并刷新页面，看到一条待办提醒；重复运行不能产生重复待办。取消预算后未来任务停用，外部平台的订单不受影响。
 6. 保存 1000 元预算后，模拟在别处消费；在页面按最新余额 800 元、待付义务 0 元主动复核，应显示差额 200 元，数据库中的预留和银行账务不变。该输入是用户自述，不能替代实时银行余额。
@@ -25,4 +25,4 @@
 
 运行 `node --test tests/purchase-*.test.mjs tests/purchase-ui.test.cjs`、`npm test`、`npm run typecheck`，并对修改文件运行 ESLint。`PURCHASE_TEST_DATABASE_URL` 是独立测试数据库的可选配置；缺失时数据库集成测试会跳过。旧 Mock 订单路径的通过不代表当前公开下单能力。
 
-当前主干的生产 Webpack 构建基线存在客户端 `node:crypto` 导入错误（`page.tsx → saveflow-mock.ts → legacy-adapter.mjs → core.mjs → verification.mjs`）。该问题在未加入本改动的主干上也能复现；测试结果与可部署状态应分别报告。
+当前主干的生产 Webpack 构建基线存在客户端 `node:crypto` 导入错误（`page.tsx → finease-mock.ts → legacy-adapter.mjs → core.mjs → verification.mjs`）。该问题在未加入本改动的主干上也能复现；测试结果与可部署状态应分别报告。

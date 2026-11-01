@@ -1,14 +1,14 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
 # TrueForge 账单最小适配层交付报告
 
 ## 本地访问码排障（2026-10-14）
 
-只输出状态的检查发现：本次诊断终端没有继承 `SAVEFLOW_ACCESS_CODE`，Next 开发模式也未发现可加载的本地环境文件。与此同时，已运行的 `127.0.0.1:3000` 对缺少访问码 Header 的请求返回 401 `UNAUTHORIZED`；按照当时入口代码，这证明该进程已配置有效的访问码和续接密钥。运行中的进程与当前终端配置不同。页面错误发生在原 HTTP 认证入口，尚未进入 TrueForge；提交值与后端期待值不匹配，不能据此断定后端未加载访问码。未读取进程的敏感启动参数，也未核对用户实际输入，故具体旧值来源尚未确认。
+只输出状态的检查发现：本次诊断终端没有继承 `FINEASE_ACCESS_CODE`，Next 开发模式也未发现可加载的本地环境文件。与此同时，已运行的 `127.0.0.1:3000` 对缺少访问码 Header 的请求返回 401 `UNAUTHORIZED`；按照当时入口代码，这证明该进程已配置有效的访问码和续接密钥。运行中的进程与当前终端配置不同。页面错误发生在原 HTTP 认证入口，尚未进入 TrueForge；提交值与后端期待值不匹配，不能据此断定后端未加载访问码。未读取进程的敏感启动参数，也未核对用户实际输入，故具体旧值来源尚未确认。
 
-客户端会发送 `X-Saveflow-Access`；本地桥接保留该 Header。`dev:qwen` 在 `app.prepare()` 后接收请求，HTTP 入口每次读取运行环境，没有发现访问码捕获过早的问题。Next 开发环境加载优先级为启动进程已有环境变量、`.env.development.local`、`.env.local`、`.env.development`、`.env`；Netlify 控制台变量不会自动同步至本机。
+客户端会发送 `X-FinEase-Access`；本地桥接保留该 Header。`dev:qwen` 在 `app.prepare()` 后接收请求，HTTP 入口每次读取运行环境，没有发现访问码捕获过早的问题。Next 开发环境加载优先级为启动进程已有环境变量、`.env.development.local`、`.env.local`、`.env.development`、`.env`；Netlify 控制台变量不会自动同步至本机。
 
-正确启动：先在原服务终端按 Ctrl+C 停止旧进程；打开新的 PowerShell，进入 `D:\金科国际\saveflow-demo`。在被 Git 忽略的 `.env.local` 中私下配置自己的访问码、续接密钥及既有 TrueForge 设置，然后执行 `npm.cmd run dev:qwen`。不要把真实值贴入聊天或提交 Git。检查启动日志中的 `banking_auth_config`：`accessCode` 和 `continuationSecret` 均应为 `configured`，账单试点需要 `trueforgeBillEnabled: true`。浏览器访问该进程日志显示的地址，输入与本地配置一致的访问码。若终端已设置同名变量，它会覆盖文件；请在启动前检查配置来源。修改环境文件或启动变量后重启后端。
+正确启动：先在原服务终端按 Ctrl+C 停止旧进程；打开新的 PowerShell，进入 `D:\金科国际\finease-demo`。在被 Git 忽略的 `.env.local` 中私下配置自己的访问码、续接密钥及既有 TrueForge 设置，然后执行 `npm.cmd run dev:qwen`。不要把真实值贴入聊天或提交 Git。检查启动日志中的 `banking_auth_config`：`accessCode` 和 `continuationSecret` 均应为 `configured`，账单试点需要 `trueforgeBillEnabled: true`。浏览器访问该进程日志显示的地址，输入与本地配置一致的访问码。若终端已设置同名变量，它会覆盖文件；请在启动前检查配置来源。修改环境文件或启动变量后重启后端。
 
 本轮仅增加安全诊断和提示：认证失败日志只含固定分类、事件名称和请求 ID；不记录访问码、密钥、Header、长度或摘要。缺 Header 与不匹配对外均为同一种 401；未认证用户不能探测续接密钥配置。访问码未配置时对外为通用 503，具体缺失/无效原因仅记服务端日志。页面认证错误显示“访问验证失败，请检查演示访问码后重试。”，服务配置错误显示“服务暂时不可用，请联系演示维护者。”，不再展示认证内部错误码。
 
@@ -41,7 +41,7 @@
 - 与本机服务配套：`@truefoundry/trueforge-sdk` **0.2.1**，已精确加入项目依赖。本轮 npm 注册表最新版分别为 0.178.2 / 0.178.0；没有升级本地服务。
 - 实际 API 基址：`http://localhost:8790`。本机 TrueForge 的 `localhost` 监听在 IPv6 `::1`；`127.0.0.1:8790` 并不可达，不能盲目替换。
 - MCP：`http://127.0.0.1:3333/mcp`，TrueForge connector 名称 `sv-trial`，MCP 服务版本 0.2.0。
-- 模型：沿用现有 `test/deepseek-v4-1-flash` provider 配置；模型鉴权保留在 TrueForge，不复制到 SaveFlow。
+- 模型：沿用现有 `test/deepseek-v4-1-flash` provider 配置；模型鉴权保留在 TrueForge，不复制到 FinEase。
 - 本地 standalone 无登录；SDK 不传 token。登录部署使用服务端 `TRUEFORGE_TOKEN` bearer token，需要自行管理刷新。
 - 刚开始时两个服务均未运行；用既有缓存版本启动，没有重建数据库或更改现有 provider/connector。
 - 初次调用受到 TrueForge 出站 URL 策略阻止。仅为本地 MCP 启动设置 `OUTBOUND_URL_ALLOWED_HOSTS='["127.0.0.1"]'`，未关闭全局 URL 检查。
@@ -67,10 +67,10 @@ SDK 创建指定 Agent 的基本方式是 `sessions.create({agent:{name:'已保�
 ## 原网页的实际链路
 
 ```text
-原 SaveFlow 网页 / askBankingAgent (30s)
+原 FinEase 网页 / askBankingAgent (30s)
   → POST /api/banking-agent
   → 方法 / 限流 / content-type / 来源 / 访问码 / 续接密钥 / 16KB 限制
-  → SAVEFLOW_TRUEFORGE_BILL_ENABLED === 'true' + 窄范围账单路由
+  → FINEASE_TRUEFORGE_BILL_ENABLED === 'true' + 窄范围账单路由
   → TrueForge 账单 inline Agent 的 Session / Turn / SSE
   → sv-trial connector → HTTP MCP → bill_summary
   → MCP 自己的独立 Mock Repository → 原 handleBillSummary (.mjs)
@@ -142,11 +142,11 @@ npm.cmd run mcp:trial
 原 UI/HTTP 终端设置服务端配置，再启动：
 
 ```powershell
-$env:SAVEFLOW_TRUEFORGE_BILL_ENABLED = 'true'
+$env:FINEASE_TRUEFORGE_BILL_ENABLED = 'true'
 $env:TRUEFORGE_BASE_URL = 'http://localhost:8790'
 $env:TRUEFORGE_MODEL = 'test/deepseek-v4-1-flash'
 $env:TRUEFORGE_MCP_SERVER = 'sv-trial'
-$env:SAVEFLOW_ACCESS_CODE = '<你自己的至少16字符访问码>'
+$env:FINEASE_ACCESS_CODE = '<你自己的至少16字符访问码>'
 $env:CONTINUATION_TOKEN_SECRET = '<你自己的随机服务端密钥>'
 npm.cmd run dev:qwen
 ```
@@ -160,7 +160,7 @@ npm.cmd run verify:trueforge:bill
 npm.cmd run verify:trueforge:bill -- '查账单' '2026 年 8 月' '查询 2026 年 1 月账单'
 ```
 
-Playwright 是可选本地验证工具，不属于生产依赖。本轮用临时 npm 包 Playwright 1.64.1 和本机 Chrome 执行。安装到独立工具目录后，可设置 `PLAYWRIGHT_MODULE` 为该包 `index.mjs` 的 file URL，再设置相同 `SAVEFLOW_ACCESS_CODE`，执行 `npm run verify:trueforge:ui`。它不拦截或伪造 HTTP 响应。
+Playwright 是可选本地验证工具，不属于生产依赖。本轮用临时 npm 包 Playwright 1.64.1 和本机 Chrome 执行。安装到独立工具目录后，可设置 `PLAYWRIGHT_MODULE` 为该包 `index.mjs` 的 file URL，再设置相同 `FINEASE_ACCESS_CODE`，执行 `npm run verify:trueforge:ui`。它不拦截或伪造 HTTP 响应。
 
 ## 状态边界和 Deploy Preview 前置条件
 

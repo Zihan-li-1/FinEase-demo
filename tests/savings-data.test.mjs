@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createBankingCore } from '../src/banking-core/core.mjs';
 import { collectSavingsData } from '../server/savings-data.mjs';
 import { summarizeBills } from '../src/skills/bill/bill-summary.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 
 test('seeded last complete month drives savings from the same transactions as bill analysis', async () => {
   const repository = createBankingCore().repository;

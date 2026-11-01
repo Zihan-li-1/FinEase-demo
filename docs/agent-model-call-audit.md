@@ -1,13 +1,13 @@
-# SaveFlow Banking Agent 模型调用审计
+# FinEase Banking Agent 模型调用审计
 
-审计对象是 `saveflow-demo` 当前分支 `codex/task-b-context-control` 的 `/api/banking-agent` 入口。本文只记录代码和定向测试证据；没有把 mock 传输层结果当成真实 TrueForge 服务可用性证明。
+审计对象是 `finease-demo` 当前分支 `codex/task-b-context-control` 的 `/api/banking-agent` 入口。本文只记录代码和定向测试证据；没有把 mock 传输层结果当成真实 TrueForge 服务可用性证明。
 
-本地模式现在由 `src/app/api/banking-agent/route.ts` 直接转发到 `server/banking-agent.mjs`。`next.config.ts` 仅在 `SAVEFLOW_STATIC_EXPORT=true` 时启用 `output: "export"`；普通 `npm.cmd run dev` 保留 Node API runtime。App Router body 会被重新包装成 Web Request，沿用原有 16KB、JSON、访问码和会话校验。
+本地模式现在由 `src/app/api/banking-agent/route.ts` 直接转发到 `server/banking-agent.mjs`。`next.config.ts` 仅在 `FINEASE_STATIC_EXPORT=true` 时启用 `output: "export"`；普通 `npm.cmd run dev` 保留 Node API runtime。App Router body 会被重新包装成 Web Request，沿用原有 16KB、JSON、访问码和会话校验。
 
 ## 当前调用链
 
 ```text
-src/lib/use-saveflow.ts
+src/lib/use-finease.ts
   -> src/lib/banking-agent-client.ts
   -> POST /api/banking-agent
   -> server/banking-agent.mjs
@@ -16,10 +16,10 @@ src/lib/use-saveflow.ts
        ├─ continuation + 取消/撤回：确定性 task control，跳过模型
        ├─ continuation + choice.optionId：确定性候选解析，跳过模型
        └─ 普通文本或自由文本补充
-            -> SAVEFLOW_BANKING_RUNTIME=trueforge（默认）
+            -> FINEASE_BANKING_RUNTIME=trueforge（默认）
                  -> server/trueforge-banking-runtime.mjs
                  -> TrueForge private session -> one turn
-            -> SAVEFLOW_BANKING_RUNTIME=legacy-qwen（仅显式配置）
+            -> FINEASE_BANKING_RUNTIME=legacy-qwen（仅显式配置）
                  -> server/banking-intent-parser.mjs -> Qwen compatible endpoint
        -> ParsedIntent JSON.parse + validateParsedIntent + grounding 校验
        -> src/agent/runtime.mjs / Banking Core prepare（只读查询或正式预览）
@@ -27,7 +27,7 @@ src/lib/use-saveflow.ts
        -> JSON response
 ```
 
-默认 Banking 路由是 TrueForge。`SAVEFLOW_BANKING_RUNTIME` 是唯一选择 TrueForge 或旧 Qwen 的服务端变量；未知值直接返回配置错误，不会静默回退。TrueForge Agent 被配置为无 MCP、无 Skill、单轮、JSON object 输出，模型只提出 ParsedIntent，Skill/Core 才能执行查询或生成预览。
+默认 Banking 路由是 TrueForge。`FINEASE_BANKING_RUNTIME` 是唯一选择 TrueForge 或旧 Qwen 的服务端变量；未知值直接返回配置错误，不会静默回退。TrueForge Agent 被配置为无 MCP、无 Skill、单轮、JSON object 输出，模型只提出 ParsedIntent，Skill/Core 才能执行查询或生成预览。
 
 TrueForge 的会话创建、模型 turn、终态检查和 JSON 解析发生在 `server/trueforge-banking-runtime.mjs`。模型输出随后必须通过 `validateParsedIntent` 与 `validateIntentGrounding`；失败时返回 `TRUEFORGE_FORMAT_ERROR`，不会进入业务执行。`unsupported` 是模型理解出的业务结果，不代表模型调用失败。
 
@@ -35,7 +35,7 @@ TrueForge 的会话创建、模型 turn、终态检查和 JSON 解析发生在 `
 
 ## 诊断日志
 
-设置 `SAVEFLOW_AGENT_DIAGNOSTICS=true` 后，服务端按现有 `requestId` 输出 JSONL 事件；默认关闭。事件只记录路由、枚举、布尔值、历史条数、耗时、状态和错误类别，不记录用户原文、完整 history、prompt、模型原始输出、token、账户/卡号、金额、余额、conversation/continuation token 或 operationId。
+设置 `FINEASE_AGENT_DIAGNOSTICS=true` 后，服务端按现有 `requestId` 输出 JSONL 事件；默认关闭。事件只记录路由、枚举、布尔值、历史条数、耗时、状态和错误类别，不记录用户原文、完整 history、prompt、模型原始输出、token、账户/卡号、金额、余额、conversation/continuation token 或 operationId。
 
 事件含义：
 
@@ -49,7 +49,7 @@ TrueForge 的会话创建、模型 turn、终态检查和 JSON 解析发生在 `
 | `agent_dispatch` | action、结果状态、是否进入业务路由、确定性跳过原因 |
 | `agent_response_sent` | HTTP 状态、业务 code、响应状态和来源类型 |
 
-日志仅在 `SAVEFLOW_AGENT_DIAGNOSTICS=true` 生效，诊断 sink 失败不会影响业务请求。
+日志仅在 `FINEASE_AGENT_DIAGNOSTICS=true` 生效，诊断 sink 失败不会影响业务请求。
 
 ## 定向验证结果
 
@@ -90,8 +90,8 @@ TrueForge 的会话创建、模型 turn、终态检查和 JSON 解析发生在 `
 具备授权部署环境后，最小核验命令为：
 
 ```powershell
-$env:SAVEFLOW_AGENT_DIAGNOSTICS='true'
-$env:SAVEFLOW_BANKING_RUNTIME='trueforge'
+$env:FINEASE_AGENT_DIAGNOSTICS='true'
+$env:FINEASE_BANKING_RUNTIME='trueforge'
 npm run dev
 ```
 

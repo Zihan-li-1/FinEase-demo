@@ -1,4 +1,4 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
 # TrueForge 多 Skill 接入交付记录
 
@@ -22,7 +22,7 @@
 | subscription_list | 空对象 | data 数组：id/name/monthlyFeeFen/status/lastUsedDate/isPotentiallyUnused/mandateId；context、evidence | status=subscription_result，data.subscriptions 原值；BankingReadCard 订阅布局 |
 | product_list | 空对象 | data 数组：id/name/riskLevel/expectedYield（bps）/liquidity/minimumAmountFen/durationDays/currency/isSynthetic；context、evidence | status=product_result，data.products 原值；BankingReadCard 产品布局，收益率仅作示例 |
 
-试点默认关闭：阶段 A 使用服务端 `SAVEFLOW_TRUEFORGE_READ_ENABLED=true`；账单原开关不变。窄范围入口匹配明确查询，混合或不支持请求继续原 Harness。每个 Session 只授权当前一个工具，浏览器不能指定工具或内部动作。
+试点默认关闭：阶段 A 使用服务端 `FINEASE_TRUEFORGE_READ_ENABLED=true`；账单原开关不变。窄范围入口匹配明确查询，混合或不支持请求继续原 Harness。每个 Session 只授权当前一个工具，浏览器不能指定工具或内部动作。
 
 `trueforge-client.mjs` 复用 SDK/Session/SSE 并扩展固定权限配置；`trueforge-tool-result.mjs` 共用调用/connector/toolCallId/threadId/参数关联、MCP 错误包装解析和 deadline；账单已复用关联校验，保留原业务数据和显示。
 
@@ -41,7 +41,7 @@
 真实测试曾捕获模型把 935 字符 MCP 凭据改错一字符，严格校验已拒绝；也捕获一次重复只读工具请求。两者均没有被作为成功结果交付。为消除长凭据复制负担并在调用前阻止重复 prepare，增加：
 
 - `server/mcp/trueforge-token-bridge.mjs`：仅监听 127.0.0.1:3334，保留原工具名/schema、只代理原 MCP。长 opaque 凭据换成 128-bit 随机短句柄；还原后才调用原 Skill，绑定工具、TTL、重复消费。业务数据原样透传。没有修改原 Skill 参数字段/类型或业务规则。
-- `saveflow-token-bridge` 是新增本地 connector；原 sv-trial 和 billtest 配置未改。`TRUEFORGE_SKILL_MCP_SERVER` 可选择此代理，账单仍用原 sv-trial。代理与外层会话 Map 均是本地临时状态。
+- `finease-token-bridge` 是新增本地 connector；原 sv-trial 和 billtest 配置未改。`TRUEFORGE_SKILL_MCP_SERVER` 可选择此代理，账单仍用原 sv-trial。代理与外层会话 Map 均是本地临时状态。
 - SDK 将当前唯一工具设为 requireApprovalForTools=['@all']。这是 SDK 的查询/prepare 放行机制，不是 Core action.decide。服务端先检查本次确定的工具、connector 和精确参数，最多放行一次。模型再请求调用时发送 SDK deny，不再次到达 MCP；最多有限轮完成并检查最终 Turn done。没有开启任何金融确认或执行工具。
 
 2026-10-17 使用该机制重新跑过完整阶段 A，全部通过，报告见 `docs/verification/trueforge-multi-A-final/`；之后才通过 B 并进入 C。
@@ -71,7 +71,7 @@ prepare() 会按原 Core 契约创建预览操作记录并推进卡片 previewGe
 
 amount 保留 `{amount_minor:安全整数分,currency:'CNY'}`。预算范围保留 0–10000000 分，转账大于零，其他限制交给原 Skill/Core。所有金融值、哈希、风险和业务编号只取关联的 MCP 数据，不解析模型自然语言。前端新增字段都是兼容的标记/列表结果，没有改变原请求接口。
 
-原网页 → POST /api/banking-agent（原鉴权、来源、16KB、限流）→ 按服务端开关和窄范围语句选择固定工具 → 同一 TrueForge Session 内 SDK 参数门控/SSE → 本地 token bridge → 原 saveflow-trial MCP → 原 Skill/Repository/Core.prepare → 业务校验 → 原响应 envelope → 既有/新增只读卡片。账单仍直连原 sv-trial connector。非试点、模糊/混合初始请求或关闭开关时保留旧 Harness；已经开始的试点失败不调用旧 Harness。
+原网页 → POST /api/banking-agent（原鉴权、来源、16KB、限流）→ 按服务端开关和窄范围语句选择固定工具 → 同一 TrueForge Session 内 SDK 参数门控/SSE → 本地 token bridge → 原 finease-trial MCP → 原 Skill/Repository/Core.prepare → 业务校验 → 原响应 envelope → 既有/新增只读卡片。账单仍直连原 sv-trial connector。非试点、模糊/混合初始请求或关闭开关时保留旧 Harness；已经开始的试点失败不调用旧 Harness。
 
 ## 文件职责
 
@@ -85,7 +85,7 @@ amount 保留 `{amount_minor:安全整数分,currency:'CNY'}`。预算范围保�
 | server/banking-agent.mjs | 现有传输校验后分流新适配层；保留已有鉴权修正和旧 Harness |
 | server/banking.mjs、src/lib/trial-preview.mjs | 保留 Core 契约，永久隔离 tfpreview 操作编号；共用前端防误调用判定 |
 | src/lib/banking-agent-client.ts | 接受订阅/产品/会话取消及预览标记，保留原账单/卡片校验和鉴权处理 |
-| src/lib/use-saveflow.ts | 新只读结果、试点预览续接、旧预览标识、可恢复输入错误和执行回调拦截 |
+| src/lib/use-finease.ts | 新只读结果、试点预览续接、旧预览标识、可恢复输入错误和执行回调拦截 |
 | src/app/BankingReadCards.tsx、banking-trial-cards.css | 订阅和产品只读卡片，桌面/窄屏展示、Mock 来源和收益示例标注 |
 | src/app/BankingCardCards.tsx、page.tsx | 复用预览组件，显示未执行/风险警告/有效期，禁止试点按钮；授权文字不再误称固定 Qwen 提供方 |
 | scripts/configure-trueforge-bridge.mjs | 通过官方 SDK 配置新增本地 connector，不改 sv-trial/billtest |
@@ -135,11 +135,11 @@ npm.cmd run mcp:bridge
 npm.cmd run configure:trueforge:bridge
 
 # 终端 4：原 UI/HTTP，服务端开关独立控制
-$env:SAVEFLOW_TRUEFORGE_BILL_ENABLED = 'true'
-$env:SAVEFLOW_TRUEFORGE_READ_ENABLED = 'true'
-$env:SAVEFLOW_TRUEFORGE_TRANSFER_ENABLED = 'true'
-$env:SAVEFLOW_TRUEFORGE_CARD_PREVIEW_ENABLED = 'true'
-$env:TRUEFORGE_SKILL_MCP_SERVER = 'saveflow-token-bridge'
+$env:FINEASE_TRUEFORGE_BILL_ENABLED = 'true'
+$env:FINEASE_TRUEFORGE_READ_ENABLED = 'true'
+$env:FINEASE_TRUEFORGE_TRANSFER_ENABLED = 'true'
+$env:FINEASE_TRUEFORGE_CARD_PREVIEW_ENABLED = 'true'
+$env:TRUEFORGE_SKILL_MCP_SERVER = 'finease-token-bridge'
 npm.cmd run dev:qwen
 ```
 

@@ -6,13 +6,13 @@
 
 页面的 Banking 消息、自由文本补充、选项都只调用 `POST /api/banking-agent`。本地通过 `npm run dev:qwen` 提供 API，Netlify 入口为 `netlify/functions/banking-agent.mjs`；静态 `out` 本身不提供 API。
 
-`SAVEFLOW_BANKING_RUNTIME` 整体选择实现，默认 `trueforge`：
+`FINEASE_BANKING_RUNTIME` 整体选择实现，默认 `trueforge`：
 
 - `trueforge`：TrueForge Agent Runtime 先提出 ConversationRoute；业务分支再由独立 ParsedIntent v1 理解器处理。两者均无工具、无执行权限。需要 `TRUEFORGE_BASE_URL`（不带路径/查询的 HTTP(S) origin）、`TRUEFORGE_MODEL`、按部署需要配置 `TRUEFORGE_TOKEN`。
 - `legacy-qwen`：迁移期显式选择 Qwen 单意图理解；首轮、补充和修改均调用同一模型，仍经过同一服务端编排器和回复合同，需要 `DASHSCOPE_API_KEY` 等旧配置。
-- 其他值为配置错误。没有按句式选择实现、按请求试探多个后端或失败静默回退。旧 `SAVEFLOW_TRUEFORGE_*_ENABLED` 开关不再选择此 API 的路由。
+- 其他值为配置错误。没有按句式选择实现、按请求试探多个后端或失败静默回退。旧 `FINEASE_TRUEFORGE_*_ENABLED` 开关不再选择此 API 的路由。
 
-`SAVEFLOW_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET` 分别至少 16 字符。持久 Core 部署还需配置 `DATABASE_URL` 并迁移；同一部署的实例使用相同续接密钥和一致 Repository。访问码通过 `X-Saveflow-Access` 发送；服务端拒绝不同源 Origin、限流每分钟 10 次、限制 JSON 请求体 16KB。密钥不得使用 `NEXT_PUBLIC_` 前缀。
+`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET` 分别至少 16 字符。持久 Core 部署还需配置 `DATABASE_URL` 并迁移；同一部署的实例使用相同续接密钥和一致 Repository。访问码通过 `X-FinEase-Access` 发送；服务端拒绝不同源 Origin、限流每分钟 10 次、限制 JSON 请求体 16KB。密钥不得使用 `NEXT_PUBLIC_` 前缀。
 
 ## 请求
 

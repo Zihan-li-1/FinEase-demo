@@ -18,7 +18,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-token-bridge",
+          "name": "finease-token-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -71,8 +71,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -198,8 +198,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -327,8 +327,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -437,8 +437,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -510,7 +510,7 @@
               ],
               "expiresAt": "2026-10-17T11:59:04.019Z",
               "previewHash": "9847bf68758b2f98ea73fd4de291d1a02f1fb7afd40e9825e4c10d5c24fec630",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:0"
+              "contextSnapshotId": "finease-phase1-fixed-v1:0"
             },
             "risk": {
               "allowed": true,
@@ -595,8 +595,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -701,8 +701,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -772,7 +772,7 @@
               ],
               "expiresAt": "2026-10-17T11:59:07.939Z",
               "previewHash": "b11d4123514559d2998b5658410dc4ac88a2631f49c484995d306ffc515b19e2",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:0"
+              "contextSnapshotId": "finease-phase1-fixed-v1:0"
             },
             "risk": {
               "allowed": true,
@@ -857,8 +857,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -928,7 +928,7 @@
               ],
               "expiresAt": "2026-10-17T11:59:11.503Z",
               "previewHash": "6c9a84014d82d1c7c44b655cd5830b508a1239d91dfc348436559eb45373dde8",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:0"
+              "contextSnapshotId": "finease-phase1-fixed-v1:0"
             },
             "risk": {
               "allowed": true,
@@ -992,7 +992,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-token-bridge",
+          "name": "finease-token-bridge",
           "enable_tools": [
             "card_get"
           ],
@@ -1041,8 +1041,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "card_get",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "card_get",
               "arguments": {
@@ -1089,11 +1089,11 @@
                 "previewGeneration": 0
               },
               "context": {
-                "datasetId": "saveflow-phase1-fixed-v1",
+                "datasetId": "finease-phase1-fixed-v1",
                 "asOf": "2026-09-01T00:00:00+08:00",
                 "currentMonth": "2026-08",
                 "previousMonth": "2026-07",
-                "snapshotId": "saveflow-phase1-fixed-v1:0",
+                "snapshotId": "finease-phase1-fixed-v1:0",
                 "dataSource": "synthetic_demo_only",
                 "currency": "CNY"
               }

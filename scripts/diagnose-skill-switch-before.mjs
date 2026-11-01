@@ -7,7 +7,7 @@ const page = await browser.newPage();
 const report = { at: new Date().toISOString(), requests: [] };
 try {
   await page.goto('http://127.0.0.1:3000');
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
   for (const message of ['从模拟活期账户转账500元给房东王先生', '查看我的卡', '查询8月账单']) {
     const pending = page.waitForResponse(r => r.url().endsWith('/api/banking-agent')); void pending.catch(() => {});

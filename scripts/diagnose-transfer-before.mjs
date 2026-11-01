@@ -12,7 +12,7 @@ try {
     const page = await browser.newPage({ baseURL: 'http://127.0.0.1:3000' });
     const scenario = { first, responses: [] }; report.scenarios.push(scenario);
     await page.goto('http://127.0.0.1:3000');
-    await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+    await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
     await page.locator('.consent-control input').check();
     for (const message of [first, '改成转账400元']) {
       const response = page.waitForResponse(r => r.url().endsWith('/api/banking-agent'), { timeout: 35000 });

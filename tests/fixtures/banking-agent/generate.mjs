@@ -3,7 +3,7 @@ import { writeFile } from 'node:fs/promises';
 import { handleBankingAgent } from '../../../server/banking-agent.mjs';
 import { createBankingCore } from '../../../src/banking-core/core.mjs';
 import { buildParsedIntent } from '../../../src/agent/clarification/merge-intent.mjs';
-const env = { SAVEFLOW_ACCESS_CODE: 'fixture-access-code-1234', CONTINUATION_TOKEN_SECRET: 'fixture-continuation-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'fixture-access-code-1234', CONTINUATION_TOKEN_SECRET: 'fixture-continuation-secret-1234' };
 const core = createBankingCore();
 const parseIntent = message => message === '查账单' ? buildParsedIntent('bill.summary', {}) : buildParsedIntent('transfer.create', {
   payee_ref: message.includes('王先生') ? '王先生' : '张三', amount: { amount_minor: 50000, currency: 'CNY' },
@@ -11,7 +11,7 @@ const parseIntent = message => message === '查账单' ? buildParsedIntent('bill
 });
 let count = 0;
 const post = async body => (await handleBankingAgent(new Request('http://localhost/api/banking-agent', {
-  method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `fixture-${++count}` }, body: JSON.stringify(body),
+  method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `fixture-${++count}` }, body: JSON.stringify(body),
 }), { env, core, parseIntent })).json();
 const save = async (name, value) => {
   const example = structuredClone(value);

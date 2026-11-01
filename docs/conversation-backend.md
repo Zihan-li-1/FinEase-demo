@@ -17,7 +17,7 @@
 
 成功结果、澄清、已建立会话中的可恢复错误都返回该元数据。鉴权失败、无效/过期会话等不能建立可信关联的路径不回显可用会话令牌。前端同时严格校验元数据结构、任务/状态枚举、容量、未知字段和响应会话归属；业务账单金额及证据校验保留。
 
-`use-saveflow.ts` 保存实际响应中的会话令牌与 revision；业务消息、选项、储蓄表单、预览编辑使用对应 taskId 和 continuationToken。新增卡片式“待继续业务”入口，可恢复挂起任务或重新核验会话，保留原页面风格。
+`use-finease.ts` 保存实际响应中的会话令牌与 revision；业务消息、选项、储蓄表单、预览编辑使用对应 taskId 和 continuationToken。新增卡片式“待继续业务”入口，可恢复挂起任务或重新核验会话，保留原页面风格。
 
 `sync` 是同一已鉴权 POST 入口的只读会话核验：必须提供 conversationToken，不能附带 message、choice、planInputs、taskId 或 continuationToken。不调用模型、prepare、decide 或 execute；读取服务端会话及其原 Core 操作状态，返回 `OK / conversation_state` 与 `data.conversation`。客户端严格要求 sync 返回该状态，不能把业务结果当作核验结果。
 
@@ -31,7 +31,7 @@
 
 ## 浏览器刷新和显示快照
 
-标签页 sessionStorage 沿用 `saveflow.banking-chat.v1` 键，快照升级为 version 2，并兼容旧 version 1。只保存显示消息、服务端生成的不透明会话令牌和每个任务的续接引用。revision、当前任务和挂起状态必须来自新的服务端响应；缓存中的 previewCurrent、historySnapshot 或 confirmed 不能恢复确认权限。
+标签页 sessionStorage 沿用 `finease.banking-chat.v1` 键，快照升级为 version 2，并兼容旧 version 1。只保存显示消息、服务端生成的不透明会话令牌和每个任务的续接引用。revision、当前任务和挂起状态必须来自新的服务端响应；缓存中的 previewCurrent、historySnapshot 或 confirmed 不能恢复确认权限。
 
 刷新后的数据流：显示只读历史 → 重新输入访问码并授权 → 点击“核验并恢复会话”（或发送新消息时先核验）→ sync 返回权威会话摘要 → 用户点击“继续/恢复业务” → 服务端验证原续接并重新解析实体、生成新选项/正式预览。单独 sync 不激活旧预览，也不会自动重发任何写操作。
 

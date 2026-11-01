@@ -1,4 +1,4 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
 # TrueForge 多轮转账与网页交互排查
 
@@ -13,7 +13,7 @@
 | 首句未进入 TrueForge / 适配层 | 原样“从模拟活期账户转账500元给房东王先生”返回 503 / MODEL_AUTH_ERROR，无对应 TrueForge Session；换成“从…给…转500元”才进入试点。 | `server/trueforge-skill-adapter.mjs:routeTrueforgeSkill` 原来只匹配收款人在金额之前的语序。增加严格的金额在前语序，保留金额验证与混合任务排除。旧 Harness 的模型配置缺失是已有本地配置问题，此次未改其凭据。 |
 | 修改后仍问金额 / Agent 续接解析层 | 支持的语序先得到 50000 分预览；第二次真实 transfer_preview 调用返回 NEEDS_CLARIFICATION、source=parser、slot=amount、“要转多少钱？例如 500 元。” | `server/banking-clarification-parser.mjs:parseClarificationAnswer` 支持“改成400元”，不支持“改成转账400元”。仅对 transfer.create 金额编辑前缀归一化，继续使用原精度/正数校验及 slots/selections 合并。适配器明确拒绝非法金额。 |
 | 收款人看起来丢失 / 网页与续接 | 第二次调用与第一次结果的 token 摘要匹配，仍在同一 Session；原网页却删除了预览，刷新又丢掉内存消息和外层 token。 | 未发现有效续接内部丢失实体 ID，不能把它归因于 Core 或模型。`server/banking-orchestrator.mjs` 的 mergeSlots 保留其他槽和候选选择；`src/agent/runtime.mjs:transferRepository` 使用已选候选。本轮保留此契约，修复网页丢卡片和刷新失联。 |
-| 卡片/聊天消失 / 网页层 | 第二轮卡片从 1 变 0，消息从应有 5 条变 4 条；刷新后只剩 1 条欢迎消息。 | `src/lib/use-saveflow.ts:startBanking` 每次 filter 掉所有 banking_preview。移除删除，保留历史并禁用旧操作。原来只有 saving-plan 操作 ID 恢复，没有聊天恢复；本轮新增限时的 tab 内恢复。 |
+| 卡片/聊天消失 / 网页层 | 第二轮卡片从 1 变 0，消息从应有 5 条变 4 条；刷新后只剩 1 条欢迎消息。 | `src/lib/use-finease.ts:startBanking` 每次 filter 掉所有 banking_preview。移除删除，保留历史并禁用旧操作。原来只有 saving-plan 操作 ID 恢复，没有聊天恢复；本轮新增限时的 tab 内恢复。 |
 | 缺修改/取消按钮 / 网页层 | 修复前 .banking-preview-card button 数量为 0。 | 原 page.tsx:BankingPreviewCard 仅展示。提取 BankingTransferPreview.tsx，为当前试点预览提供金额/收款人表单、取消、禁用确认；表单阻止默认导航。旧 Harness 的转账展示和原卡片执行链路保持原行为。 |
 | “确认转账”错误不清楚 / 适配层 | 首轮扩展复测发现该短语未被本地拒绝规则覆盖，模型未调用工具，返回格式错误，没有执行。 | 扩充精确拒绝规则，直接 403 / PREVIEW_ONLY，不调用模型或消费 token，仍可取消。[中间失败记录](verification/transfer-debug/intermediate-confirm-failure.json) 保留，最终复测通过。 |
 | 确认不能执行 / Core 边界 | MCP 与网站使用两个独立 Mock Core，网站没有试点预览的业务状态；MCP 只授权查询/prepare。 | 执行集成尚未完成，不能通过启用按钮解决。按钮保持 disabled；聊天确认拒绝；原 /api/banking 永久拒绝 tfpreview: 编号的 guard 保留。 |
@@ -23,7 +23,7 @@
 ## 真实服务与会话
 
 - TrueForge：http://localhost:8790；原网页/HTTP：http://127.0.0.1:3000；bridge：127.0.0.1:3334/mcp；原 MCP：127.0.0.1:3333/mcp。地址只在服务器端使用。核对本机包：CLI **0.3.1**、SDK **0.2.1**。
-- 网页实际使用 `server/trueforge-client.mjs:trialAgentSpec` 创建的 **inline Agent，并非注册的 billtest**。模型为 `test/deepseek-v4-1-flash`，connector 为 saveflow-token-bridge；每个转账 Session 只允许 transfer_preview，所有调用需先校验参数。未修改已有注册 Agent。
+- 网页实际使用 `server/trueforge-client.mjs:trialAgentSpec` 创建的 **inline Agent，并非注册的 billtest**。模型为 `test/deepseek-v4-1-flash`，connector 为 finease-token-bridge；每个转账 Session 只允许 transfer_preview，所有调用需先校验参数。未修改已有注册 Agent。
 - SDK 用 POST /api/v1/sessions 创建、GET /api/v1/sessions/{id} 恢复并复核权限，通过 sessions.createTurnStream 读取 SSE。model.message.toolCalls 是模型提出的调用，tool.response 才是 MCP 业务结果；最终必须 turn.done / status=done，且无 requiredActions。
 - tool.approval_required 时先核对工具、connector、参数，再发送 user.tool_approval 继续。因此一个网页请求通常对应两个连续 SDK Turn。保留 SDK delta 合并、结束状态、期限与取消逻辑，不能用模型“已经完成”替代工具结果。
 - 最终真实转账测试只有 **1 个 Session、10 个连续 SDK Turn、5 次真实 transfer_preview**。所有 previousTurnId 连续，续接摘要与上次结果对应；usage 显示模型收到了工具定义，model.message 有真实函数调用。见 [完整脱敏事件](verification/transfer-debug/after-events.json)、[已断言的摘要](verification/transfer-debug/trace-checks.json)。没有确认或执行工具调用。
@@ -36,7 +36,7 @@
 
 第二次为 `{continuationToken: <上次结果的 bridge 别名>, message: "改成转账400元"}`。工具返回新的 operationId/previewHash，exactEffects 为 **ACC-CHECKING → payee_003，40000 分**；实体 ID 没有由模型生成。后续金额表单改为 350 元、收款人表单输入“王先生”，resolver 返回真实候选，选择“王强”得到 payee_004，仍保留原账户和 35000 分。
 
-模型最终文字是“已返回结果”，网页金额和收款人来自工具数据。修复前“要转多少钱”是 SaveFlow 固定澄清提示，不是 DeepSeek 总结。
+模型最终文字是“已返回结果”，网页金额和收款人来自工具数据。修复前“要转多少钱”是 FinEase 固定澄清提示，不是 DeepSeek 总结。
 
 ## 调用链与刷新恢复
 
@@ -54,7 +54,7 @@
 | --- | --- |
 | server/trueforge-skill-adapter.mjs | 严格金额在前语序、非法修改错误、本地拒绝确认转账。 |
 | server/banking-clarification-parser.mjs | 识别金额修改，保留原 ParsedIntent 续接合并。 |
-| src/lib/use-saveflow.ts | 保留历史、恢复聊天、绑定当前试点预览的编辑/取消。 |
+| src/lib/use-finease.ts | 保留历史、恢复聊天、绑定当前试点预览的编辑/取消。 |
 | src/lib/banking-chat-storage.ts（新增） | 有界/限时恢复，去除私有凭据，不恢复执行权。 |
 | src/app/BankingTransferPreview.tsx（新增） | 试点修改表单、取消、禁用确认，历史不可操作。 |
 | src/app/page.tsx、src/app/modern-bank-overrides.css | 组件接线和样式。 |

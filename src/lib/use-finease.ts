@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { canTransition, coreOperationBlocksInput, transition, type CoreOperationStage, type FlowEvent, type Stage } from "./flow-machine";
-import { saveflowMock } from "./saveflow-mock";
+import { fineaseMock } from "./finease-mock";
 import { request } from "./api/client";
 import { apiConfig } from "./api/config";
 import { askQwen, type AgentTurn } from "./agent-client";
@@ -17,23 +17,23 @@ import { agentErrorHint, agentErrorPolicy } from "./agent-error-policy.mjs";
 import type { BankingConversation } from './banking-conversation-contract';
 
 export type Message = { id: number; role: "agent" | "user"; text: string; kind?: "conversation" | "banking_skill_overview" | "banking_purchase" | "normal" | "analysis" | "result" | "error" | "banking_clarification" | "banking_bill" | "banking_preview" | "banking_card" | "banking_card_preview" | "banking_read" | "banking_plan" | "banking_receipt" | "banking_wealth" | "banking_wealth_preview" | "banking_wealth_inputs" | "banking_savings_inputs" | "banking_savings_plan" | "banking_internal_transfer"; analysis?: Analysis; banking?: BankingAgentData; receipt?: ActionReceipt; verification?: { availableBalanceFen: number; transactionId: string; occurredAt: string; amountFen: number; status: string }; errorHint?: string };
-const initialMessages: Message[] = [{ id: 1, role: "agent", text: "你好，我是 SaveFlow。可以查询模拟账单，或生成转账正式预览，例如：给张三转 500 元。" }];
-const pendingKey = "saveflow.pending-operation.v1";
+const initialMessages: Message[] = [{ id: 1, role: "agent", text: "你好，我是 FinEase。可以查询模拟账单，或生成转账正式预览，例如：给张三转 500 元。" }];
+const pendingKey = "finease.pending-operation.v1";
 
-export function useSaveflow() {
+export function useFinEase() {
   const [stage, setStage] = useState<Stage>("welcome");
   const [modelMode, setModelMode] = useState<"qwen" | "mock" | "banking">("banking");
   const [replyStyle, setReplyStyle] = useState<"concise" | "friendly" | "professional">("concise");
   const chatHistory = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [accessCode, setAccessCode] = useState("");
-  const [targetAmountFen, setTargetAmountFen] = useState<number | null>(saveflowMock.goal.targetAmount * 100);
+  const [targetAmountFen, setTargetAmountFen] = useState<number | null>(fineaseMock.goal.targetAmount * 100);
   const targetDeadline = useRef<string | null>(null);
   const [usage, setUsage] = useState<{ inputTokens: number; outputTokens: number } | null>(null);
   const conversation = useRef<AgentTurn[]>([]);
   const stageRef = useRef<Stage>("welcome");
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
-  const [monthlySaving, setMonthlySaving] = useState(saveflowMock.goal.monthlySaving);
+  const [monthlySaving, setMonthlySaving] = useState(fineaseMock.goal.monthlySaving);
   const [consent, setConsent] = useState(false);
   const [operationId, setOperationId] = useState("");
   const [failure, setFailure] = useState<"analysis" | "plan">("analysis");
@@ -655,8 +655,8 @@ export function useSaveflow() {
     coreOperationsRef.current = {}; setCoreOperations({});
     chatHistory.current = [];
     activePreviews.current = { card: null, transfer: null };
-    setMonthlySaving(saveflowMock.goal.monthlySaving); setValidation(""); setOperationId(""); setConsent(false);
-    setTargetAmountFen(saveflowMock.goal.targetAmount * 100); setUsage(null); conversation.current = []; setBankingContinuation(null); lastBankingRequest.current = null;
+    setMonthlySaving(fineaseMock.goal.monthlySaving); setValidation(""); setOperationId(""); setConsent(false);
+    setTargetAmountFen(fineaseMock.goal.targetAmount * 100); setUsage(null); conversation.current = []; setBankingContinuation(null); lastBankingRequest.current = null;
     setActiveCardOperationId(null);
     setActiveTransferOperationId(null);
     installFlows({}); setFocusedFlowId(null);

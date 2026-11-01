@@ -1,4 +1,4 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
 # TrueForge 跨 Skill 续接隔离修复
 
@@ -8,7 +8,7 @@
 
 [修复前真实网页报告](verification/skill-switch/before-ui.json)：转账预览成功后，“查看我的卡”的 HTTP 请求错误携带原转账 token，返回 400 / CONTINUATION_ACTION_MISMATCH，历史预览仍在。
 
-1. 网页 `src/lib/use-saveflow.ts:startBanking` 原来把唯一的 bankingContinuation 附加到每条消息；它同时代表“当前聊天焦点”和“具体业务的续接权”。完成卡片查询又会把全局 token 清空，无法返回原转账；刷新也只恢复这一个全局状态。
+1. 网页 `src/lib/use-finease.ts:startBanking` 原来把唯一的 bankingContinuation 附加到每条消息；它同时代表“当前聊天焦点”和“具体业务的续接权”。完成卡片查询又会把全局 token 清空，无法返回原转账；刷新也只恢复这一个全局状态。
 2. `server/banking-agent.mjs` 看到 tfm1 后正确进入 Skill Adapter。`server/trueforge-skill-adapter.mjs` 先校验签名/scope/有效期/revision，再校验新路由的工具与 token 绑定工具一致；转账 token 配卡片查询必须报错。不能靠删掉此校验修复。
 3. `server/banking-orchestrator.mjs:switchesTask` 在独立 MCP 调用中受 expectedAction 约束，不能跨工具重用旧业务 slots。Bridge 的 `state.name !== name` 也防止把 transfer_preview 的私有凭据用于 card_get。两者均未修改。
 
@@ -18,7 +18,7 @@
 
 - `src/lib/trueforge-routing.mjs`：把现有窄路由和策略原样移到无 SDK/密钥依赖的纯模块，服务端保留原导出兼容性。客户端只用于判断任务边界，不能授权工具；后端仍独立读取私有开关和验证请求。明确查询开新任务；混合/含糊输入只提示澄清，不套用转账 token。
 - `src/lib/banking-flow-state.ts`：每个业务流保存本地导航 key、动作、服务器原样发出的 token、期限和最新预览编号。key 不是 TrueForge Session ID，也不是身份凭证。新查询完成只结束自己的流，不删除原转账流；修改转账只替换该流的预览版本；取消只删除该流。其他 Skill 不延长转账有效期。最多保存 25 个流。
-- `src/lib/use-saveflow.ts`：区分新请求、当前流补参和从卡片明确恢复的请求。金额修改继续带原转账 token，卡片/账单新查询不带；返回修改使用对应流最新 token，不依赖最近查询留下的全局值。保留聊天历史；历史已替换版本禁用。到期清理流并禁用操作。
+- `src/lib/use-finease.ts`：区分新请求、当前流补参和从卡片明确恢复的请求。金额修改继续带原转账 token，卡片/账单新查询不带；返回修改使用对应流最新 token，不依赖最近查询留下的全局值。保留聊天历史；历史已替换版本禁用。到期清理流并禁用操作。
 - `src/app/page.tsx`：按每笔有效转账的最新预览编号启用修改/取消，查询其他 Skill 后仍可从原卡片恢复。BankingTransferPreview 组件及其禁执行逻辑未改。
 - `src/lib/banking-chat-storage.ts`：持久化/校验多个限时业务流和当前焦点，兼容此前单 token 历史。仅 tab 内 sessionStorage，原 100 条/256000 字符/30 分钟历史上限保留。只保存原样 tfm1/tfb1 外层 token，续接最长 5 分钟，刷新不延长。访问码、授权勾选、私有 MCP token 和 TrueForge Session ID 不保存；服务器仍是最终权威。
 - `server/trueforge-skill-adapter.mjs`：保留原跨动作拒绝逻辑，并补充携带其他 Skill token 查询账单的明确拒绝。正常切换不靠服务器丢弃转账 token，而靠网页发送正确的新请求。
@@ -63,7 +63,7 @@
 
 各 Session 的 previousTurnId 连续。没有 action.decide/action.execute 工具。实际 SDK Turn 因工具审批可以多于网页请求；最终均 turn.done/status=done，无悬挂审批。事件中的 Session/token 仅保存 SHA256 摘要，访问码/密钥不进入报告。
 
-服务仍是 TrueForge http://localhost:8790（CLI 0.3.1，SDK 0.2.1），模型 test/deepseek-v4-1-flash；inline Agent 并非 billtest。多 Skill 走 saveflow-token-bridge → 本地 MCP，账单沿用 sv-trial connector。未对外开放服务。
+服务仍是 TrueForge http://localhost:8790（CLI 0.3.1，SDK 0.2.1），模型 test/deepseek-v4-1-flash；inline Agent 并非 billtest。多 Skill 走 finease-token-bridge → 本地 MCP，账单沿用 sv-trial connector。未对外开放服务。
 
 ## 测试与文件清单
 
@@ -73,7 +73,7 @@
 - [上一轮完整转账回归](verification/skill-switch/original-transfer-regression.json) 本轮重跑通过：500→400、刷新、表单、候选、重复请求、取消、聊天确认拒绝、直接执行拒绝、历史保留。
 - 未进行 PostgreSQL、长期负载、Netlify build/Deploy Preview 或资金执行。首次缺年份模型调用失败如上保留，不当作成功；最终七场景均通过。
 
-本轮修改：`src/lib/use-saveflow.ts`、`src/lib/banking-chat-storage.ts`、`src/app/page.tsx`、`server/trueforge-skill-adapter.mjs`、`server/trueforge-bill-adapter.mjs`、`server/trueforge-client.mjs`；新增纯路由模块 `src/lib/trueforge-routing.mjs` 和多业务流状态模块 `src/lib/banking-flow-state.ts`。
+本轮修改：`src/lib/use-finease.ts`、`src/lib/banking-chat-storage.ts`、`src/app/page.tsx`、`server/trueforge-skill-adapter.mjs`、`server/trueforge-bill-adapter.mjs`、`server/trueforge-client.mjs`；新增纯路由模块 `src/lib/trueforge-routing.mjs` 和多业务流状态模块 `src/lib/banking-flow-state.ts`。
 
 测试修改：`tests/trueforge-skills.test.mjs`、`tests/trueforge-preview-client.test.cjs`、`tests/trueforge-bill.test.mjs`。新增 `scripts/verify-skill-switch-ui.mjs`、`scripts/diagnose-skill-switch-before.mjs`；扩展 `scripts/inspect-trueforge-transfer.py` 支持多个只读工具事件，更新 `scripts/verify-trueforge-bill.mjs` 的消息格式。本文和 verification/skill-switch 为交付证据；next-env/tsbuildinfo 延续生成文件状态。
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "datasetId": "saveflow-phase1-fixed-v3",
+  "datasetId": "finease-phase1-fixed-v3",
   "dataType": "synthetic_demo_only",
   "currency": "CNY",
   "snapshotDate": "2026-10-22",

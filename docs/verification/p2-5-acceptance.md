@@ -41,7 +41,7 @@
 | `npm run verify:conversation-ui` | 9 | 0 | 0 | 真实 Chrome + 本地 HTTP + 注入理解结果 + 模拟 Core |
 | `node scripts/verify-conversation-live-ui.mjs` | 5 | 0 | 0 | 真实 Chrome + 完整 `dev:qwen` + 真实配置模型 + 内存模拟 Core |
 
-默认 `npm test` 的 12 项跳过是：10 项未配置 `BANKING_TEST_DATABASE_URL` 的 PostgreSQL 测试，以及 2 项默认未启用的真实模型专项。后两项另以 `SAVEFLOW_VERIFY_LIVE_RECOVERY=true`、`SAVEFLOW_VERIFY_LIVE_BILL=true` 和 `node --env-file=.env.local --test --test-name-pattern='LIVE TrueForge' tests/agent-recovery.test.cjs tests/banking-bill-contract.test.cjs` 实际执行通过，不修改默认运行的跳过统计，也不重复计入其通过数。
+默认 `npm test` 的 12 项跳过是：10 项未配置 `BANKING_TEST_DATABASE_URL` 的 PostgreSQL 测试，以及 2 项默认未启用的真实模型专项。后两项另以 `FINEASE_VERIFY_LIVE_RECOVERY=true`、`FINEASE_VERIFY_LIVE_BILL=true` 和 `node --env-file=.env.local --test --test-name-pattern='LIVE TrueForge' tests/agent-recovery.test.cjs tests/banking-bill-contract.test.cjs` 实际执行通过，不修改默认运行的跳过统计，也不重复计入其通过数。
 
 自然语言 runner 同时修正了验收日期和未配置时的统计：未配置模型时明确 skipped。新增独立子进程回归在无配置的临时目录实际得到 0 通过、0 失败、31 跳过；不把它当成 31 项模型成功。
 

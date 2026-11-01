@@ -10,7 +10,7 @@ const statusText = { available_demo: "可体验", planning_only: "只读规划",
 
 export function BankingSkillOverview({ overview, interactive = true, onSelectExample }: { overview: SkillOverview; interactive?: boolean; onSelectExample: (prompt: string) => void }) {
   const [expanded, setExpanded] = useState<SkillGroupId | null>(null);
-  return <section className={styles.overview} aria-label="SaveFlow Agent 能力总览">
+  return <section className={styles.overview} aria-label="FinEase Agent 能力总览">
     <div className={styles.heading}><div><strong>选择一项金融服务</strong><span>所有能力均基于模拟数据，写操作仍需预览和页面确认。</span></div></div>
     <div className={styles.grid}>{overview.groups.map(group => {
       const Icon = icons[group.id]; const open = expanded === group.id;

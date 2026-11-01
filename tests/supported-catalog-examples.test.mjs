@@ -8,9 +8,9 @@ import { createScenarioSkill, createInMemoryScenarioStore } from '../src/skills/
 import { createBankingCore } from '../src/banking-core/core.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'catalog-example-access', CONTINUATION_TOKEN_SECRET: 'catalog-example-continuation-secret' };
+const env = { FINEASE_ACCESS_CODE: 'catalog-example-access', CONTINUATION_TOKEN_SECRET: 'catalog-example-continuation-secret' };
 const request = (message, ip) => new Request('http://localhost/api/banking-agent', { method: 'POST', headers: {
-  'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': ip,
+  'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': ip,
 }, body: JSON.stringify({ message, consent: true, history: [] }) });
 
 test('catalog budget reminder becomes a valid suggest-only scenario draft', async () => {

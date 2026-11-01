@@ -7,10 +7,10 @@ const path = require('node:path');
 const { createBankingCore } = require('../src/banking-core/core.mjs');
 const { handleBankingAgent } = require('../server/banking-agent.mjs');
 
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_ACCESS_CODE: 'integration-access-code-1234', CONTINUATION_TOKEN_SECRET: 'integration-continuation-secret-1234' };
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_ACCESS_CODE: 'integration-access-code-1234', CONTINUATION_TOKEN_SECRET: 'integration-continuation-secret-1234' };
 let ip = 0;
 const request = body => new Request('http://localhost/api/banking-agent', {
-  method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `integration-${++ip}` }, body: JSON.stringify(body),
+  method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `integration-${++ip}` }, body: JSON.stringify(body),
 });
 const parse = (message, options) => options?.context ? require('./fixtures/continuation-model.mjs').continuationModel(message, options) : ({
   schemaVersion: '1.0.0', action: 'transfer.create',
@@ -30,7 +30,7 @@ for (const adapter of ['local', 'netlify']) test(`real HTTP / ${adapter}: one pr
   assert.notEqual(a.pid, b.pid);
   const before = await (await fetch(`${b.url}/test-state`)).json();
   const post = async (host, body, headers = {}) => {
-    const response = await fetch(`${host.url}/api/banking-agent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `http-${++ip}`, origin: host.url, ...headers }, body: JSON.stringify(body) });
+    const response = await fetch(`${host.url}/api/banking-agent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `http-${++ip}`, origin: host.url, ...headers }, body: JSON.stringify(body) });
     const payload = await response.json();
     assert.ok(payload.requestId);
     assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -70,7 +70,7 @@ for (const adapter of ['local', 'netlify']) test(`real HTTP / ${adapter}: one pr
   assert.equal(result.data.data.month, '2026-08');
   assert.equal(result.data.data.transactionCount, 12);
   assert.equal(result.data.evidence[0].source, 'synthetic_demo_only');
-  assert.equal((await post(b, { message: '查账单' }, { 'x-saveflow-access': 'wrong' })).code, 'UNAUTHORIZED');
+  assert.equal((await post(b, { message: '查账单' }, { 'x-finease-access': 'wrong' })).code, 'UNAUTHORIZED');
   assert.equal((await post(b, { message: '查账单' }, { origin: 'https://foreign.example' })).code, 'FORBIDDEN');
   assert.equal((await post(b, { operationId: preview.data.operationId, confirmed: true })).code, 'INVALID_REQUEST');
   assert.deepEqual(await (await fetch(`${b.url}/test-state`)).json(), before);

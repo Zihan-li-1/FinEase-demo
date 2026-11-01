@@ -1,16 +1,16 @@
-> 历史 MCP 试点/专项记录：文中的句式路由、SAVEFLOW_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
+> 历史 MCP 试点/专项记录：文中的句式路由、FINEASE_TRUEFORGE_* 开关、tfm1/tfb1 续接和部署结果不适用于当前 `/api/banking-agent`。独立适配器及执行桥按原合同保留；当前统一入口与限制以 [Banking Agent API](Banking-Agent-API.md) 为准。
 
-# SaveFlow TrueForge MCP 试点
+# FinEase TrueForge MCP 试点
 
 ## 范围与复用
 
-独立服务 `server/mcp/saveflow-trial.mjs` 提供账单、卡片、转账预览、订阅和理财产品查询。服务启动、工具注册和适配调用均在该文件中；澄清与预览编排提取到共享模块 `server/banking-orchestrator.mjs`。
+独立服务 `server/mcp/finease-trial.mjs` 提供账单、卡片、转账预览、订阅和理财产品查询。服务启动、工具注册和适配调用均在该文件中；澄清与预览编排提取到共享模块 `server/banking-orchestrator.mjs`。
 
 正式入口的调用链为：`server/banking-agent.mjs` → `runBankingConversation` → `dispatchParsedIntent` → `src/agent/runtime.mjs` 的 handlers → Repository；转账使用 `prepareTransferPreview()` 调用 Core 的 `prepare()`，卡片写意图由 `handleCard()` 生成请求后调用相同 Core 的 `prepare()`。
 
 试点直接复用正式入口使用的 **`src/agent/runtime.mjs` 的 `handleBillSummary`**，没有新增统计代码。仓库另有 `src/agent/handlers/bill-handler.ts`，它调用 `src/skills/bill/bill-skill.ts` 的 `summarizeBills`；当前正式服务实际导入的是 `.mjs` runtime，而非该 TypeScript handler。本次不修改或合并两条现有实现。
 
-Mock 入口复用 `src/banking-core/repository.mjs` 的 `createFinancialContext()` 和 `createBankingCore()`，由 Repository 读取原有 `src/data/saveflow_mock_data.json`。固定 owner 为 `USR-DEMO-001`，启动时核对；工具输入没有用户 ID，并拒绝所有额外字段。服务始终使用自己的 Mock Core 和 Repository，不根据 `DATABASE_URL` 切换数据库，不使用正式服务的运行中状态。
+Mock 入口复用 `src/banking-core/repository.mjs` 的 `createFinancialContext()` 和 `createBankingCore()`，由 Repository 读取原有 `src/data/finease_mock_data.json`。固定 owner 为 `USR-DEMO-001`，启动时核对；工具输入没有用户 ID，并拒绝所有额外字段。服务始终使用自己的 Mock Core 和 Repository，不根据 `DATABASE_URL` 切换数据库，不使用正式服务的运行中状态。
 
 本轮按要求改造正式 HTTP 入口以调用共享编排；HTTP 的访问码、来源校验、限流、请求体限制和响应结构保留。账单、卡片、转账 Skill/Core 业务函数、Mock 文件和原 Skill 参数未修改。新增卡片预览的续接凭据，支持后续改金额或换卡。
 
@@ -39,10 +39,10 @@ Mock 入口复用 `src/banking-core/repository.mjs` 的 `createFinancialContext(
 
 ## 文件与依赖
 
-- 新增 `server/mcp/saveflow-trial.mjs`：独立 Streamable HTTP MCP 服务。
+- 新增 `server/mcp/finease-trial.mjs`：独立 Streamable HTTP MCP 服务。
 - 新增 `server/banking-orchestrator.mjs`：从 HTTP 入口提取共享澄清与正式预览编排。
 - 修改 `server/banking-agent.mjs`：传输层校验后调用共享编排。
-- 更新 `tests/saveflow-trial.test.mjs`：通过真实 HTTP 和 MCP SDK 客户端验证工具、统计、输入拦截、业务异常、预览边界及 HTTP/MCP 续接一致性。
+- 更新 `tests/finease-trial.test.mjs`：通过真实 HTTP 和 MCP SDK 客户端验证工具、统计、输入拦截、业务异常、预览边界及 HTTP/MCP 续接一致性。
 - 新增本说明 `docs/trueforge-trial.md`。
 - 更新 `package.json`：启动/测试命令及依赖，并将 MCP 测试加入默认 `npm test`；`package-lock.json` 的依赖变更来自第一轮。
 
@@ -50,20 +50,20 @@ Mock 入口复用 `src/banking-core/repository.mjs` 的 `createFinancialContext(
 
 ## 启动
 
-在 `saveflow-demo` 中执行，Node 要求沿用项目的 `>=22.12.0`：
+在 `finease-demo` 中执行，Node 要求沿用项目的 `>=22.12.0`：
 
 ```powershell
 npm.cmd install
 npm.cmd run mcp:trial
 ```
 
-默认地址：`http://127.0.0.1:3333/mcp`。也可直接执行 `node server/mcp/saveflow-trial.mjs`。按 Ctrl+C 停止。
+默认地址：`http://127.0.0.1:3333/mcp`。也可直接执行 `node server/mcp/finease-trial.mjs`。按 Ctrl+C 停止。
 
 如需从 Docker 中的 TrueForge 访问 Windows 主机，或从其他主机访问，启动前指定监听地址：
 
 ```powershell
-$env:SAVEFLOW_MCP_HOST = '0.0.0.0'
-$env:SAVEFLOW_MCP_PORT = '3333'
+$env:FINEASE_MCP_HOST = '0.0.0.0'
+$env:FINEASE_MCP_PORT = '3333'
 npm.cmd run mcp:trial
 ```
 
@@ -79,14 +79,14 @@ npm.cmd run mcp:trial
 npm.cmd run test:mcp:trial
 ```
 
-手动验证：保持服务运行，在 `saveflow-demo` 的另一个 PowerShell 终端执行。这个客户端会先完成 MCP 初始化，再发现和调用工具。
+手动验证：保持服务运行，在 `finease-demo` 的另一个 PowerShell 终端执行。这个客户端会先完成 MCP 初始化，再发现和调用工具。
 
 ```powershell
 $OutputEncoding = [System.Text.UTF8Encoding]::new()
 @'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-const client = new Client({ name: 'saveflow-trial-check', version: '0.1.0' });
+const client = new Client({ name: 'finease-trial-check', version: '0.1.0' });
 try {
   await client.connect(new StreamableHTTPClientTransport(new URL('http://127.0.0.1:3333/mcp')));
   console.log(JSON.stringify(await client.listTools(), null, 2));
@@ -116,7 +116,7 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new()
 @'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-const client = new Client({ name: 'saveflow-preview-check', version: '0.2.0' });
+const client = new Client({ name: 'finease-preview-check', version: '0.2.0' });
 const call = async (name, args = {}) => {
   const result = await client.callTool({ name, arguments: args });
   const output = result.structuredContent ?? result.content;
@@ -150,13 +150,13 @@ try {
 
 | 配置 | 值 |
 | --- | --- |
-| Name | `saveflow-trial` |
+| Name | `finease-trial` |
 | Server URL | `http://127.0.0.1:3333/mcp`（TrueForge 后端与服务同机） |
 | Transport（若有选择项） | `Streamable HTTP` |
 | Authentication | `No auth` |
 | Headers | 留空 |
 
-地址必须是 **TrueForge 后端可访问**的地址。若 TrueForge 后端运行在 Docker Desktop，启动 MCP 时使用 `SAVEFLOW_MCP_HOST=0.0.0.0`，URL 填 `http://host.docker.internal:3333/mcp`；其他主机或托管实例则使用实际可达的主机地址或代理 URL，并保留 `/mcp` 路径。仅浏览器与服务同机不足以保证后端可访问。
+地址必须是 **TrueForge 后端可访问**的地址。若 TrueForge 后端运行在 Docker Desktop，启动 MCP 时使用 `FINEASE_MCP_HOST=0.0.0.0`，URL 填 `http://host.docker.internal:3333/mcp`；其他主机或托管实例则使用实际可达的主机地址或代理 URL，并保留 `/mcp` 路径。仅浏览器与服务同机不足以保证后端可访问。
 
 保存后，在 TrueForge 的试点 Agent 中选择该 connector，重新连接以刷新工具列表，确认发现上表的 8 个工具且没有确认/执行工具。发送“查询 2026 年 8 月账单”，预期工具参数为 `{"month":"2026-08"}`；只说“查账单”时应由 Agent 询问月份，若工具收到缺月调用也会返回明确缺参结果。卡片或转账需要澄清时，Agent 向用户展示候选/问题，并在同名工具内传回原凭据与用户回答；返回预览后明确告知尚未执行。连接表单不填写 command/args；本实现提供 HTTP URL。
 

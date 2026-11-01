@@ -27,15 +27,15 @@ async function bodyJson(request) {
 /** Private, single synthetic-user demo. Auth establishes the Mock identity; body cannot set it.
  * In-memory state is NOT a bank ledger and is NOT shared between serverless instances. */
 export async function handleBanking(request, { env = process.env, core: providedCore } = {}) {
-  const legacy = new URL(request.url).pathname === '/api/saveflow';
+  const legacy = new URL(request.url).pathname === '/api/finease';
   const requestId = legacy ? request.headers.get('X-Request-ID') || crypto.randomUUID() : crypto.randomUUID();
-  const reply = (body, status = 200) => Response.json(legacy ? { requestId, ...body } : { schema_version: WIRE_VERSION, request_id: requestId, ...toWire(body) }, { status, headers: { 'Cache-Control': 'no-store', 'X-Saveflow-Data-Source': 'synthetic_demo_only' } });
+  const reply = (body, status = 200) => Response.json(legacy ? { requestId, ...body } : { schema_version: WIRE_VERSION, request_id: requestId, ...toWire(body) }, { status, headers: { 'Cache-Control': 'no-store', 'X-FinEase-Data-Source': 'synthetic_demo_only' } });
   try {
     const core = providedCore ?? await getConfiguredBankingCore(env);
     if (request.method !== 'POST') return reply({ code: 'METHOD_NOT_ALLOWED', message: '仅支持 POST' }, 405);
-    const expected = env.SAVEFLOW_ACCESS_CODE;
+    const expected = env.FINEASE_ACCESS_CODE;
     if (!expected || expected.length < 16) return reply({ code: 'ACCESS_NOT_CONFIGURED', message: '请配置服务端演示访问码' }, 503);
-    const access = request.headers.get('X-Saveflow-Access') ?? '';
+    const access = request.headers.get('X-FinEase-Access') ?? '';
     if (Buffer.byteLength(access) !== Buffer.byteLength(expected) || !timingSafeEqual(Buffer.from(access), Buffer.from(expected))) throw new BankingError('UNAUTHORIZED', '演示访问码无效');
     const origin = request.headers.get('Origin');
     if (origin && origin !== new URL(request.url).origin) throw new BankingError('FORBIDDEN', '不允许跨来源请求');

@@ -18,7 +18,7 @@ for (const [i, definition] of languageCases.entries()) test(`wiring only ${i + 1
 });
 
 test('real-model verifier reports missing configuration as skipped, never passed or a mocked model run', async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'saveflow-no-model-'));
+  const directory = await mkdtemp(path.join(tmpdir(), 'finease-no-model-'));
   const env = { ...process.env };
   delete env.TRUEFORGE_BASE_URL; delete env.TRUEFORGE_MODEL;
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('../scripts/verify-natural-language.mjs', import.meta.url))], {

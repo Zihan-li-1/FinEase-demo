@@ -8,9 +8,9 @@ import { createBankingCore } from '../src/banking-core/core.mjs';
 import { savingsAdviceFixture } from '../tests/fixtures/savings-runtime.mjs';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const base = process.env.SAVEFLOW_VERIFY_URL || 'http://127.0.0.1:4300';
+const base = process.env.FINEASE_VERIFY_URL || 'http://127.0.0.1:4300';
 const output = 'docs/verification/savings-cards-ui';
-const env = { SAVEFLOW_ACCESS_CODE: 'ui-fixture-access-code', CONTINUATION_TOKEN_SECRET: 'ui-fixture-secret-for-test-only' };
+const env = { FINEASE_ACCESS_CODE: 'ui-fixture-access-code', CONTINUATION_TOKEN_SECRET: 'ui-fixture-secret-for-test-only' };
 const core = createBankingCore();
 const forbidden = async () => { throw new Error('UI verification must not perform financial writes'); };
 const options = { env, now: () => Date.parse('2026-10-22T12:00:00+08:00'),
@@ -22,7 +22,7 @@ const options = { env, now: () => Date.parse('2026-10-22T12:00:00+08:00'),
 let serial = 0;
 async function call(body) {
   const response = await handleBankingAgent(new Request(`${base}/api/banking-agent`, { method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, 'X-Forwarded-For': `ui-fixture-${++serial}` },
+    headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': env.FINEASE_ACCESS_CODE, 'X-Forwarded-For': `ui-fixture-${++serial}` },
     body: JSON.stringify({ history: [], consent: true, ...body }),
   }), options);
   const payload = await response.json();
@@ -42,7 +42,7 @@ try {
     try {
       await context.addInitScript(({ plan }) => {
         const now = Date.now();
-        sessionStorage.setItem('saveflow.banking-chat.v1', JSON.stringify({ version: 2, savedAt: now, continuationExpiresAt: now,
+        sessionStorage.setItem('finease.banking-chat.v1', JSON.stringify({ version: 2, savedAt: now, continuationExpiresAt: now,
           continuation: null, flows: {}, focusedFlowId: null, messages: [{ id: 1, role: 'agent', text: '储蓄计划已核算', kind: 'banking_savings_plan', banking: plan }] }));
       }, { plan });
       const page = await context.newPage();

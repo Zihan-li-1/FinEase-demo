@@ -48,7 +48,7 @@ flowchart LR
 | GET | `/health` | 进程存活，不初始化数据库 |
 | GET | `/ready` | Repository 和五个 Adapter 可调用性 |
 
-除 health 外复用现有演示访问码语义：`X-Saveflow-Access` 必须匹配服务端 `SAVEFLOW_ACCESS_CODE`（至少 16 字符），校验同源；客户端不能指定 user_id。当前仍为私有单模拟用户，不是生产多租户鉴权。请求体最多 16KB。错误使用 401/403/404/409/422/500/502/503/504，不全部包装 HTTP 200。
+除 health 外复用现有演示访问码语义：`X-FinEase-Access` 必须匹配服务端 `FINEASE_ACCESS_CODE`（至少 16 字符），校验同源；客户端不能指定 user_id。当前仍为私有单模拟用户，不是生产多租户鉴权。请求体最多 16KB。错误使用 401/403/404/409/422/500/502/503/504，不全部包装 HTTP 200。
 
 统一 envelope：`{request_id,run_id,state,data,error}`。SkillResult：`{status,data,user_message,error,retryable,metadata,audit}`。输出、日志和审计不返回密钥及完整账号；原始凭证/长账号不能作为参数传入。状态日志只记录状态、版本、run_id 和时间。
 
@@ -102,7 +102,7 @@ READ_ONLY 跳过确认；card 操作提案为 WRITE，scenario（事件复核可
 
 ## 启动与验证
 
-在 `Github-demo/saveflow-demo` 目录运行。使用现有 `.env.local` 配置服务端访问码；无需配置 LLM 密钥。若使用 PostgreSQL，设置 DATABASE_URL 后运行原迁移命令。
+在 `Github-demo/finease-demo` 目录运行。使用现有 `.env.local` 配置服务端访问码；无需配置 LLM 密钥。若使用 PostgreSQL，设置 DATABASE_URL 后运行原迁移命令。
 
 ```powershell
 # 本机 Node 不在默认 PATH 时：
@@ -111,7 +111,7 @@ npm.cmd run db:migrate # 仅在已配置 DATABASE_URL 时需要
 npm.cmd run dev
 # 另一个终端，替换为自己的服务端访问码，不提交到仓库：
 Invoke-RestMethod http://localhost:3000/health
-Invoke-RestMethod http://localhost:3000/ready -Headers @{'X-Saveflow-Access'=$env:SAVEFLOW_ACCESS_CODE}
+Invoke-RestMethod http://localhost:3000/ready -Headers @{'X-FinEase-Access'=$env:FINEASE_ACCESS_CODE}
 npm.cmd run test:agent-framework
 npm.cmd test
 node scripts/verify-agent-framework.mjs

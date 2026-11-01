@@ -10,7 +10,7 @@
 
 ## 五层核验
 
-1. `use-saveflow.ts` 直接发送当前 text，只有 history 截取最近 8 条及每条 2000 字符；当前用户输入未被替换或截断。续接凭据来自当前草稿或显式恢复的流程；服务端验证签名，并允许理解边界识别用户换任务。本次原网页实测成功，测试也断言新请求不附加 continuationToken。
+1. `use-finease.ts` 直接发送当前 text，只有 history 截取最近 8 条及每条 2000 字符；当前用户输入未被替换或截断。续接凭据来自当前草稿或显式恢复的流程；服务端验证签名，并允许理解边界识别用户换任务。本次原网页实测成功，测试也断言新请求不附加 continuationToken。
 2. `trueforge-banking-runtime.mjs` 已把 `understandingContext({now,timezone,financialContext})` 放入 `calendar`。真实运行的模型收到 currentDate=2026-10-22、Asia/Shanghai 及财务覆盖上下文，正确理解用户要求的四句话；没有修改模型提示词或增加上下文字段、句式解析器。
 3. `validate-parsed-intent.mjs` 接受合法 period，严格验证日期、时区、最长 366 天及 month/period 互斥；`merge-intent.mjs` 已将 period 视为完整时间槽位。无需修改这两处。
 4. `banking-orchestrator.mjs` 将验证后的意图交给 `handleBillSummary()`；Repository 接收到正确过滤器，按交易本地日期包含起止全天。没有伪造交易或改变 Core 的确认、执行和权限边界。
@@ -53,7 +53,7 @@
 | `npm run lint` | 通过。 |
 | `npm run build` | 通过，生成静态生产构建。 |
 | `npm run verify:natural-language` | 使用已配置的真实 TrueForge，31/31 通过；不是模型桩。 |
-| `$env:SAVEFLOW_VERIFY_LIVE_BILL='true'; node --env-file=.env.local --test tests/banking-bill-contract.test.cjs` | 8/8 通过，无跳过；最后一项为真实模型→真实 HTTP→真实客户端→实际卡片渲染，使用未修改 seed。 |
+| `$env:FINEASE_VERIFY_LIVE_BILL='true'; node --env-file=.env.local --test tests/banking-bill-contract.test.cjs` | 8/8 通过，无跳过；最后一项为真实模型→真实 HTTP→真实客户端→实际卡片渲染，使用未修改 seed。 |
 
 真实模型为本机已配置的 `test/deepseek-v4-1-flash`。自然语言 harness 为其他业务场景补充合成边界记录，因此“9 月原始缺数据”的验收使用独立的原始 seed 全链路测试和原网页实测。
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 import { createLowBalanceCore as createBankingCore } from './fixtures/low-balance-core.mjs';
 import { OperationStore } from '../src/banking-core/operation-store.mjs';
 import { getLegacyContext, getLegacyContextAsync, legacyRequest } from '../src/banking-core/legacy-adapter.mjs';

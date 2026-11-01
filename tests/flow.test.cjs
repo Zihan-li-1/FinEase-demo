@@ -58,9 +58,9 @@ test('consent, confirmation, action whitelist and risk rejection are enforced', 
   assert.equal((await mockRequest('analyze', { goal: 'goal', consent: true }, '')).totalExpenseFen > 0, true);
 });
 
-process.env.NEXT_PUBLIC_SAVEFLOW_API_MODE = 'http';
-process.env.NEXT_PUBLIC_SAVEFLOW_API_BASE_URL = 'https://sandbox.example.com';
-process.env.NEXT_PUBLIC_SAVEFLOW_API_TIMEOUT_MS = '500';
+process.env.NEXT_PUBLIC_FINEASE_API_MODE = 'http';
+process.env.NEXT_PUBLIC_FINEASE_API_BASE_URL = 'https://sandbox.example.com';
+process.env.NEXT_PUBLIC_FINEASE_API_TIMEOUT_MS = '500';
 const { request } = require('../src/lib/api/client.ts');
 test('HTTP: validates response, sends idempotency key, rejects mismatched receipts, never retries writes', async () => {
   const original = global.fetch;
@@ -68,7 +68,7 @@ test('HTTP: validates response, sends idempotency key, rejects mismatched receip
   try {
     global.fetch = async (url, init) => {
       count++;
-      assert.equal(url, 'https://sandbox.example.com/api/saveflow');
+      assert.equal(url, 'https://sandbox.example.com/api/finease');
       assert.equal(init.headers['Idempotency-Key'], 'http-1');
       assert.equal(init.credentials, 'include');
       return Response.json({ code: 'OK', requestId: 'r1', data: { operationId: 'other', status: 'succeeded', message: 'ok' } });

@@ -9,12 +9,12 @@ import { createBankingCore } from '../src/banking-core/core.mjs';
 import { lowBalanceSource } from './fixtures/low-balance-core.mjs';
 import { handleBankingAgent } from '../server/banking-agent.mjs';
 import { buildParsedIntent } from '../src/agent/clarification/merge-intent.mjs';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
-import { startTrialMcpServer } from '../server/mcp/saveflow-trial.mjs';
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
+import { startTrialMcpServer } from '../server/mcp/finease-trial.mjs';
 
 async function withClient(repository, verify, options = {}) {
   const server = startTrialMcpServer({ host: '127.0.0.1', port: 0, repository, parseIntent: continuationModel, ...options });
-  const client = new Client({ name: 'saveflow-trial-test', version: '0.1.0' });
+  const client = new Client({ name: 'finease-trial-test', version: '0.1.0' });
   try {
     await once(server, 'listening');
     const url = new URL(`http://127.0.0.1:${server.address().port}/mcp`);
@@ -31,7 +31,7 @@ const callTool = async (client, name, args = {}) => {
   const result = await client.callTool({ name, arguments: args });
   return result.structuredContent ?? { ok: false, error: { code: 'SCHEMA_ERROR', message: result.content[0].text } };
 };
-const env = { SAVEFLOW_BANKING_RUNTIME: 'legacy-qwen', SAVEFLOW_ACCESS_CODE: 'trial-test-access-1234', CONTINUATION_TOKEN_SECRET: 'trial-test-continuation-secret' };
+const env = { FINEASE_BANKING_RUNTIME: 'legacy-qwen', FINEASE_ACCESS_CODE: 'trial-test-access-1234', CONTINUATION_TOKEN_SECRET: 'trial-test-continuation-secret' };
 
 async function withCoreClient(verify, { source = lowBalanceSource(), now = () => 1000 } = {}) {
   const core = createBankingCore({ source, now });
@@ -248,7 +248,7 @@ test('HTTP and MCP reuse clarification rules but cannot exchange session-bound c
     let requestNumber = 0;
     const sendHttp = async (body, expectedStatus = 200) => {
       const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', {
-        method: 'POST', headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `mcp-parity-${++requestNumber}` },
+        method: 'POST', headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `mcp-parity-${++requestNumber}` },
         body: JSON.stringify(body),
       }), { env, core, now: () => 1000, parseIntent: async (message, options) => options.context ? continuationModel(message, options) : buildParsedIntent('transfer.create', { payee_ref: '张三', amount: { amount_minor: 50000, currency: 'CNY' } }) });
       assert.equal(response.status, expectedStatus);

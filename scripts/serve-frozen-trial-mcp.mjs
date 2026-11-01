@@ -1,7 +1,7 @@
 // Explicit local test fixture only. Does not modify the seed file or call Core.execute.
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 import { createBankingCore } from '../src/banking-core/core.mjs';
-import { startTrialMcpServer } from '../server/mcp/saveflow-trial.mjs';
+import { startTrialMcpServer } from '../server/mcp/finease-trial.mjs';
 const source = structuredClone(seed);
 source.datasetId += '-frozen-test';
 source.cards.find(c => c.id === 'CARD-ENT').status = 'frozen';

@@ -19,7 +19,7 @@ const descriptions = [
 ];
 const report = { mode: 'real_trueforge', timezone: 'Asia/Shanghai', recordedAt: new Date().toISOString(), syntheticDataOnly: true,
   cases: descriptions.map((message, index) => ({ id: index + 1, message, status: 'unverified' })) };
-const missing = ['TRUEFORGE_BASE_URL', 'TRUEFORGE_MODEL', 'SAVEFLOW_ACCESS_CODE', 'CONTINUATION_TOKEN_SECRET'].filter(key => !process.env[key]);
+const missing = ['TRUEFORGE_BASE_URL', 'TRUEFORGE_MODEL', 'FINEASE_ACCESS_CODE', 'CONTINUATION_TOKEN_SECRET'].filter(key => !process.env[key]);
 if (missing.length) {
   report.reason = `缺少 ${missing.join(', ')}；未调用真实模型。`;
   process.exitCode = 2;
@@ -30,7 +30,7 @@ if (missing.length) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
   }).outputText, filename);
   const { askBankingAgent } = require('../src/lib/banking-agent-client.ts');
-  const env = { ...process.env, SAVEFLOW_BANKING_RUNTIME: 'trueforge' };
+  const env = { ...process.env, FINEASE_BANKING_RUNTIME: 'trueforge' };
   let clock = Date.now(); const now = () => clock;
   const actual = createBankingCore({ now }); const calls = { prepares: 0, decisions: 0, executions: 0 };
   const core = { ...actual, prepare: request => { calls.prepares++; return actual.prepare(request); },
@@ -47,7 +47,7 @@ if (missing.length) {
       return raw;
     } };
     const response = await handleBankingAgent(new Request('http://localhost/api/banking-agent', { method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-saveflow-access': env.SAVEFLOW_ACCESS_CODE, 'x-forwarded-for': `live-route-${++serial}` }, body: JSON.stringify(body) }),
+      headers: { 'content-type': 'application/json', 'x-finease-access': env.FINEASE_ACCESS_CODE, 'x-forwarded-for': `live-route-${++serial}` }, body: JSON.stringify(body) }),
     { env, core, now, conversationHost: host, fetchImpl: nativeFetch, conversationRuntimeClient: router });
     return { response, payload: await response.clone().json(), routeProposal };
   };
@@ -74,7 +74,7 @@ if (missing.length) {
         if (entry.id === 19) {
           assert.ok(result.payload.data?.plan);
           globalThis.fetch = async (url, init) => url === '/api/banking-agent' ? result.response.clone() : nativeFetch(url, init);
-          try { const accepted = await askBankingAgent(body, env.SAVEFLOW_ACCESS_CODE, new AbortController().signal); assert.ok(accepted.plan); }
+          try { const accepted = await askBankingAgent(body, env.FINEASE_ACCESS_CODE, new AbortController().signal); assert.ok(accepted.plan); }
           finally { globalThis.fetch = nativeFetch; }
         }
       } else if ([10, 13, 14, 17, 18].includes(entry.id)) {

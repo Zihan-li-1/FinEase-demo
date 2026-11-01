@@ -88,7 +88,7 @@ function errorData(code, message) {
 // Status only: never include values, lengths, hashes or request headers in logs.
 export function bankingAuthConfigStatus(env = process.env) {
   const state = value => typeof value !== 'string' || !value ? 'missing' : value.length < 16 ? 'invalid' : 'configured';
-  return { accessCode: state(env.SAVEFLOW_ACCESS_CODE), continuationSecret: state(env.CONTINUATION_TOKEN_SECRET) };
+  return { accessCode: state(env.FINEASE_ACCESS_CODE), continuationSecret: state(env.CONTINUATION_TOKEN_SECRET) };
 }
 
 /** One configured understanding boundary -> validated intent -> Skill -> Core. */
@@ -126,10 +126,10 @@ export async function handleBankingAgent(
     const origin = request.headers.get('origin');
     if (origin && origin !== new URL(request.url).origin) return reply(403, 'FORBIDDEN', '不允许跨来源请求');
 
-    const expected = env.SAVEFLOW_ACCESS_CODE;
+    const expected = env.FINEASE_ACCESS_CODE;
     const configStatus = bankingAuthConfigStatus(env);
     if (configStatus.accessCode !== 'configured') return authFailure(`ACCESS_CONFIG_${configStatus.accessCode.toUpperCase()}`, 503, 'SERVICE_UNAVAILABLE', '服务暂时不可用，请联系演示维护者。');
-    const supplied = Buffer.from(request.headers.get('x-saveflow-access') || '');
+    const supplied = Buffer.from(request.headers.get('x-finease-access') || '');
     const expectedBytes = Buffer.from(expected);
     if (supplied.length !== expectedBytes.length || !timingSafeEqual(supplied, expectedBytes)) return authFailure(supplied.length ? 'ACCESS_MISMATCH' : 'ACCESS_HEADER_MISSING', 401, 'UNAUTHORIZED', '访问验证失败，请检查演示访问码后重试。');
     // Configuration details are only available after authentication succeeds.
@@ -157,7 +157,7 @@ export async function handleBankingAgent(
     if ((body?.planning === true || body?.taskMode === 'plan') && (body?.continuationToken || body?.taskId || body?.choice || body?.planInputs || body?.wealthInputs)) throw Object.assign(new Error('只读规划必须作为独立任务发起'), { code: 'INVALID_REQUEST', status: 400 });
     diagnostics.emit('agent_request_received', { mode: 'banking', hasContinuation: typeof body?.continuationToken === 'string' });
     style = validateReplyStyle(body?.replyStyle);
-    const implementation = env.SAVEFLOW_BANKING_RUNTIME || 'trueforge';
+    const implementation = env.FINEASE_BANKING_RUNTIME || 'trueforge';
     if (!['trueforge', 'legacy-qwen'].includes(implementation)) throw Object.assign(new Error('Runtime configuration'), { code: 'BANKING_RUNTIME_CONFIG_ERROR', status: 503 });
     // Dependency injection is for tests/hosts, never supplied by the request.
     const explicitCancel = typeof body?.message === 'string' && /^(?:取消|取消(?:本次)?(?:转账|操作)|不用了)[。！!]?$/.test(body.message.trim());

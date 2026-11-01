@@ -11,7 +11,7 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true }).cat
 const access = 'conversation-ui-access-1234';
 const report = { testDate: '2026-10-26', understanding: 'injected offline fixture; not real model', transport: 'real HTTP', browser: 'Chrome headless', cases: [], pageErrors: 0 };
 const directory = 'docs/verification/conversation-ui';
-const key = 'saveflow.banking-chat.v1';
+const key = 'finease.banking-chat.v1';
 const contexts = [];
 async function fresh() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } }); contexts.push(context);
@@ -100,7 +100,7 @@ try {
 
   assert.notEqual(first.data.conversation.token, original.data.conversation.token);
   const cross = await b.evaluate(async ({ url, access, first, current }) => {
-    const response = await fetch(`${url}/api/banking-agent`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': access },
+    const response = await fetch(`${url}/api/banking-agent`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': access },
       body: JSON.stringify({ conversationToken: current.token, taskMode: 'continue', taskId: first.taskId, continuationToken: first.continuationToken, message: '给张三转100元' }) });
     return (await response.json()).code;
   }, { url, access, first: { taskId: selected.data.conversation.currentTask.taskId, continuationToken: selected.data.continuationToken }, current: refreshed.data.conversation });

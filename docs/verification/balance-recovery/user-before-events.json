@@ -18,7 +18,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-token-bridge",
+          "name": "finease-token-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -71,8 +71,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -198,8 +198,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -327,8 +327,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -414,7 +414,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-token-bridge",
+          "name": "finease-token-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -467,8 +467,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -594,8 +594,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -723,8 +723,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {

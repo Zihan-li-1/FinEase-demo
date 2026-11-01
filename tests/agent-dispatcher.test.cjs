@@ -114,7 +114,7 @@ test('handler errors become skill_error and never fall through to the other hand
 
 test('real bill handler reads the shared repository and reflects changed transactions', async () => {
   const { createFinancialContext } = await import('../src/banking-core/repository.mjs');
-  const seed = JSON.parse(readFileSync(require.resolve('../src/data/saveflow_mock_data.json'), 'utf8'));
+  const seed = JSON.parse(readFileSync(require.resolve('../src/data/finease_mock_data.json'), 'utf8'));
   const first = await handleBillSummary(readyBill, createFinancialContext(seed).repository);
   assert.equal(first.ok, true);
   assert.equal(first.kind, 'bill_result');

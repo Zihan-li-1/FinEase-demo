@@ -28,7 +28,7 @@ async function pageForGoal(goal = '我要在2026年12月31日前存够一万元'
   await context.route('**/*', route => new URL(route.request().url()).origin === url ? route.continue() : route.abort());
   const page = await context.newPage(); page.on('pageerror', () => report.pageErrors++);
   await page.goto(url);
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
   const pending = await request(page, async () => { await page.locator('.composer input').fill(goal); await page.locator('.composer input').press('Enter'); });
   assert.equal(pending.body.data.status, 'needs_plan_inputs');

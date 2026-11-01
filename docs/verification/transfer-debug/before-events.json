@@ -18,7 +18,7 @@
       },
       "mcpServers": [
         {
-          "name": "saveflow-token-bridge",
+          "name": "finease-token-bridge",
           "enable_tools": [
             "transfer_preview"
           ],
@@ -72,8 +72,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {
@@ -144,7 +144,7 @@
               ],
               "expiresAt": "2026-10-17T09:04:59.064Z",
               "previewHash": "8bbab3f2733940ac4dd14f306841ea4328d68236ee8f5e10a7b995490da1d4f5",
-              "contextSnapshotId": "saveflow-phase1-fixed-v1:0"
+              "contextSnapshotId": "finease-phase1-fixed-v1:0"
             },
             "risk": {
               "allowed": true,
@@ -229,8 +229,8 @@
               "tool_info": {
                 "type": "mcp",
                 "name": "transfer_preview",
-                "server_id": "saveflow-token-bridge",
-                "server_name": "saveflow-token-bridge"
+                "server_id": "finease-token-bridge",
+                "server_name": "finease-token-bridge"
               },
               "name": "transfer_preview",
               "arguments": {

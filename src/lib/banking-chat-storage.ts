@@ -1,10 +1,10 @@
-import type { Message } from "./use-saveflow";
+import type { Message } from "./use-finease";
 import { bankingContinuationToken, type BankingFlows } from "./banking-flow-state";
 import { validBankingConversation } from './banking-conversation-contract';
 import { PARSED_INTENT_ACTIONS } from '../agent/parsed-intent';
 import { validSkillOverview } from './banking-agent-client';
 
-export const bankingChatKey = "saveflow.banking-chat.v1";
+export const bankingChatKey = "finease.banking-chat.v1";
 const retentionMs = 30 * 60 * 1000;
 const continuationMs = 5 * 60 * 1000;
 const planContinuationMs = 30 * 60 * 1000;

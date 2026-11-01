@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- node:test CJS harness */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const env = { DASHSCOPE_API_KEY: 'test-provider-secret', SAVEFLOW_ACCESS_CODE: 'test-access-code-123456' };
+const env = { DASHSCOPE_API_KEY: 'test-provider-secret', FINEASE_ACCESS_CODE: 'test-access-code-123456' };
 const decision = { intent: 'create_plan', reply: '建议如下', targetAmountFen: null, monthlySavingFen: 200000, months: null };
-function request(body = { message: '每月存2000元', consent: true, history: [] }, access = env.SAVEFLOW_ACCESS_CODE) {
-  return new Request('https://demo.example/api/agent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': access, Origin: 'https://demo.example' }, body: JSON.stringify(body) });
+function request(body = { message: '每月存2000元', consent: true, history: [] }, access = env.FINEASE_ACCESS_CODE) {
+  return new Request('https://demo.example/api/agent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': access, Origin: 'https://demo.example' }, body: JSON.stringify(body) });
 }
 const upstream = (value = decision, finish = 'stop') => Response.json({ choices: [{ finish_reason: finish, message: { content: JSON.stringify(value) } }], usage: { prompt_tokens: 100, completion_tokens: 50 } });
 

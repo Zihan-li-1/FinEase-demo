@@ -18,9 +18,9 @@ test('real chat card: start, radio answers, navigation, cancellation, trusted re
   const { createRiskAssessmentStore } = await import('../server/risk-assessment-store.mjs');
   const { createBankingCore } = await import('../src/banking-core/core.mjs');
   const { handleBankingAgent } = await import('../server/banking-agent.mjs');
-  const directory = await mkdtemp(path.join(tmpdir(), 'saveflow-risk-ui-'));
-  const env = { SAVEFLOW_ACCESS_CODE: 'risk-ui-access-123456', CONTINUATION_TOKEN_SECRET: 'risk-ui-secret-123456' };
-  const store = createRiskAssessmentStore({ scope: 'ui-test', env: { ...env, SAVEFLOW_DEMO_DATA_DIR: directory } });
+  const directory = await mkdtemp(path.join(tmpdir(), 'finease-risk-ui-'));
+  const env = { FINEASE_ACCESS_CODE: 'risk-ui-access-123456', CONTINUATION_TOKEN_SECRET: 'risk-ui-secret-123456' };
+  const store = createRiskAssessmentStore({ scope: 'ui-test', env: { ...env, FINEASE_DEMO_DATA_DIR: directory } });
   const core = createBankingCore({ riskStore: store });
   const oldFetch = global.fetch;
   let sequence = 0, submits = 0;
@@ -32,7 +32,7 @@ test('real chat card: start, radio answers, navigation, cancellation, trusted re
   };
   let renderer;
   t.after(async () => { if (renderer) await act(async () => renderer.unmount()); global.fetch = oldFetch; global.IS_REACT_ACT_ENVIRONMENT = false; });
-  await act(async () => { renderer = create(React.createElement(BankingWealthResult, { accessCode: env.SAVEFLOW_ACCESS_CODE, data: { status: 'wealth_result', data: { kind: 'questionnaire_required' } } })); });
+  await act(async () => { renderer = create(React.createElement(BankingWealthResult, { accessCode: env.FINEASE_ACCESS_CODE, data: { status: 'wealth_result', data: { kind: 'questionnaire_required' } } })); });
   const button = text => renderer.root.findAllByType('button').find(b => b.children.includes(text));
   const click = async text => { const b = button(text); assert.ok(b, text); assert.equal(!!b.props.disabled, false, text); await act(async () => b.props.onClick()); };
   await click('开始模拟测评');

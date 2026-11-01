@@ -4,7 +4,7 @@ import { handleAgent } from '../server/qwen.mjs';
 
 nextEnv.loadEnvConfig(process.cwd(), true, { info() {}, error() {} });
 const key = process.env.DASHSCOPE_API_KEY?.trim();
-const access = process.env.SAVEFLOW_ACCESS_CODE || '';
+const access = process.env.FINEASE_ACCESS_CODE || '';
 const checks = {
   apiKeyConfigured: Boolean(key && !key.includes('你的') && !key.includes('这里')),
   accessCodeValid: access.length >= 16 && access.length <= 128 && /^[\x21-\x7e]+$/.test(access),
@@ -19,7 +19,7 @@ let providerStatus = null;
 let networkCode = null;
 const request = new Request('http://localhost/api/agent', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'X-Saveflow-Access': access, Origin: 'http://localhost' },
+  headers: { 'Content-Type': 'application/json', 'X-FinEase-Access': access, Origin: 'http://localhost' },
   body: JSON.stringify({ message: '我想每月存2000元。', history: [], consent: true }),
 });
 const started = Date.now();

@@ -10,7 +10,7 @@ import { createBankingCore } from '../../src/banking-core/core.mjs';
 import { buildParsedIntent } from '../../src/agent/clarification/merge-intent.mjs';
 import { continuationModel } from './continuation-model.mjs';
 
-const env = { SAVEFLOW_ACCESS_CODE: 'conversation-ui-access-1234', CONTINUATION_TOKEN_SECRET: 'conversation-ui-token-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'conversation-ui-access-1234', CONTINUATION_TOKEN_SECRET: 'conversation-ui-token-secret-1234' };
 let clock = Date.now();
 const core = createBankingCore({ now: () => clock });
 const counts = { prepare: 0, decide: 0, execute: 0, sync: 0, model: 0 };

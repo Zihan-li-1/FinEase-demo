@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { Message } from "@/lib/use-saveflow";
-import { saveflowMock } from "@/lib/saveflow-mock";
+import type { Message } from "@/lib/use-finease";
+import { fineaseMock } from "@/lib/finease-mock";
 import { currentSubscriptions } from "@/lib/subscription-overview";
 
 const money = (fen: number) => `¥${(fen / 100).toFixed(2)}`;
 
 export function BankingSubscriptionOverview({ messages }: { messages: Message[] }) {
   const [expanded, setExpanded] = useState(false);
-  const subscriptions = currentSubscriptions(saveflowMock.subscriptions, messages);
+  const subscriptions = currentSubscriptions(fineaseMock.subscriptions, messages);
   const active = subscriptions.filter(item => item.status === "active");
   const unused = active.filter(item => item.isPotentiallyUnused);
   return <div className="activity-card subscription-overview">

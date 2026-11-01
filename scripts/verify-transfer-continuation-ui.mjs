@@ -12,7 +12,7 @@ page.on('pageerror', error => report.browserErrors.push(error.message));
 let bankingRequests = 0;
 page.on('request', r => { if (r.url().endsWith('/api/banking-agent')) bankingRequests++; });
 async function authorize() {
-  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.SAVEFLOW_ACCESS_CODE);
+  await page.getByLabel('演示访问码', { exact: true }).fill(process.env.FINEASE_ACCESS_CODE);
   await page.locator('.consent-control input').check();
 }
 async function request(message, action) {
@@ -57,7 +57,7 @@ try {
     await page.getByRole('button', { name: '生成新预览', exact: true }).click();
   });
   assert.equal(third.data.preview.exactEffects[0].amountFen, 35000); assert.equal(third.data.preview.exactEffects[0].payeeId, original.payeeId);
-  const replay = await page.request.post('/api/banking-agent', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE }, data: { message: '改成转账350元', continuationToken: second.data.continuationToken, consent: true, history: [] } });
+  const replay = await page.request.post('/api/banking-agent', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE }, data: { message: '改成转账350元', continuationToken: second.data.continuationToken, consent: true, history: [] } });
   assert.equal((await replay.json()).data.operationId, third.data.operationId);
   report.checks.push('amount form prevents reload and resumes restored Session; identical replay returns same operation without new preview');
   const clarification = await request('card: 修改收款人为王先生', async () => {
@@ -75,9 +75,9 @@ try {
   const cancelled = await request('card: 取消', () => page.locator('.banking-preview-card').last().getByRole('button', { name: '取消', exact: true }).click());
   assert.equal(cancelled.data.status, 'cancelled');
   assert.equal(await page.locator('.message-row').count(), 15); assert.equal(await page.locator('.banking-preview-card').count(), 4);
-  const blocked = await page.request.post('/api/banking', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE, 'Idempotency-Key': changed.data.operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: changed.data.operationId, preview_hash: changed.data.preview.previewHash } } });
+  const blocked = await page.request.post('/api/banking', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE, 'Idempotency-Key': changed.data.operationId }, data: { schema_version: '1.1.0', action: 'action.execute', input: { operation_id: changed.data.operationId, preview_hash: changed.data.preview.previewHash } } });
   assert.equal(blocked.status(), 403);
-  const stale = await page.request.post('/api/banking-agent', { headers: { 'X-Saveflow-Access': process.env.SAVEFLOW_ACCESS_CODE }, data: { message: '改成转账300元', continuationToken: changed.data.continuationToken, consent: true, history: [] } });
+  const stale = await page.request.post('/api/banking-agent', { headers: { 'X-FinEase-Access': process.env.FINEASE_ACCESS_CODE }, data: { message: '改成转账300元', continuationToken: changed.data.continuationToken, consent: true, history: [] } });
   assert.equal((await stale.json()).code, 'CONTINUATION_STALE');
   report.checks.push('chat confirmation blocked, cancel button ends session, direct Core execution forbidden, cancelled credentials stale, all fifteen messages retained');
   assert.deepEqual(report.browserErrors, []);

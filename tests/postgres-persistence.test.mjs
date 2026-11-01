@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import seed from '../src/data/saveflow_mock_data.json' with { type: 'json' };
+import seed from '../src/data/finease_mock_data.json' with { type: 'json' };
 import { createPostgresBankingCore } from '../src/banking-core/postgres-store.mjs';
 
 const connectionString = process.env.BANKING_TEST_DATABASE_URL;

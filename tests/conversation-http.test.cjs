@@ -14,14 +14,14 @@ const { createConversationStore } = require('../server/conversation-state.mjs');
 const { verifyContinuationToken, issueContinuationToken } = require('../src/agent/clarification/continuation-token.mjs');
 const { buildParsedIntent } = require('../src/agent/clarification/merge-intent.mjs');
 const { askBankingAgent, BankingAgentError } = require('../src/lib/banking-agent-client.ts');
-const env = { SAVEFLOW_ACCESS_CODE: 'conversation-http-access-1234', CONTINUATION_TOKEN_SECRET: 'conversation-http-secret-1234' };
+const env = { FINEASE_ACCESS_CODE: 'conversation-http-access-1234', CONTINUATION_TOKEN_SECRET: 'conversation-http-secret-1234' };
 const bill = () => buildParsedIntent('bill.summary', { month: '2026-08' });
 const transfer = () => buildParsedIntent('transfer.create', { payee_ref: '张三', amount: { amount_minor: 50000, currency: 'CNY' } });
 let serial = 0;
 async function fixture(t, overrides = {}) {
   let clock = Date.parse('2026-10-22T04:00:00Z');
   const now = () => clock;
-  const source = structuredClone(require('../src/data/saveflow_mock_data.json'));
+  const source = structuredClone(require('../src/data/finease_mock_data.json'));
   if (overrides.fundSavings) { source.accounts[1].balance = 1000; source.accounts[1].availableBalance = 1000; }
   const core = createBankingCore({ now, source });
   const calls = { prepares: 0, reads: 0, understands: [] };
@@ -62,7 +62,7 @@ async function fixture(t, overrides = {}) {
   const url = `http://127.0.0.1:${server.address().port}`;
   const post = async body => {
     const r = await fetch(`${url}/api/banking-agent`, { method: 'POST', headers: { 'Content-Type': 'application/json',
-      'X-Saveflow-Access': env.SAVEFLOW_ACCESS_CODE, 'X-Forwarded-For': `conversation-${++serial}` }, body: JSON.stringify(body) });
+      'X-FinEase-Access': env.FINEASE_ACCESS_CODE, 'X-Forwarded-For': `conversation-${++serial}` }, body: JSON.stringify(body) });
     return { httpStatus: r.status, ...await r.json() };
   };
   return { post, url, core, calls, host, now, beforeTransactions, setObservedState: value => { observedState = value; }, advance: ms => { clock += ms; } };
@@ -343,18 +343,18 @@ test('HTTP → real askBankingAgent validates session metadata on success and re
   };
   t.after(() => { global.fetch = actualFetch; });
   const signal = new AbortController().signal;
-  const first = await askBankingAgent({ message: '给张三转500元' }, env.SAVEFLOW_ACCESS_CODE, signal);
+  const first = await askBankingAgent({ message: '给张三转500元' }, env.FINEASE_ACCESS_CODE, signal);
   let recovery;
   await assert.rejects(askBankingAgent({ conversationToken: first.conversation.token, conversationRevision: first.conversation.revision,
-    continuationToken: first.continuationToken, choice: { optionId: 'opt_fake' } }, env.SAVEFLOW_ACCESS_CODE, signal), e => {
+    continuationToken: first.continuationToken, choice: { optionId: 'opt_fake' } }, env.FINEASE_ACCESS_CODE, signal), e => {
     assert.ok(e instanceof BankingAgentError); assert.equal(e.code, 'INVALID_CHOICE');
     assert.equal(e.conversation.token, first.conversation.token); recovery = e.recovery; return true;
   });
   const billResult = await askBankingAgent({ conversationToken: recovery.conversation.token, conversationRevision: recovery.conversation.revision,
-    taskMode: 'new', message: '查看2026年8月账单' }, env.SAVEFLOW_ACCESS_CODE, signal);
+    taskMode: 'new', message: '查看2026年8月账单' }, env.FINEASE_ACCESS_CODE, signal);
   assert.equal(billResult.status, 'bill_result');
   for (mutate of [v => { v.revision = -1; }, v => { v.token = 'conv_forged'; }, v => { v.token = `cs1.${'A'.repeat(43)}`; }, v => { v.currentTask.confirmed = true; }, v => { v.operationReferences.push({ operationId: 'op_fake', taskId: v.currentTask.taskId, coreState: 'fabricated' }); }]) {
-    await assert.rejects(askBankingAgent({ conversationToken: billResult.conversation.token, taskMode: 'new', message: '查看2026年8月账单' }, env.SAVEFLOW_ACCESS_CODE, signal), e => e.code === 'BANKING_AGENT_RESPONSE_ERROR');
+    await assert.rejects(askBankingAgent({ conversationToken: billResult.conversation.token, taskMode: 'new', message: '查看2026年8月账单' }, env.FINEASE_ACCESS_CODE, signal), e => e.code === 'BANKING_AGENT_RESPONSE_ERROR');
   }
 });
 

@@ -8,12 +8,12 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $deployRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$remoteUrl = 'https://github.com/Zihan-li-1/saveflow-demo.git'
+$remoteUrl = (git -C $deployRoot remote get-url origin).Trim()
 $composeFiles = @('-f', 'compose.yaml', '-f', 'compose.postgres.yaml')
-$project = 'saveflow-local-check'
+$project = 'finease-local-check'
 $webUrl = 'http://localhost:4300'
 
-function Fail([string]$Message) { throw "SaveFlow deployment stopped: $Message" }
+function Fail([string]$Message) { throw "FinEase deployment stopped: $Message" }
 function Run([string]$File, [string[]]$CommandArgs) {
   & $File @CommandArgs
   if ($LASTEXITCODE -ne 0) { Fail "$File $($CommandArgs -join ' ') failed with exit code $LASTEXITCODE" }
@@ -33,7 +33,7 @@ if (-not [string]::IsNullOrWhiteSpace($ProxyUrl)) {
 }
 if ([string]::IsNullOrWhiteSpace($EnvFile)) { $EnvFile = Join-Path $deployRoot '.env.local' }
 if (-not (Test-Path $EnvFile)) {
-  $fallback = Join-Path $deployRoot '..\saveflow-demo\.env.local'
+  $fallback = Join-Path $deployRoot '..\finease-demo\.env.local'
   if (Test-Path $fallback) { $EnvFile = (Resolve-Path $fallback).Path }
   else { Fail "env file not found: $EnvFile" }
 }
@@ -63,19 +63,19 @@ $deploymentSha = (git rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0) { Fail 'deployment tree contains changes absent from GitHub main; merge the integration branch into main before deploying' }
 
 $portOwners = @(docker ps --format '{{.Names}} {{.Ports}}' | Where-Object { $_ -match '0\.0\.0\.0:4300|127\.0\.0\.1:4300' })
-if ($portOwners.Count -gt 0 -and ($portOwners -notmatch 'saveflow-local-check-web-1')) { Fail "port 4300 is occupied by: $($portOwners -join '; ')" }
-$env:SAVEFLOW_GIT_SHA = $githubSha
+if ($portOwners.Count -gt 0 -and ($portOwners -notmatch 'finease-local-check-web-1')) { Fail "port 4300 is occupied by: $($portOwners -join '; ')" }
+$env:FINEASE_GIT_SHA = $githubSha
 if (-not [string]::IsNullOrWhiteSpace($ProxyUrl)) {
   $env:HTTP_PROXY = $ProxyUrl.Replace('127.0.0.1', 'host.docker.internal')
   $env:HTTPS_PROXY = $env:HTTP_PROXY
   $env:ALL_PROXY = $env:HTTP_PROXY
 }
-Compose @('--env-file', $EnvFile, 'build', '--build-arg', "SAVEFLOW_GIT_SHA=$githubSha", '--build-arg', 'SAVEFLOW_GIT_DIRTY=false', 'web')
+Compose @('--env-file', $EnvFile, 'build', '--build-arg', "FINEASE_GIT_SHA=$githubSha", '--build-arg', 'FINEASE_GIT_DIRTY=false', 'web')
 Compose @('--env-file', $EnvFile, 'up', '-d', 'pilot-db')
 Compose @('--env-file', $EnvFile, 'run', '--rm', 'pilot-migrate')
 Compose @('--env-file', $EnvFile, 'up', '-d', 'web', 'mcp', 'bridge')
 
-$required = @('saveflow-local-check-pilot-db-1', 'saveflow-local-check-web-1', 'saveflow-local-check-mcp-1', 'saveflow-local-check-bridge-1')
+$required = @('finease-local-check-pilot-db-1', 'finease-local-check-web-1', 'finease-local-check-mcp-1', 'finease-local-check-bridge-1')
 $ps = @()
 for ($attempt = 0; $attempt -lt 30; $attempt += 1) {
   $ps = @(docker compose --project-name $project @composeFiles --env-file $EnvFile ps --format json | ConvertFrom-Json)
@@ -93,9 +93,9 @@ foreach ($name in $required) {
 }
 $health = Invoke-RestMethod "$webUrl/healthz"
 $version = Invoke-RestMethod "$webUrl/version"
-$labels = docker inspect --format '{{json .Config.Labels}}' 'saveflow-local-check-web-1' | ConvertFrom-Json
-$imageSha = [string]$labels.'org.openai.saveflow.git-sha'
-$imageDirty = [string]$labels.'org.openai.saveflow.git-dirty'
+$labels = docker inspect --format '{{json .Config.Labels}}' 'finease-local-check-web-1' | ConvertFrom-Json
+$imageSha = [string]$labels.'org.openai.finease.git-sha'
+$imageDirty = [string]$labels.'org.openai.finease.git-dirty'
 if ($health.ok -ne $true -or $version.gitSha -ne $githubSha -or $version.gitDirty -ne 'false' -or $imageSha -ne $githubSha -or $imageDirty -ne 'false') { Fail "version/health mismatch: GitHub=$githubSha web=$($version.gitSha) dirty=$($version.gitDirty) image=$imageSha imageDirty=$imageDirty" }
 
 Write-Output "Deployment succeeded"

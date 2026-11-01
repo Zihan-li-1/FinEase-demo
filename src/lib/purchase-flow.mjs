@@ -28,7 +28,7 @@ export function normalizePurchaseSlots(slots, currentDate) {
 
 const PURCHASE_ACTION = /(买|购买|订购|订|准备|预留|提醒|搜索|查找|生成.*链接)/;
 const NON_PURCHASE = /(取消|退订|订阅|规则|比例|退款|退货|花呗|花销|转账|汇款|转给|订单|物流|快递|到货|进度|查询)/;
-const CAPABILITY_QUESTION = /^(?:请问\s*)?(?:(?:你|我|这个应用|系统|SaveFlow)\s*)?(?:能不能|可不可以|能否|是否(?:能|可以)|能|可以|会).*(?:吗|么|[?？])\s*$/i;
+const CAPABILITY_QUESTION = /^(?:请问\s*)?(?:(?:你|我|这个应用|系统|FinEase)\s*)?(?:能不能|可不可以|能否|是否(?:能|可以)|能|可以|会).*(?:吗|么|[?？])\s*$/i;
 const DATE_TEXT = /(\d{4}\s*[-/.年]\s*\d{1,2}\s*[-/.月]\s*\d{1,2}\s*[日号]?|\d{1,2}\s*[.\-/月]\s*\d{1,2}\s*[日号]?|[一二三四五六七八九十]{1,3}\s*月\s*[一二三四五六七八九十]{1,3}\s*[日号])/;
 
 /** 模型没把购物请求认成 scenario.plan_purchase 时的兜底：从用户原话重建购物意图，避免整条流程被模型一句话吞掉。 */

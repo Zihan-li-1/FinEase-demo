@@ -26,7 +26,7 @@ export function PurchaseFlow({ accessCode = '', consent = false, initialSlots = 
 
   useEffect(() => {
     if (wf?.status === 'active') {
-      try { localStorage.setItem('saveflow.purchase.last.v1', wf.workflow_ref); } catch { /* Optional browser storage. */ }
+      try { localStorage.setItem('finease.purchase.last.v1', wf.workflow_ref); } catch { /* Optional browser storage. */ }
     }
   }, [wf]);
   const call = <T,>(action: string, input: unknown) => purchaseRequest<T>(action, input, accessCode, consent);
@@ -61,7 +61,7 @@ export function PurchaseFlow({ accessCode = '', consent = false, initialSlots = 
     <div className={styles.heading}><h3>购物预算与商品链接</h3><span>预留预算，银行余额不变</span></div>
     <p>Agent 帮你预留购物金额；到期提醒会在你打开本页面时显示。商品链接打开购物平台，由你自行核对商品、价格、配送并创建订单。</p>
     {!wf && <button disabled={busy} onClick={() => run(async () => {
-      const id = localStorage.getItem('saveflow.purchase.last.v1');
+      const id = localStorage.getItem('finease.purchase.last.v1');
       if (!id) throw new Error('当前浏览器没有保存过购物预算。');
       setWf(await call<PurchaseWorkflow>('purchase.read', { workflow_ref: id }));
     })}>恢复最近购物预算</button>}
@@ -148,7 +148,7 @@ export function PurchaseFlow({ accessCode = '', consent = false, initialSlots = 
         <div className={styles.grid}>{links.map(link => <article key={link.category}><b>{link.category === 'flowers' ? '鲜花' : '蛋糕'}</b>
           <p>平台搜索词：{link.query}</p><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}，自行选择并下单</a>
           {link.check_before_order.length > 0 && <p>下单前请人工核对排除项：{link.check_before_order.join('、')}。搜索结果不能证明商品符合要求。</p>}</article>)}</div>
-        <p>每个品类只有一条搜索入口；SaveFlow 尚未筛选具体商品，也没有按价格分档推荐。商品、库存、总价、运费、配送时间和过敏原请以平台页面为准；SaveFlow 不创建或查询平台订单。</p>
+        <p>每个品类只有一条搜索入口；FinEase 尚未筛选具体商品，也没有按价格分档推荐。商品、库存、总价、运费、配送时间和过敏原请以平台页面为准；FinEase 不创建或查询平台订单。</p>
         <button disabled={busy} onClick={() => run(async () => setPlan(await call<PlanPreview>('purchase.cancel_preview', { workflow_ref: wf.workflow_ref, expected_version: wf.version })))}>预览释放预留预算</button>
         {plan && <div className={styles.preview}><p>{plan.notice}</p><button disabled={busy} onClick={() => run(async () => {
           setWf(await call<PurchaseWorkflow>('scenario.purchase.cancel', { workflow_ref: wf.workflow_ref, expected_version: wf.version,

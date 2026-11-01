@@ -2,7 +2,7 @@
 
 后续定点修复已将精确历史统计移至服务端，并补齐复核诊断和手动重试。当前合同与验证见 [储蓄计划复核失败修复](savings-repair.md)；下文保留初次迁移的历史记录。
 
-验证日期：2026-10-30。工作目录：`saveflow-demo`，基线提交 `3de73ae`。本次修改保留在工作区，未发布至现有 Docker/线上部署。
+验证日期：2026-10-30。工作目录：`finease-demo`，基线提交 `3de73ae`。本次修改保留在工作区，未发布至现有 Docker/线上部署。
 
 ## 模型与安全边界
 
@@ -79,7 +79,7 @@ reason 非空、最多二百字符，禁止阿拉伯数字、全角数字及货�
 - 在服务器 `DASHSCOPE_API_KEY` 置空后重启并重跑真实页面链路，仍通过。模型未使用测试 JSON 或拦截响应。真实建议数值可随生成变化，复核严格按当次结果计算可行性及缺口。
 - 确定性缺口测试：收入 1,200,000 分、分类建议支出 846,000 分、月需储蓄 500,000 分时返回缺口 146,000 分，`feasible=false`。
 
-日志位于工作区父目录 `saveflow-savings-focused-final-20261030.log`、`saveflow-savings-migration-tests-20261030.log`、`saveflow-savings-migration-lint-20261030.log`、`saveflow-savings-migration-build-20261030.log`，以及两份 `saveflow-savings-baseline-*` 日志。
+日志位于工作区父目录 `finease-savings-focused-final-20261030.log`、`finease-savings-migration-tests-20261030.log`、`finease-savings-migration-lint-20261030.log`、`finease-savings-migration-build-20261030.log`，以及两份 `finease-savings-baseline-*` 日志。
 
 复跑针对性测试：
 
@@ -91,7 +91,7 @@ node --test tests/savings-advisor.test.mjs tests/savings-conversation.test.mjs t
 
 ## 部署配置
 
-本机 `.env.local` 已配置 `TRUEFORGE_BASE_URL`、`TRUEFORGE_MODEL`、`SAVEFLOW_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`，无需添加新的储蓄专用变量。新部署须提供这些值；理解默认使用 TrueForge，可显式设置 `SAVEFLOW_BANKING_RUNTIME=trueforge`。受鉴权的 TrueForge 还需要 `TRUEFORGE_TOKEN`，供应商 DeepSeek key 配置在 TrueForge 内，不发送至页面。
+本机 `.env.local` 已配置 `TRUEFORGE_BASE_URL`、`TRUEFORGE_MODEL`、`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`，无需添加新的储蓄专用变量。新部署须提供这些值；理解默认使用 TrueForge，可显式设置 `FINEASE_BANKING_RUNTIME=trueforge`。受鉴权的 TrueForge 还需要 `TRUEFORGE_TOKEN`，供应商 DeepSeek key 配置在 TrueForge 内，不发送至页面。
 
 持久化/Netlify 部署继续按原规则配置 `DATABASE_URL`（或明确允许临时演示状态）；它与本次模型迁移独立。`DASHSCOPE_API_KEY`、`QWEN_MODEL`、`QWEN_BASE_URL` 只供独立的 legacy Qwen 功能使用，不是储蓄建议的前置条件。
 
@@ -114,4 +114,4 @@ node --test tests/savings-advisor.test.mjs tests/savings-conversation.test.mjs t
 
 真实页面复验使用主分支扩展后的八个月历史及清空 DashScope key 的服务器，三次均因模型趋势与服务端精确月均比较不一致而被拒绝，没有生成 verified 卡片，金融写请求和浏览器异常均为零。此限制保留，不以省略观察、替换模型结果或放松复核处理。`main-live-ui.json` 记录此次未通过的主分支结果；`live-ui.json` 和截图保留迁移分支的原始成功证据。
 
-主分支复验日志：工作区父目录的 `saveflow-savings-main-focused-20261030.log`、`saveflow-savings-main-tests-20261030.log`、`saveflow-savings-main-lint-20261030.log`、`saveflow-savings-main-build-20261030.log`。本次只合并代码，不重建或重启部署容器。
+主分支复验日志：工作区父目录的 `finease-savings-main-focused-20261030.log`、`finease-savings-main-tests-20261030.log`、`finease-savings-main-lint-20261030.log`、`finease-savings-main-build-20261030.log`。本次只合并代码，不重建或重启部署容器。

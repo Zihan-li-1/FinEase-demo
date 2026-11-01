@@ -4,7 +4,7 @@
 
 推送前工作区干净，功能分支 `fix/agent-error-recovery` 与 GitHub 均为 `ec833dc`。检查发现 main 已前进到 `5aacc64d8a996bf7ea66042263b5ba8d24372a5c`，共同祖先为 `b8dc507`；上游新增 12 个提交。原 PR #28 对旧功能基线可合并，但旧账单 PR #20 对 main 已有冲突，因此本次将最新 main 合入当前功能分支，并将 #28 的比较基线改为 main。
 
-实际处理 12 个文件的文本冲突：`package.json`、`server/banking-agent.mjs`、`server/banking-orchestrator.mjs`、`src/agent/runtime.mjs`、四个账单/卡片/只读/转账组件、`src/app/page.tsx`、`src/lib/banking-agent-client.ts`、`src/lib/banking-chat-storage.ts`、`src/lib/use-saveflow.ts`。
+实际处理 12 个文件的文本冲突：`package.json`、`server/banking-agent.mjs`、`server/banking-orchestrator.mjs`、`src/agent/runtime.mjs`、四个账单/卡片/只读/转账组件、`src/app/page.tsx`、`src/lib/banking-agent-client.ts`、`src/lib/banking-chat-storage.ts`、`src/lib/use-finease.ts`。
 
 - 保留 main 的储蓄目标与分类收支表单、储蓄建议验证、卡片管理页、余额提醒、订阅识别说明，以及账单变化解读。
 - 保留本分支合法 unavailable 月份和 IANA 时区校验、严格金额/证据验证、结构化错误恢复、服务端新选项与续接、规则页面独立确认。
