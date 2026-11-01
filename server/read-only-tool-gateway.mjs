@@ -37,7 +37,7 @@ function validateResult(result, tool, context) {
 
 export const READ_ONLY_TOOL_NAMES = Object.freeze(['bill.summary', 'subscription.list', 'card.get', 'product.list', 'wealth.recommend', 'wealth.compare']);
 
-export function createReadOnlyToolGateway({ repository, constraints = {}, now = Date.now, timezone = 'Asia/Shanghai' }) {
+export function createReadOnlyToolGateway({ repository, wealthPorts, constraints = {}, now = Date.now, timezone = 'Asia/Shanghai' }) {
   if (!repository) throw new TypeError('read-only gateway requires repository');
   return Object.freeze({
     async execute(tool, args, meta = {}) {
@@ -63,12 +63,13 @@ export function createReadOnlyToolGateway({ repository, constraints = {}, now = 
         const products = await repository.getInvestmentProducts();
         result = { ok: true, kind: 'product_result', action: 'product.list', data: { products: publicProducts(products) }, evidence: evidence(context, products.map(product => product.id)) };
       } else if (tool === 'wealth.recommend' || tool === 'wealth.compare') {
-        const skill = createWealthSkill(repository);
+        const skill = createWealthSkill(repository, wealthPorts);
         const financialContext = tool === 'wealth.recommend' ? await buildFinancialAnalysisContext(repository, { now, timezone }) : undefined;
         result = await skill({ action: tool, ...input }, financialContext ? { financialContext } : {});
         if (result?.data?.products) result.data.products = result.data.products.map(item => { const copy = { ...item }; delete copy.product_ref; return copy; });
         if (result?.evidence?.[0]?.as_of) result.evidence = result.evidence.map(item => ({ source: item.source, asOf: item.as_of, entityIds: item.entity_ids ?? [] }));
       }
+      if (result?.data?.kind === 'questionnaire_required') throw Object.assign(new Error('Complete the demo risk questionnaire first'), { code: 'RISK_ASSESSMENT_REQUIRED' });
       if (!result) throw new Error('READ_ONLY_TOOL_NOT_IMPLEMENTED');
       const checked = validateResult(result, tool, context);
       return { toolCallId: `plan_call_${randomUUID()}`, tool, args: safe(input), result: checked, source: meta.source ?? 'formal_repository' };

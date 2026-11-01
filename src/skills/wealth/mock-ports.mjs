@@ -1,5 +1,5 @@
 /** Synthetic, single-user demo data. It is never an investment account or a live assessment. */
-export function createWealthMockPorts({ getHoldings, now = Date.now }) {
+export function createWealthMockPorts({ getHoldings, now = Date.now, riskStore = undefined }) {
   const assessment = {
     assessment_id: 'risk_demo_001', risk_level: 'R2', assessment_scope: 'investment',
     completed_at: '2026-10-01T00:00:00+08:00', expires_at: '2027-01-01T00:00:00+08:00', source: 'trusted_ui',
@@ -11,8 +11,9 @@ export function createWealthMockPorts({ getHoldings, now = Date.now }) {
   };
   return Object.freeze({
     now: () => new Date(now()).toISOString(),
-    questionnaire: { source: 'trusted_ui', route: '/wealth/risk-assessment' },
-    getRiskAssessment: async () => structuredClone(assessment),
+    questionnaire: { source: 'trusted_ui', route: '/api/banking-agent', mode: 'inline_demo' },
+    getRiskAssessment: riskStore?.getRiskAssessment ?? (async () => structuredClone(assessment)),
+    ...(riskStore ? { submitRiskAssessment: riskStore.submitRiskAssessment } : {}),
     getDisclosure: async productId => rules[productId] ? {
       product_id: productId, status: 'active', version: '2026-10-01',
       expires_at: '2027-01-01T00:00:00+08:00',

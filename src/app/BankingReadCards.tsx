@@ -1,3 +1,4 @@
+import { BankingRiskAssessment } from "./BankingWealthCards";
 import type { BankingAgentData } from "@/lib/banking-agent-client";
 import type { InvestmentProduct } from "@/banking-core/contracts";
 import "./banking-trial-cards.css";
@@ -13,7 +14,8 @@ const ProductTerms = () => <div className="financial-term-help">
   <details><summary>流动性 <span>点此了解</span></summary><p>流动性就是需要用钱时，多久能把理财资金取出来。当天可取最灵活；下一个工作日可取需要等待；持有到计划结束通常不能提前使用这笔钱。</p></details>
 </div>;
 type SubscriptionView = { id: string; name: string; monthlyFeeFen: number; status: "active" | "cancelled"; lastUsedDate: string; isPotentiallyUnused: boolean; inactivityDays?: number; unusedReason?: string; recognition?: { confidence: "high" | "medium" | "not_flagged"; signals: string[] } };
-export function BankingReadCard({ data, active = false, busy = false, onConfirm, onReject, onCheck }: { data?: BankingAgentData; active?: boolean; busy?: boolean; onConfirm?: (data: BankingAgentData) => void; onReject?: (data: BankingAgentData) => void; onCheck?: (data: BankingAgentData) => void }) {
+export function BankingReadCard({ data, accessCode = "", active = false, busy = false, onConfirm, onReject, onCheck }: { data?: BankingAgentData; accessCode?: string; active?: boolean; busy?: boolean; onConfirm?: (data: BankingAgentData) => void; onReject?: (data: BankingAgentData) => void; onCheck?: (data: BankingAgentData) => void }) {
+  if (data?.status === "risk_assessment_required") return <BankingRiskAssessment data={data} accessCode={accessCode} />;
   const subscriptions = data?.data?.subscriptions as SubscriptionView[] | undefined;
   const subscriptionSummary = data?.data?.summary as { activeCount?: number; activeMonthlyFeeFen?: number; potentiallyUnusedCount?: number; potentiallyUnusedMonthlyFeeFen?: number; potentialAnnualSavingsFen?: number } | undefined;
   const products = data?.data?.products as InvestmentProduct[] | undefined;
@@ -52,7 +54,6 @@ export function BankingReadCard({ data, active = false, busy = false, onConfirm,
       </div>
       <ProductTerms />
     </article>)}
-    {data?.status === "risk_assessment_required" && <article><h3>需要用户本人完成正式问卷</h3><p>模型不能代答；完成适当性评估前不提供申购入口。</p></article>}
     {steps?.map((step, index) => <article key={`${step.action}-${index}`}><h3>{index + 1}. {actionName(step.action)}</h3><p>{step.reason}</p></article>)}
     {rule && <article><h3>{rule.id ? `规则 ${rule.id}` : "规则变更预览"}</h3><div className="financial-data-grid"><p><span>状态</span><strong>{rule.status || "待确认"}</strong></p><p><span>触发</span><strong>{rule.trigger?.value || "—"}</strong></p><p><span>建议步骤</span><strong>{rule.proposed_steps?.map(step => actionName(step.action)).join("、") || "—"}</strong></p></div></article>}
     {data?.status === 'scenario_rule_preview' && onConfirm && onReject && onCheck && <div className="error-actions">

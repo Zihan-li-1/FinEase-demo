@@ -152,11 +152,11 @@ export async function runBankingConversation(body, {
     try { onDiagnostic({ event: 'agent_dispatch', action: data?.action || 'unknown', status: data?.status || 'unknown', enteredBusinessRoute: !['unsupported', 'error'].includes(data?.status), skippedModelReason: data?.status === 'cancelled' ? 'explicit_cancel' : undefined }); } catch { /* diagnostics are observational */ }
     return { httpStatus, code, message, data, replyContext };
   };
-  const wealthReadHandler = (raw, financialContext) => createWealthSkill(repository)(raw, financialContext ? { financialContext } : {});
+  const wealthReadHandler = (raw, financialContext) => createWealthSkill(repository, core.wealthPorts)(raw, financialContext ? { financialContext } : {});
   const wealthHandler = async raw => {
     const extended = ['wealth.subscribe', 'wealth.redeem'].includes(raw.action) ||
       (raw.action === 'wealth.recommend' && raw.goal && typeof raw.goal === 'object') ||
-      (raw.action === 'wealth.assess_risk' && ['investment', 'portfolio'].includes(raw.assessment_scope));
+      raw.action === 'wealth.assess_risk';
     if (!extended) {
       if (raw.action === 'wealth.recommend') {
         const financial = await buildFinancialAnalysisContext(repository, { now, timezone });

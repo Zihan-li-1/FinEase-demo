@@ -1,16 +1,18 @@
 "use client";
 
 import { stageCopy } from "@/lib/flow-machine";
-import type { BankingAgentData } from "@/lib/banking-agent-client";
+import { useState } from "react";
+import { askBankingAgent, type BankingAgentData, type RiskQuestionnaireRequest } from "@/lib/banking-agent-client";
 
 const riskText = (level: string) => level === "R1" ? "较低风险，短期可能约亏 0%–2%" : level === "R2" ? "中等风险，阶段亏损可能约 2%–10%" : level === "R3" ? "较高风险，亏损可能超过 10%" : "风险情况待确认";
 const liquidityText = (value: string) => value === "T+0" ? "通常当天可取" : value === "T+1" ? "通常下一个工作日可取" : value === "AT_MATURITY" ? "一般需持有到计划结束" : "取用时间待确认";
 const ProductTerms = () => <div className="financial-term-help"><details><summary>风险等级 <span>点此了解</span></summary><p>它表示价格波动和亏损可能性。百分比仅用于帮助理解，不是实际产品的最大亏损承诺。</p></details><details><summary>流动性 <span>点此了解</span></summary><p>它表示需要用钱时，多久能把资金取出来；越快可取，使用越灵活。</p></details></div>;
 
-export function BankingWealthResult({ data }: { data?: BankingAgentData }) {
+export function BankingWealthResult({ data, accessCode = "" }: { data?: BankingAgentData; accessCode?: string }) {
   const result = data?.data;
   if (!result) return null;
   const kind = String(result.kind);
+  if (["risk_assessment", "questionnaire_required", "questionnaire"].includes(kind)) return <BankingRiskAssessment data={data} accessCode={accessCode} />;
   const screening = result.screening_context as { target_date: string; investable_amount_minor: number; max_risk_level: string; liquidity_requirement: string; source: string } | undefined;
   const products = (kind === "recommendation" ? (result.products ?? result.matches) : kind === "comparison" ? result.products : []) as Array<{ name: string; product_code?: string; category?: "fund" | "bond" | "stock"; risk_level: string; liquidity: string; expected_yield_bps: number; duration_days?: number }>;
   const categories = [{ key: "fund", label: "基金" }, { key: "bond", label: "债券" }, { key: "stock", label: "股票" }] as const;
@@ -41,6 +43,63 @@ export function BankingWealthResult({ data }: { data?: BankingAgentData }) {
     {products?.length > 0 && <ProductTerms />}
     <small>合成数据演示 · 展示收益不保证 · 截至 {String(result.as_of || "未知")}</small>
   </div>;
+}
+
+type RiskQuestion = { id: string; title: string; options: string[] };
+type RiskRecord = { risk_level: string; reasons?: string[]; matched_risk_levels?: string[]; assessment_id: string; completed_at: string; expires_at: string };
+
+export function BankingRiskAssessment({ data, accessCode }: { data?: BankingAgentData; accessCode: string }) {
+  const [current, setCurrent] = useState(data);
+  const [questions, setQuestions] = useState<RiskQuestion[] | null>(null);
+  const [version, setVersion] = useState("");
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [step, setStep] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const request = async (input: RiskQuestionnaireRequest) => {
+    setBusy(true); setError("");
+    try {
+      const response = await askBankingAgent({ riskQuestionnaire: input }, accessCode, new AbortController().signal);
+      if (response.data?.kind === "questionnaire") {
+        setQuestions(response.data.questions as RiskQuestion[]); setVersion(String(response.data.version)); setAnswers({}); setStep(0);
+      } else { setCurrent(response); setQuestions(null); }
+    } catch (err) { setError(err instanceof Error ? err.message : "请求失败，请重试。"); }
+    finally { setBusy(false); }
+  };
+  const assessment = current?.data?.assessment as RiskRecord | undefined;
+  const question = questions?.[step];
+  const complete = !!questions && questions.every(q => Number.isInteger(answers[q.id]));
+  return <section className="banking-result-card" aria-label="模拟风险测评">
+    {question && questions ? <>
+      <b>模拟风险测评 · {step + 1}/{questions.length}</b>
+      <progress value={Object.keys(answers).length} max={questions.length} aria-label="答题进度" />
+      <fieldset disabled={busy}><legend>{question.title}</legend>
+        {question.options.map((option, index) => <label key={option} style={{ display: "block", padding: "10px 0" }}>
+          <input type="radio" name={question.id} checked={answers[question.id] === index} onChange={() => setAnswers(previous => ({ ...previous, [question.id]: index }))} /> {option}
+        </label>)}
+      </fieldset>
+      <div className="error-actions">
+        <button type="button" className="secondary-button" disabled={busy || step === 0} onClick={() => setStep(step - 1)}>上一步</button>
+        {step < questions.length - 1 ? <button type="button" className="primary-button" disabled={busy || answers[question.id] === undefined} onClick={() => setStep(step + 1)}>下一步</button> :
+          <button type="button" className="primary-button" disabled={busy || !complete} onClick={() => request({ operation: "submit", version, answers })}>提交测评</button>}
+        <button type="button" className="secondary-button" disabled={busy} onClick={() => { setQuestions(null); setAnswers({}); setError(""); }}>取消</button>
+      </div>
+      <small>请本人选择；提交前不会生成测评等级。</small>
+    </> : current?.data?.kind === "recommendation" ? <><BankingWealthResult data={current} accessCode={accessCode} /><button type="button" className="secondary-button" disabled={busy} onClick={() => request({ operation: "start" })}>重新测评</button></> : <>
+      {assessment ? <>
+        <h3>风险等级：{assessment.risk_level}</h3>
+        <p>{({ R1: "偏保守，承受波动能力较低", R2: "稳健，可承担一定波动", R3: "进取，可承担较大波动" } as Record<string, string>)[assessment.risk_level]}</p>
+        {assessment.reasons?.map(reason => <small key={reason}>{reason}</small>)}
+        <p>模拟可匹配产品：{assessment.matched_risk_levels?.join(" / ") || assessment.risk_level}</p>
+        <small>完成于 {assessment.completed_at.slice(0, 10)} · 有效至 {assessment.expires_at.slice(0, 10)}</small>
+        <button type="button" className="primary-button" disabled={busy} onClick={() => request({ operation: "matches" })}>查看匹配产品</button>
+      </> : <p>请本人完成 7 道选择题，生成模拟测评结果。</p>}
+      <button type="button" className="secondary-button" disabled={busy} onClick={() => request({ operation: "start" })}>{assessment ? "重新测评" : "开始模拟测评"}</button>
+      <small>模拟测评，不等同于金融机构正式投资者适当性评估</small>
+    </>}
+    {busy && <span role="status">处理中…</span>}
+    {error && <p role="alert">{error}</p>}
+  </section>;
 }
 
 export function BankingWealthPreview({ data, active, busy, onConfirm, onReject, onCheck }: { data?: BankingAgentData; active: boolean; busy: boolean; onConfirm: (data: BankingAgentData) => void; onReject: (data: BankingAgentData) => void; onCheck: (data: BankingAgentData) => void }) {

@@ -1,4 +1,5 @@
 // @ts-check
+import { validRiskAssessment } from './risk-assessment.mjs';
 
 export const WEALTH_ACTIONS = Object.freeze([
   'wealth.recommend', 'wealth.compare', 'wealth.assess_risk',
@@ -52,7 +53,7 @@ export function validateWealthAction(value) {
     value.product_refs.forEach((/** @type {unknown} */ ref) => nonEmpty(ref, 'product_ref'));
   } else if (value.action === 'wealth.assess_risk') {
     exactKeys(value, ['action', 'assessment_scope']);
-    if (value.assessment_scope !== 'investment_suitability') throw new WealthSkillError('VALIDATION_ERROR', 'assessment_scope 无效');
+    if (!['investment', 'portfolio', 'investment_suitability'].includes(value.assessment_scope)) throw new WealthSkillError('VALIDATION_ERROR', 'assessment_scope 无效');
   } else if (value.action === 'wealth.subscribe') {
     exactKeys(value, ['action', 'product_ref', 'amount', 'source_account_ref']);
     nonEmpty(value.product_ref, 'product_ref'); nonEmpty(value.source_account_ref, 'source_account_ref'); amount(value.amount);
@@ -79,8 +80,8 @@ function fenToYuanText(fen) {
   return `${fen < 0 ? '-' : ''}¥${(abs / 100).toFixed(2)}`;
 }
 
-/** @param {import('../../banking-core/contracts').FinancialContextRepository} repository */
-export function createWealthSkill(repository) {
+/** @param {import('../../banking-core/contracts').FinancialContextRepository} repository @param {Record<string, any>} [ports] */
+export function createWealthSkill(repository, ports = undefined) {
   if (!repository || typeof repository.getInvestmentProducts !== 'function' || typeof repository.getContextInfo !== 'function') throw new TypeError('Wealth Skill 需要 FinancialContextRepository');
   return async function runWealthAction(/** @type {unknown} */ raw, /** @type {{financialContext?: any}} */ options = {}) {
     try {
@@ -110,7 +111,9 @@ export function createWealthSkill(repository) {
         evidence[0].entity_ids = resolved.map(product => product.id);
         return { ok: true, kind: 'wealth_comparison', action: input.action, data: { products: resolved.map(productView), methodology: { expected_yield_is_guaranteed: false, ranking_applied: false }, disclaimer: '预期收益不代表实际收益；本结果使用模拟产品数据，不构成投资建议。' }, evidence };
       }
-      const maxRisk = RISK_ORDER[/** @type {'R1'|'R2'|'R3'} */ (input.max_risk_level)];
+      const assessment = await ports?.getRiskAssessment?.();
+      if (ports && !validRiskAssessment(assessment, typeof ports.now === 'function' ? ports.now() : new Date().toISOString())) return { ok: true, kind: 'wealth_result', action: input.action, data: { kind: 'questionnaire_required', questionnaire: ports.questionnaire, synthetic_demo_only: true, as_of: context.asOf, context_snapshot_id: context.snapshotId, evidence }, evidence };
+      const maxRisk = Math.min(RISK_ORDER[/** @type {'R1'|'R2'|'R3'} */ (input.max_risk_level)], assessment ? Number(assessment.risk_level.slice(1)) : 3);
       const maxLiquidityDelay = LIQUIDITY_ORDER[/** @type {'T+0'|'T+1'|'AT_MATURITY'} */ (input.liquidity_requirement)];
       const eligible = products.filter(product => RISK_ORDER[product.riskLevel] <= maxRisk && LIQUIDITY_ORDER[product.liquidity] <= maxLiquidityDelay && product.durationDays <= input.horizon_days && (!input.amount || product.minimumAmountFen <= input.amount.amount_minor));
       evidence[0].entity_ids = eligible.map(product => product.id);

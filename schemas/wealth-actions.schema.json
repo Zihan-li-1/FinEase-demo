@@ -92,7 +92,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["action", "slots"],
-      "properties": { "action": { "const": "wealth.assess_risk" }, "slots": { "type": "object", "additionalProperties": false, "required": ["assessment_scope"], "properties": { "assessment_scope": { "enum": ["investment", "portfolio"] } } } }
+      "properties": { "action": { "const": "wealth.assess_risk" }, "slots": { "type": "object", "additionalProperties": false, "required": ["assessment_scope"], "properties": { "assessment_scope": { "enum": ["investment", "portfolio", "investment_suitability"] } } } }
     },
     "subscribe": {
       "type": "object",

@@ -1,3 +1,4 @@
+import { handleRiskQuestionnaire } from './risk-questionnaire.mjs';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { getConfiguredBankingCore } from '../src/banking-core/postgres-store.mjs';
 import { BankingIntentParserError, parseBankingIntent as defaultParseBankingIntent } from './banking-intent-parser.mjs';
@@ -135,7 +136,7 @@ export async function handleBankingAgent(
 
     const body = await readBody(request);
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw Object.assign(new Error('请求体必须为对象'), { code: 'INVALID_REQUEST', status: 400 });
-    const invalidFields = Object.keys(body).some(key => !['message', 'history', 'chatHistory', 'consent', 'continuationToken', 'choice', 'replyStyle', 'planInputs', 'wealthInputs', 'planning', 'planningConstraints', 'conversationToken', 'conversationRevision', 'taskId', 'taskMode'].includes(key));
+    const invalidFields = Object.keys(body).some(key => !['riskQuestionnaire', 'message', 'history', 'chatHistory', 'consent', 'continuationToken', 'choice', 'replyStyle', 'planInputs', 'wealthInputs', 'planning', 'planningConstraints', 'conversationToken', 'conversationRevision', 'taskId', 'taskMode'].includes(key));
     const chatHistory = validateChatHistory(body.chatHistory);
     delete body.chatHistory;
     if (body.consent !== undefined && body.consent !== true) throw Object.assign(new Error('consent 必须明确为 true'), { code: 'INVALID_REQUEST', status: 400 });
@@ -166,6 +167,12 @@ export async function handleBankingAgent(
     // Conversation binding rejects retired/unbound tokens before any understanding.
     let core, coreError;
     try { core = options.core ?? await getConfiguredBankingCore(env); } catch (error) { coreError = error; }
+    if (body.riskQuestionnaire !== undefined) {
+      if (coreError) throw coreError;
+      if (Object.keys(body).some(key => !['riskQuestionnaire', 'replyStyle', 'history', 'consent'].includes(key))) throw Object.assign(new Error('Invalid questionnaire request'), { code: 'INVALID_REQUEST', status: 400 });
+      const result = await handleRiskQuestionnaire(body.riskQuestionnaire, core);
+      return reply(200, 'OK', '模拟测评服务已更新', result);
+    }
     if (invalidFields) {
       if (core) {
         // Preserve authenticated recovery metadata on rejected business fields.
@@ -219,7 +226,7 @@ export async function handleBankingAgent(
       let plan;
       try {
         const planningClient = options.planningRuntimeClient ?? createPlanningRuntimeClient({ env, fetchImpl });
-        plan = await runReadOnlyPlanner({ message: body.message, history: [], constraints: body.planningConstraints ?? {}, repository, runtimeClient: planningClient, env, now, timezone: options.timezone ?? 'Asia/Shanghai', signal: request.signal, requestId, taskId: planningTask?.taskId, conversation: conversation.metadata() });
+        plan = await runReadOnlyPlanner({ message: body.message, history: [], constraints: body.planningConstraints ?? {}, repository, wealthPorts: core.wealthPorts, runtimeClient: planningClient, env, now, timezone: options.timezone ?? 'Asia/Shanghai', signal: request.signal, requestId, taskId: planningTask?.taskId, conversation: conversation.metadata() });
       } catch (error) { await conversation.endPlanning('cancelled'); throw error; }
       await conversation.endPlanning(['cancelled', 'partial', 'needs_clarification'].includes(plan.status) ? 'cancelled' : 'completed');
       return reply(200, 'OK', plan.status === 'business_intent' ? '这是单项业务请求，请直接描述要查询或办理的业务。' : plan.status === 'needs_clarification' ? plan.question : plan.analysis || plan.reason || '只读规划已完成', { status: plan.status, plan });

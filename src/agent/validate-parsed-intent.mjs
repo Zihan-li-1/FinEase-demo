@@ -220,7 +220,7 @@ function validateWealth(input, slots) {
     return;
   }
   rejectUnknownKeys(slots, ['assessment_scope'], 'slots');
-  if ('assessment_scope' in slots && slots.assessment_scope !== 'investment_suitability') fail('slots.assessment_scope is invalid');
+  if ('assessment_scope' in slots && !['investment', 'portfolio', 'investment_suitability'].includes(slots.assessment_scope)) fail('slots.assessment_scope is invalid');
   const missing = 'assessment_scope' in slots ? [] : ['assessment_scope'];
   requireMissingSlots(input.missingSlots, missing); requireStatus(input.status, missing.length ? 'needs_clarification' : 'ready_for_resolution');
 }
@@ -357,7 +357,7 @@ export function validateParsedIntent(value) {
     case 'wealth.recommend':
     case 'wealth.compare':
     case 'wealth.assess_risk':
-      if ((input.action === 'wealth.recommend' && typeof slots.goal === 'object') || (input.action === 'wealth.assess_risk' && ['investment', 'portfolio'].includes(slots.assessment_scope))) validateWealthExtended(input, slots);
+      if ((input.action === 'wealth.recommend' && typeof slots.goal === 'object') || (input.action === 'wealth.assess_risk' && ['investment', 'portfolio', 'investment_suitability'].includes(slots.assessment_scope))) validateWealthExtended(input, slots);
       else validateWealth(input, slots);
       break;
     case 'wealth.subscribe':

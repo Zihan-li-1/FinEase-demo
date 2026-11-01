@@ -120,7 +120,7 @@ test('missing or expired risk assessment returns only a trusted questionnaire', 
   const missingQuestionnaire = await runResolvedWealthIntent(repository, ports({ getRiskAssessment: async () => undefined, questionnaire: undefined }), intent);
   assert.equal(missingQuestionnaire.error.code, 'CAPABILITY_UNAVAILABLE');
   const wrongScope = await runResolvedWealthIntent(repository, ports(), resolved('wealth.assess_risk', { assessment_scope: 'portfolio' }));
-  assert.equal(wrongScope.data.kind, 'questionnaire_required');
+  assert.equal(wrongScope.data.kind, 'risk_assessment'); // portfolio is a legacy alias of investment
 });
 
 test('subscribe validates minimum, balance, suitability and disclosure before returning L3 request', async () => {
