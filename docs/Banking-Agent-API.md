@@ -2,18 +2,108 @@
 
 默认 TrueForge 入口先验证独立 ConversationRoute：普通聊天直接回复，业务进入原 ParsedIntent v1 → Skill/Resolver → Core 查询或正式预览，多步骤只读目标自动进入现有规划器，任务控制进入独立可信校验。仍兼容 API 显式 `planning: true` / `taskMode: "plan"`，页面已移除规划模式勾选框。详见 [统一对话与验收](Unified-Conversation-Routing.md)。
 
-## 唯一入口与服务端配置
+## 部署方式与运行环境
 
-页面的 Banking 消息、自由文本补充、选项都只调用 `POST /api/banking-agent`。本地通过 `npm run dev:qwen` 提供 API，Netlify 入口为 `netlify/functions/banking-agent.mjs`；静态 `out` 本身不提供 API。
+### 1. 当前推荐运行方式：本地 Docker
 
-`FINEASE_BANKING_RUNTIME` 整体选择实现，默认 `trueforge`：
+当前 FinEase TrueForge 演示使用本地 Docker 环境。
 
-- `trueforge`：TrueForge Agent Runtime 先提出 ConversationRoute；业务分支再由独立 ParsedIntent v1 理解器处理。两者均无工具、无执行权限。需要 `TRUEFORGE_BASE_URL`（不带路径/查询的 HTTP(S) origin）、`TRUEFORGE_MODEL`、按部署需要配置 `TRUEFORGE_TOKEN`。
-- `legacy-qwen`：迁移期显式选择 Qwen 单意图理解；首轮、补充和修改均调用同一模型，仍经过同一服务端编排器和回复合同，需要 `DASHSCOPE_API_KEY` 等旧配置。
-- 其他值为配置错误。没有按句式选择实现、按请求试探多个后端或失败静默回退。旧 `FINEASE_TRUEFORGE_*_ENABLED` 开关不再选择此 API 的路由。
+访问入口：
 
-`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET` 分别至少 16 字符。持久 Core 部署还需配置 `DATABASE_URL` 并迁移；同一部署的实例使用相同续接密钥和一致 Repository。访问码通过 `X-FinEase-Access` 发送；服务端拒绝不同源 Origin、限流每分钟 10 次、限制 JSON 请求体 16KB。密钥不得使用 `NEXT_PUBLIC_` 前缀。
+http://127.0.0.1:4300/
 
+运行架构：
+
+浏览器
+→ Docker Web / Banking Agent API
+→ 宿主机 TrueForge
+→ Docker MCP / Bridge
+→ FinEase 业务逻辑与合成 Banking Core
+
+相关服务：
+
+| 服务 | 地址 | 运行位置 |
+|---|---|---|
+| Web / API | 127.0.0.1:4300 | Docker |
+| MCP | 127.0.0.1:4333 | Docker |
+| Bridge | 127.0.0.1:4334 | Docker |
+| TrueForge | 127.0.0.1:8790 | 宿主机 |
+
+TrueForge 不包含在当前 Docker 镜像中。
+
+### 2. 静态导出与 API 的关系
+
+当前 Next.js 项目使用静态导出配置。
+
+`out/` 仅包含静态前端资源，不包含完整的服务端 POST API 能力。
+
+因此：
+
+- 不能将单独上传 `out/` 视为完整 Banking Agent 部署。
+- 本地 Docker 使用容器服务入口承载静态文件和现有 API Handler。
+- Netlify 部署必须同时配置 `netlify/functions`。
+- Functions 运行所需的环境变量必须在部署平台单独配置。
+
+具体路由映射以仓库 `netlify.toml` 和实际 Function 文件为准。
+
+### 3. Netlify 部署状态
+
+Netlify 保留为可选发布路径。
+
+2026-10-18 的 Deploy Preview 构建成功，但访问被 Netlify 登录保护拦截，未完成应用业务验收。
+
+当前不能认定：
+
+- Banking Agent API 已在 Netlify 云端完整运行。
+- TrueForge 已成功接入 Netlify。
+- MCP / Bridge 已经可以从云端访问。
+- 线上续接状态已经支持多实例恢复。
+- 当前公共网址对应最新工作区代码。
+
+详细情况见：
+
+`docs/netlify-preview-report.md`
+
+### 4. TrueForge 远端接入限制
+
+Netlify Functions 不能直接访问本机或本地 Docker 网络中的服务。
+
+以下地址不能直接作为 Netlify 云端的 TrueForge/MCP 上游地址：
+
+- 127.0.0.1
+- host.docker.internal
+- 本地 Docker 私有网络地址
+- 仅在开发机可访问的数据库地址
+
+远端部署必须提供真实可达的服务地址，并完成 HTTPS、鉴权、出站访问控制和共享状态配置。
+
+### 5. 多实例状态要求
+
+当前 TrueForge 适配链仍有进程内存状态依赖。
+
+部署到多实例或 Serverless 环境前，需要完成：
+
+- ConversationState 持久化。
+- 续接凭据的共享校验与原子消费。
+- revision 状态持久化。
+- 取消和重复请求记录持久化。
+- MCP Bridge 别名和重复请求记录持久化。
+- 跨实例与进程重启恢复验收。
+
+单实例本地 HTTP 测试通过，不代表上述能力已经完成。
+
+### 6. 部署验收口径
+
+| 状态 | 定义 |
+|---|---|
+| 构建通过 | 构建产物生成成功 |
+| 本地 API 通过 | 本地 HTTP 请求与业务返回符合预期 |
+| 本地 TrueForge 联调通过 | 本地模型、MCP、Bridge 与业务流程正常 |
+| 远端 API 通过 | 部署后的远端请求实际成功 |
+| 远端业务验收通过 | 页面、模型、工具、数据库及会话流程完整通过 |
+| 生产部署通过 | 完成目标环境安全、可靠性及业务验收 |
+
+不得将前一层的通过结果直接描述为后一层已经通过。
 ## 请求
 
 自动规划示例：`{"message":"分析8月账单支出与闲置订阅，不要执行任何修改。"}`。规划任务在 ConversationState 内独立绑定。自动路由剥离旧续接凭据；显式 plan 请求仍不能带旧任务的 continuationToken、taskId 或选择。一般解释和单项查询不会仅因包含多个关键词而进入规划。
