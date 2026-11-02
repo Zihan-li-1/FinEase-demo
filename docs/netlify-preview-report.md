@@ -1,72 +1,153 @@
-# TrueForge 试点 GitHub 推送与 Netlify 预览验收
+# FinEase Netlify Deploy Preview 验收报告
 
-日期：2026-10-18（Asia/Shanghai）。本轮目标为竞赛 Demo；关闭网页后的聊天历史不保留不作为阻塞，多轮业务状态可靠性仍须单独验收。
+- 项目：FinEase AI Banking Agent
+- 验收日期：2026-10-18
+- 部署平台：Netlify
+- 部署类型：Deploy Preview
+- 当前状态：构建完成，应用业务验收未完成
 
-## 当前结论
+## 1. 验收结论
 
-**试点分支已推送，Draft PR #13 已创建，Netlify Deploy Preview 构建成功；实际业务验收被 Netlify 登录保护拦截，尚不能确认线上 Demo 可演示。** 没有合并 PR、修改/推送 main、关闭站点保护或开放真实资金执行。
+本次 Netlify Deploy Preview 构建完成，但访问受到 Netlify 登录保护拦截，无法进入实际应用。
 
-- 分支：`spike/trueforge-harness`
-- Draft PR：仓库 PR #13
-- 预览：[deploy-preview-13](https://deploy-preview-13--startling-flan-ed8dcb.netlify.app)
-- 实际部署日志入口：[Netlify deploy 6ad4a3ebf7b8f5ab5b5f1b17](https://app.netlify.com/projects/startling-flan-ed8dcb/deploys/6ad4a3ebf7b8f5ab5b5f1b17)
+因此，本次只能确认部署构建阶段完成，不能确认：
 
-## Git 与完整差异审阅
+- 网页是否能够正常访问。
+- Banking Agent API 是否能够正常响应。
+- Netlify Functions 是否能够正常处理业务请求。
+- TrueForge 是否能够从云端正常调用。
+- MCP / Bridge 是否能够从云端正常访问。
+- 数据库及续接状态是否能够正常工作。
+- 用户是否能够完成完整的金融业务交互。
 
-开始时 `HEAD=eef2770`，刷新后的 `origin/main=4f6a80b75143aef98e63f08e5a4deeaa66ffcf51`，有 3 个新增上游提交。若直接发布旧分支，会丢失上游转账财务上下文、权限元数据、TS 对齐改进与 10 项测试。
+**本次结果不构成 Netlify 在线业务验收通过。**
 
-已按三组提交原有工作：
+## 2. 本次实际验证范围
 
-1. `9728e72 feat(trueforge): add restricted query and preview trial harness`
-2. `d29b481 fix(postgres): serialize JSONB once and support legacy records`
-3. `4790ba4 test(docker): record isolated persistence and trial verification evidence`
+| 验收项目 | 结果 | 说明 |
+|---|---|---|
+| Netlify 构建 | 通过 | Deploy Preview 构建完成 |
+| Preview 页面访问 | 未通过验收 | 被 Netlify 登录保护拦截 |
+| 前端实际交互 | 未验证 | 无法进入应用 |
+| Banking Agent API | 未验证 | 未完成远端业务请求 |
+| Netlify Functions | 未完成业务验收 | 构建配置不代表线上运行正常 |
+| TrueForge 远端调用 | 未验证 | 未建立完整远端链路 |
+| MCP / Bridge 远端调用 | 未验证 | 本地服务不能直接视为云端可达 |
+| 多实例续接 | 未验证 | 当前存在进程内存状态依赖 |
+| 完整业务流程 | 未通过验收 | 缺少实际在线业务验证 |
 
-随后在独立 worktree 整合 origin/main，解决 `package.json` 和 `server/banking-agent.mjs` 冲突：保留全量试点测试和依赖，把上游财务上下文放回抽取后的 `banking-orchestrator.mjs`，并保留上游 Core/Skill 改动及新增测试。整合提交为 `b6eeee0`；最终本地验证与部署驱动提交为 `49c32a5`。没有重置、丢弃已有工作或改动本地 main。
+## 3. 本地 Docker 与 Netlify 的环境区别
 
-Git 的 github.com HTTPS 连接多次失败，但 GitHub API 可用。使用本机既有 Git 凭据在内存中，通过 Git 数据 API 上传相同 blob/tree/commit，并逐个校验原 SHA；仅创建/快进 `spike/trueforge-harness`，没有强推或改动 main。远端业务提交与本地一致：`49c32a50eb0c6bbd8e561bae1b334cf19b84411b`。随后补充的验收记录提交不改变业务运行代码。
+当前本地 TrueForge 演示环境采用：
 
-`next-env.d.ts` 与 `tsconfig.tsbuildinfo` 的工作区改动保留，不纳入 PR 的生成文件差异；对上游已追踪的 buildinfo 仅在索引恢复 origin/main 基线，不覆盖工作区文件。`.env.local`、`.netlify/`、`.trueforge/`、SQLite、私有诊断日志和依赖/构建目录均排除。凭据值未写入 Git、日志、前端或 PR。
+```text
+浏览器
+  ↓
+Docker Web / API
+  ↓
+宿主机 TrueForge
+  ↓
+Docker MCP / Bridge
+  ↓
+合成数据库与 Banking Core
+  ↓
+网页结果展示
+```
 
-## 本轮实际运行的本地验证
+其中：
 
-| 检查 | 通过 | 失败 | 跳过 | 证据 |
-| --- | ---: | ---: | ---: | --- |
-| 整合前 PostgreSQL 试点基线 | 194 | 0 | 0 | [日志](verification/netlify-preview/postgres-before-sync.log) |
-| 整合前 Mock | 187 | 0 | 7 | [日志](verification/netlify-preview/mock-before-sync.log) |
-| 整合后 PostgreSQL 全量 | 204 | 0 | 0 | [日志](verification/netlify-preview/postgres-final.log) |
-| 整合后 Mock 全量 | 197 | 0 | 7 | [日志](verification/netlify-preview/mock-final.log) |
-| 新增上游转账契约测试 | 10 | 0 | 0 | [日志](verification/netlify-preview/upstream-contracts.log) |
-| Docker HTTP 安全边界 | 16 | 0 | 0 | [报告](verification/netlify-preview/docker-http-report.json) |
-| Docker 原网页业务 | 10 次请求符合断言 | 0 | 0 | [报告](verification/netlify-preview/docker-ui-report.json) |
+- Web / API 在 Docker 中运行。
+- TrueForge 在宿主机运行。
+- MCP / Bridge 在 Docker 中运行。
+- 数据库使用本地合成数据环境。
+- 服务之间通过本地网络地址通信。
 
-七项跳过均为数据库专用测试；204 比 194 多出的十项来自最新 main。lint、Next typegen、typecheck 均通过。Docker 生产构建第一次因 npm 下载 `ECONNRESET` 失败，原命令重试成功：[失败证据](verification/netlify-preview/docker-build-network-attempt.log)、[成功构建](verification/netlify-preview/docker-build-final.log)。宿主机 `node --run test` 异常退出，改用原生 `npm.cmd test` 成功；不把前一次调用计为通过。
+Netlify 云端环境与本地环境并不共享这些网络条件。
 
-真实 Docker 网页通过账单、卡片查询、账户/收款人澄清、余额不足与恢复、修改金额、预览、取消、聊天确认拒绝与直接执行拒绝；桌面和手机无脚本错误或横向溢出。此结果来自本地 Docker/宿主机 TrueForge，不是 Netlify 业务结果。
+Netlify Functions 无法直接访问：
 
-## Netlify 实际结果
+- 开发机的 `127.0.0.1:3000`。
+- 开发机的 `127.0.0.1:3333/mcp`。
+- 本地 Docker 的 `host.docker.internal`。
+- 仅在本地 Docker 网络中可访问的服务。
+- 仅在本地运行的数据库。
 
-初次验收部署为 `6ad4a3ebf7b8f5ab5b5f1b17`，Build ID 为 `6ad4a3ebf7b8f5ab5b5f1b15`，对应业务提交 `49c32a50eb0c6bbd8e561bae1b334cf19b84411b`。公开部署 API 返回 `state=ready`、`plugin_state=success`，Netlify bot 在 PR 中确认 ready。部署摘要显示 15 个新文件、3 条重定向、1 条 Header 规则和 4 个 Functions 发布成功。见 [部署快照](verification/netlify-preview/deployment-report.json)。
+因此，即使本地 Docker 已经成功调用 TrueForge，也不能据此证明 Netlify 云端可以调用同一套服务。
 
-实际浏览器与独立 HTTP 请求结果：
+## 4. Netlify 完整部署的必要条件
 
-| 路径 | HTTP | 响应类型 | 结论 |
-| --- | ---: | --- | --- |
-| `/` | 401 | `text/html`，标题 `Login Redirect` | 预览入口登录保护 |
-| `/api/banking-agent` | 401 | `text/html` | 请求未进入 FinEase Agent |
-| `/api/banking` | 401 | `text/html` | 请求未进入 Core API |
+未来如需重新启用 Netlify，需要完成以下工作。
 
-这是 Netlify 入口访问保护，**不是 FinEase JSON `UNAUTHORIZED`，也不是 `CONTINUATION_INVALID`**。浏览器尚未加载原应用，业务 POST 数量为 0。[入口证据及请求 ID](verification/netlify-preview/preview-access-report.json)、[浏览器验收记录](verification/netlify-preview/preview-ui-report.json)。
+### 4.1 前端与 API
 
-因此以下项目明确为**未验收**：线上原卡片 UI、账单/卡片查询、账户选择、收款人选择、修改金额、预览与取消、聊天确认拒绝、跨请求多轮续接、实际 TrueForge/MCP 网络连接与实际数据库连接。不能把登录保护的 401 当成业务安全测试通过。
+- 部署 Next.js 静态构建产物。
+- 同时部署 `netlify/functions`。
+- 核对 Functions 路由映射。
+- 确认服务端环境变量正确配置。
+- 确认 API 鉴权、请求校验和限流正常工作。
 
-公开站点/部署元数据可读，但完整构建元数据 API 返回 401；没有 Netlify 私有账户会话，未读取完整构建日志、Function 实例日志或部署上下文环境变量。公开元数据省略环境值，不能据此认定变量缺失。已提供日志入口和请求 ID，便于有权限的站点维护者继续定位。
+仅上传 `out` 或静态 ZIP 不构成完整应用部署。
 
-## 剩余风险与继续验收条件
+### 4.2 TrueForge 与 MCP
 
-- 需要可用的 Netlify 预览登录方式/授权会话，才能继续业务验收；没有关闭整个站点的保护，也没有把应用访问码当成 Netlify 登录密码尝试。
-- 应核对 Deploy Previews 的 Functions 环境：访问码、稳定续接密钥、数据库 URL/允许临时 Mock 的显式决策、TrueForge 开关、模型与服务地址、MCP/Bridge connector。密钥不得使用 `NEXT_PUBLIC_` 或写进 netlify.toml。
-- Docker `host.docker.internal` 与宿主机 `127.0.0.1` 地址仅供本机链路，不能证明 Netlify 能访问 TrueForge/MCP。未读取线上环境，不能断言线上已错误使用这些地址。
-- `tfm1`、`tfb1` 和 Bridge `tfg1` 的会话、取消/重复请求状态仍在各自 Map；不同 Function 实例或重启可能失效。上一轮本地重启已复现，本轮 Netlify 因入口被拦截未触发，不能写成“已在线上复现”或“已修复”。
-- 聊天历史暂不持久化不作为本次 Demo 阻塞；业务续接能否完成独立判断。当前“部署成功、业务未验收”，不能承诺满足线上 Demo 演示要求，更不等于生产验收。
+- TrueForge 必须提供云端可访问的服务地址。
+- MCP / Bridge 必须提供受控的远端连接。
+- 服务间通信使用 HTTPS 或其他经批准的安全网络通道。
+- 配置身份认证和出站访问白名单。
+- 不得将本机地址直接写入线上环境变量并假设云端可以访问。
 
-解锁预览访问后可使用 `scripts/verify-netlify-preview.mjs` 复跑；脚本仅接受 `https://deploy-preview-<PR>--<site>.netlify.app`，拒绝生产域名，不确认/执行资金操作，不保存访问码或 Token。需要账户授权时通过本地安全配置提供，不把密码发到聊天或写入报告。
+### 4.3 会话与续接状态
+
+必须完成：
+
+- ConversationState 共享持久化。
+- 续接 Token 的跨实例有效性。
+- revision 和原子消费机制。
+- 取消及重复请求状态持久化。
+- MCP Bridge 别名及重复请求记录持久化。
+- 多实例并发与服务重启测试。
+
+TrueForge Session 自身可以恢复，不代表 FinEase 自己的会话关联、续接 Token 和重复请求缓存也已经持久化。
+
+### 4.4 安全与业务验收
+
+还需要验证：
+
+- 用户身份隔离。
+- 访问码和服务端密钥管理。
+- 请求限流。
+- 操作预览和确认隔离。
+- 模型不能绕过 Core 直接执行。
+- 异常响应与超时恢复。
+- 数据库连接和故障恢复。
+- 线上日志与审计记录。
+
+## 5. 重新验收的通过标准
+
+| 项目 | 通过标准 |
+|---|---|
+| Preview 访问 | 获得授权的验收人员能够进入应用 |
+| 页面 | 核心页面正常加载，无关键错误 |
+| API | 真实请求能够正常返回 |
+| TrueForge | 能够完成实际模型调用 |
+| MCP | 能够发现并调用受限工具 |
+| 账单 | 能正常返回原网页账单卡片 |
+| 多轮对话 | 补参、切换任务、刷新及跨实例恢复符合预期 |
+| 数据库 | 操作状态和续接记录能够可靠恢复 |
+| 安全 | 未授权请求和越权操作被拒绝 |
+| 回退 | 远端服务失败时能够明确提示，不自动重复发起金融操作 |
+
+Netlify 登录保护应通过授权访问方式解决，不应为了演示而直接取消必要的访问控制。
+
+## 6. 当前部署状态
+
+截至本报告所记录的验收结果：
+
+- 本地 Docker 是当前主要演示环境。
+- Netlify Deploy Preview 仅完成构建。
+- Netlify 应用业务尚未完成验收。
+- 当前公共网址不作为 FinEase TrueForge 本地 Demo 的有效入口。
+- 不将 Netlify 部署配置视为生产环境已经更新。
+- 未完成多实例续接和远端服务验收前，不宣称可以公开在线演示或生产部署。
+
+**最终结论：Netlify 仍然可以作为未来可选发布平台，但当前没有足够证据证明 FinEase TrueForge 完整业务链路已经在 Netlify 云端运行。**
