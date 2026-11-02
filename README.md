@@ -1,365 +1,214 @@
-# FinEase
+# FinEase — AI Banking Agent
 
-### 面向个人金融管理的 AI Banking Agent
+FinEase 是一个面向个人金融管理场景的 AI Banking Agent 演示项目。用户通过自然语言提出金融需求，由 Agent 理解意图、调用金融业务能力，并通过受控的业务流程返回查询结果或操作预览。
 
-FinEase 是一个基于大语言模型（LLM）与 Agent 技术构建的智能金融管理系统。用户可以通过自然语言与 Agent 对话，完成金融意图识别、业务查询、任务规划及受控操作。
+## 01. 当前演示入口
 
-项目旨在将自然语言交互能力与确定性的金融业务系统相结合，使用户能够通过统一的对话入口管理个人金融事务，而不必理解复杂的银行业务流程和专业术语。
-
-FinEase 不仅是一个能够回答金融问题的聊天机器人，更是一个具备业务理解、任务编排、金融数据查询和安全操作能力的 AI Banking Agent。
-
----
-
-## 1. 项目介绍
-
-### 1.1 核心业务场景
-
-项目围绕个人金融管理，覆盖以下六类核心业务场景：
-
-| 业务场景 | 核心功能 |
-|---|---|
-| 智能转账 | 自然语言发起转账、账户与收款人识别、缺参澄清、转账预览及确认 |
-| 账单分析 | 消费分类统计、账单汇总、异常信息识别、周期对比与支出分析 |
-| 理财操作 | 理财产品推荐与对比、风险测评、模拟申购与赎回 |
-| 卡片管理 | 卡片查询、安全检查、预算设置、交易控制、模拟冻结与解冻 |
-| 订阅/代扣管理 | 自动识别订阅记录、订阅汇总、闲置订阅分析 |
-| 跨场景联动 | 联合分析账单、订阅及其他金融信息，生成多步骤只读规划与业务建议 |
-
-### 1.2 核心设计理念
-
-FinEase 的核心设计原则是：
-
-**通用智能能力可以灵活扩展，金融业务的规则、数据和执行权限必须保持确定。**
-
-为此，项目将模型理解与金融业务执行分离：
-
-- **自然语言理解：** 使用 LLM 理解用户意图、识别业务类型和必要参数。
-- **确定性业务编排：** 通过 ParsedIntent、Validator、Dispatcher 和 Skill 完成业务路由。
-- **金融数据管理：** 通过 Financial Context 统一数据来源、统计口径及证据。
-- **安全操作控制：** 通过 Banking Core 管理操作预览、用户确认、风险验证、执行及回执。
-
-模型不能直接决定资金操作，也不能通过聊天文字绕过服务端的业务校验。
-
-### 1.3 系统架构
-
-项目采用模块化 Agent 架构：
+**当前推荐入口：本地 Docker + TrueForge 联调环境**
 
 ```text
-                  User
-                   |
-             Natural Language
-                   |
-              Web Interface
-                   |
-          POST /api/banking-agent
-                   |
-          Conversation Routing
-                   |
-              TrueForge
-                   |
-          Intent Recognition
-                   |
-         ParsedIntent Validation
-                   |
-             Orchestrator
-                   |
-             Dispatcher
-                   |
-        +----------+----------+
-        |          |          |
-      Skills    Resolver    Planner
-        |          |          |
-        +----------+----------+
-                   |
-        +----------+----------+
-        |                     |
- Financial Context       Banking Core
-        |                     |
-        +----------+----------+
-                   |
-          Structured Results
-                   |
-          UI Cards / Feedback
+http://127.0.0.1:4300/
 ```
 
-**核心组件：**
+该地址仅在本地 Docker 演示环境运行时可访问，不是公网服务。
 
-| 组件 | 主要职责 |
+当前项目状态：
+
+| 项目 | 状态 |
 |---|---|
-| Agent | 理解自然语言、识别意图、组织对话 |
-| TrueForge | 提供 Agent Harness、模型会话及运行时支持 |
-| ParsedIntent | 统一业务意图及参数结构 |
-| Orchestrator / Dispatcher | 负责业务编排、校验及确定性分发 |
-| Skills | 封装具体金融业务能力 |
-| Financial Context | 提供可信金融数据及来源证据 |
-| Banking Core | 管理金融操作的预览、确认、验证、执行与回执 |
+| 本地 Docker 网页与 API | 已完成联调 |
+| TrueForge 本地 Agent 调用 | 已有真实联调记录 |
+| MCP / Bridge | 已完成本地联调 |
+| 合成 PostgreSQL Core 持久化 | 已完成对应专项验收 |
+| TrueForge 多实例续接状态 | 尚未完成持久化验收 |
+| Netlify 云端业务访问 | 尚未完成验收 |
+| 生产环境部署 | 未完成 |
+| 真实银行账户及资金连接 | 未接入 |
 
-此外，项目提供独立的确定性 Agent 任务接口 `/api/v1/agent/runs`，用于结构化多步骤任务编排，补充而不替代主要的 Banking Agent 对话链路。
+所有金融数据均为演示合成数据。当前项目不连接真实银行账户，不执行真实资金交易。
 
-### 1.4 技术栈
+## 02. 当前本地演示架构
 
-| 层级 | 技术 |
-|---|---|
-| 前端框架 | Next.js 16 |
-| UI | React 19 |
-| 开发语言 | TypeScript / JavaScript ESM |
-| Agent Harness | TrueForge |
-| 模型接入 | TrueForge SDK、兼容接口 |
-| 数据校验 | Zod |
-| 数据库 | PostgreSQL |
-| 工具协议 | MCP |
-| 测试 | Node.js Test Runner |
-| 部署配置 | Netlify / Docker |
+```text
+浏览器
+  │
+  ▼
+Docker Web / Banking Agent API
+127.0.0.1:4300
+  │
+  ▼
+宿主机 TrueForge 0.3.1
+127.0.0.1:8790
+  │
+  ▼
+Docker MCP / Bridge
+  │
+  ▼
+FinEase 业务逻辑与合成 Banking Core
+  │
+  ▼
+原网页卡片与结果展示
+```
 
----
+主要服务：
 
-## 2. 环境要求
-
-### 2.1 基础环境
-
-| 软件 | 版本要求 | 用途 |
+| 服务 | 运行位置 | 地址 |
 |---|---|---|
-| Node.js | >= 22.12.0 | 项目运行环境 |
-| npm | 随 Node.js 安装 | 依赖管理 |
-| Git | 建议安装最新版 | 项目克隆与版本管理 |
-| TrueForge | 本地联调基线 0.3.1 | 默认 Banking Agent 运行时 |
-| PostgreSQL | 可选 | 金融操作持久化 |
+| Web / API | Docker | 127.0.0.1:4300 |
+| MCP | Docker | 127.0.0.1:4333 |
+| MCP Bridge | Docker | 127.0.0.1:4334 |
+| TrueForge 0.3.1 | 宿主机 | 127.0.0.1:8790 |
+| PostgreSQL | Docker 私有网络 | 不直接暴露宿主机端口 |
 
-推荐使用 Windows 10/11、macOS 或 Linux。
+TrueForge 不包含在本项目 Docker 镜像中，而是在宿主机运行。Docker 内的 Web、MCP 和 Bridge 通过受控网络配置与其连接。
 
-**注意：** PostgreSQL 不是本地 Mock 演示的必需条件；TrueForge 则需要在使用默认真实模型路由时单独配置并运行。
+## 03. 本地运行
 
-### 2.2 模型环境
+### 环境要求
 
-FinEase 默认使用 TrueForge 作为 Banking Agent 的运行时。
+- Windows + Docker Desktop
+- Docker Compose
+- Node.js 环境
+- 已配置的 TrueForge 0.3.1
+- 项目原有 `.env.local` 配置
 
-需要准备：
+请使用自己的本地 `.env.local`。不要提交密钥、访问码或其他敏感配置到 Git。
 
-- 可访问的 TrueForge 服务。
-- 已配置的模型供应商。
-- 对应的模型名称。
-- 服务端访问凭据（如果 TrueForge 部署启用了认证）。
+### 第一步：启动 TrueForge
 
-当前项目的默认模型配置示例：
-
-```dotenv
-TRUEFORGE_BASE_URL=http://localhost:8790
-TRUEFORGE_MODEL=test/deepseek-v4-1-flash
-```
-
-模型名称需要与你在 TrueForge 中实际配置的模型一致。
-
-如需使用旧版 Qwen Banking Runtime，可通过服务端配置显式切换，不会自动回退。
-
-### 2.3 数据库环境
-
-本地默认使用合成数据和内存 Mock，无须安装 PostgreSQL。
-
-如需启用 PostgreSQL：
-
-1. 配置 `DATABASE_URL`。
-2. 创建数据库。
-3. 执行数据库迁移。
-
-```bash
-npm run db:migrate
-```
-
-数据库配置应使用独立的演示数据，不得连接真实银行客户数据。
-
----
-
-## 3. 快速启动
-
-### 3.1 克隆项目
-
-```bash
-git clone https://github.com/Zihan-li-1/FinEase-demo.git
-
-cd FinEase-demo
-```
-
-### 3.2 安装依赖
-
-```bash
-npm ci
-```
-
-### 3.3 配置环境变量
-
-复制项目根目录的环境变量模板：
-
-**Windows PowerShell：**
+在 PowerShell 中执行：
 
 ```powershell
-if (-not (Test-Path .env.local)) {
-    Copy-Item .env.example .env.local
-}
+$env:HOST = '127.0.0.1'
+$env:OUTBOUND_URL_ALLOWED_HOSTS = '["127.0.0.1"]'
+npx.cmd @truefoundry/trueforge@0.3.1 --port 8790
 ```
 
-**macOS / Linux：**
+沿用本地已经配置的模型和 TrueForge 数据。
 
-```bash
-cp .env.example .env.local
+### 第二步：启动 Docker 服务
+
+在项目根目录的另一个终端执行：
+
+```powershell
+docker compose --env-file .env.local --profile test build tests web
+
+docker compose --env-file .env.local -f compose.yaml -f compose.postgres.yaml up -d web mcp bridge
+
+node scripts/configure-trueforge-docker.mjs
+
+docker compose --env-file .env.local -f compose.yaml -f compose.postgres.yaml ps
 ```
 
-打开 `.env.local`，配置默认 Banking Agent 所需的参数：
+### 第三步：访问网页
 
-```dotenv
-# 演示访问码，至少16位
-FINEASE_ACCESS_CODE=your_private_demo_access_code
-
-# 服务端续接凭据密钥，至少16位
-CONTINUATION_TOKEN_SECRET=your_random_secret
-
-# Banking Agent 运行时
-FINEASE_BANKING_RUNTIME=trueforge
-
-# TrueForge 服务
-TRUEFORGE_BASE_URL=http://localhost:8790
-TRUEFORGE_MODEL=test/deepseek-v4-1-flash
-
-# 本地独立运行且未启用认证时可留空
-TRUEFORGE_TOKEN=
-```
-
-配置说明：
-
-- `FINEASE_ACCESS_CODE`：网页演示访问码，不是模型 API Key。
-- `CONTINUATION_TOKEN_SECRET`：服务端用于保护多轮任务续接凭据的密钥。
-- `FINEASE_BANKING_RUNTIME`：选择 Banking Agent 运行时，默认 `trueforge`。
-- `TRUEFORGE_BASE_URL`：TrueForge 服务地址，只填写协议和主机端口，不附加 API 路径。
-- `TRUEFORGE_MODEL`：TrueForge 中已经配置的模型名称。
-- `TRUEFORGE_TOKEN`：仅在 TrueForge 服务需要 Bearer Token 时配置。
-
-上述密钥只能保存在服务端环境变量中，不得添加 `NEXT_PUBLIC_` 前缀，也不得提交至 GitHub。
-
-### 3.4 启动服务
-
-确认 TrueForge 服务已经启动，并且模型配置正常。
-
-在项目根目录执行：
-
-```bash
-npm run dev:qwen
-```
-
-该命令会同时启动：
-
-- Next.js 前端。
-- Banking Agent HTTP 接口。
-- 原有业务 API。
-- 本地模型服务接口。
-
-<text>注意：</text> `dev:qwen` 是历史脚本名称。当前 Banking Agent 默认使用 TrueForge，而不是因为脚本名称就使用 Qwen。
-
-普通的 `npm run dev` 只启动 Next.js 开发服务器，不提供完整的自定义 Banking API 服务，因此完整本地联调应使用 `npm run dev:qwen`。
-
-### 3.5 访问系统
-
-启动成功后，打开：
-
-**http://127.0.0.1:3000**
-
-输入配置好的演示访问码，即可开始体验。
-
-可尝试以下指令：
+打开：
 
 ```text
-查询2026年8月的账单。
-
-给张三转500元。
-
-查询我的信用卡信息。
-
-推荐适合我的理财产品。
-
-找出我的闲置订阅。
-
-分析8月账单支出与闲置订阅，
-给出可以减少支出的建议。
+http://127.0.0.1:4300/
 ```
 
-系统会根据具体请求进入对应的业务处理流程。信息不足时会进行澄清；涉及金融操作时会生成相应预览及确认流程。
+使用本地演示访问码进入页面，按照现有授权提示进行操作。
 
----
+### 停止服务
 
-## 4. 测试与验证
-
-项目提供自动化测试、类型检查、代码规范检查及生产构建命令。
-
-### 4.1 基础测试
-
-```bash
-# 运行项目测试
-npm test
-
-# TypeScript 类型检查
-npm run typecheck
-
-# ESLint 检查
-npm run lint
-
-# Next.js 生产构建
-npm run build
+```powershell
+docker compose --env-file .env.local -f compose.yaml -f compose.postgres.yaml down
 ```
 
-### 4.2 专项测试
+不要随意增加 `-v`，以免删除本地测试数据库卷。
 
-```bash
-# Banking Core 模拟演示
-npm run demo:banking
+## 04. 当前业务能力
 
-# 统一对话路由测试
-npm run test:conversation-routing
+FinEase 围绕六类金融业务能力构建：
 
-# TrueForge 真实模型路由验证
-npm run verify:conversation-routing:live
-```
+1. 智能转账
+2. 账单分析
+3. 理财操作
+4. 卡片管理
+5. 订阅与代扣管理
+6. 跨场景联动
 
-真实模型测试需要配置可用的 TrueForge 服务及模型，可能产生模型调用费用。
+当前 TrueForge 本地试点重点验证：
 
-测试所使用的金融数据仍为合成数据，不会调用真实银行资金接口。
+- 账单查询与分析。
+- 转账账户、收款人澄清。
+- 转账金额修改与正式预览。
+- 卡片信息查询。
+- 多轮对话中的任务切换和恢复。
+- 模型聊天与金融操作授权的隔离。
 
----
+金融写操作必须遵循独立的预览、确认和 Core 校验流程。模型聊天中的“确认”不能代替独立授权。
 
-## 5. 安全性与使用边界
+## 05. 部署状态说明
 
-FinEase 将模型理解、业务校验和金融操作权限分离，主要安全机制包括：
+### 本地 Docker
 
-- 模型输出必须通过 ParsedIntent Schema 和业务参数校验。
-- 模型不能自行提供可信账户 ID、操作编号或执行授权。
-- 金融写操作需要经过业务预览和相应的用户确认、风险验证。
-- 普通聊天中的“确认”等文字不能直接触发资金执行。
-- 业务结果以结构化数据和可信业务回执为准，不从模型自然语言中提取金融操作结果。
-- 系统根据实际 Repository、Core 和运行配置动态判断能力是否可用。
+本地 Docker 是当前推荐的完整 TrueForge 演示方式。
 
-**当前项目属于金融业务模拟演示系统，并非真实银行服务。**
+已完成本地 Web、API、TrueForge、MCP、Bridge 和合成数据环境的联调。
 
-具体限制：
+具体检测结果见：
 
-1. 账单、账户、卡片及理财产品数据均为合成演示数据。
-2. 转账、卡片管理、理财申购与赎回均不涉及真实资金。
-3. 订阅支持查询和闲置分析，不提供真实第三方会员取消授权。
-4. 购物规划不等于实际下单，预算建议不等于真实资金冻结。
-5. 部分会话和续接状态仍依赖进程内存，尚未完成完整的多实例及重启恢复验收。
-6. 当前实现不等同于真实银行身份认证、支付授权或监管合规认证。
+- `docs/docker-test-report.md`
+- `docs/trueforge-trial.md`
+- `docs/p2-5-acceptance.md`
 
----
+需要注意：本地单进程测试通过不代表跨实例续接已经解决。当前 TrueForge 适配相关的续接状态、会话 revision、重复请求及 Bridge 别名仍存在进程内存依赖。
 
-## 6. 项目文档
+### Netlify
 
-更多技术细节及开发约定：
+Netlify 仅保留为历史预览及未来可选部署方式。
 
-| 文档 | 内容 |
+2026-10-18 的 Deploy Preview 虽然构建完成，但访问受到 Netlify 登录保护拦截，未能完成应用业务验收。
+
+因此：
+
+- 不将该 Preview 视为已验收的在线 Demo。
+- 不将历史公共网址作为当前有效演示入口。
+- 不宣称当前 TrueForge 已完成 Netlify 云端接入。
+- 不将本地 HTTP、MCP 或 TrueForge 调用成功等同于云端调用成功。
+
+具体情况见 `docs/netlify-preview-report.md`。
+
+Netlify 完整部署需要同时部署静态前端和 Functions，并正确配置服务端环境变量。仅发布 `out` 不构成完整的 API 应用部署。
+
+Netlify 云端不能直接访问开发机的 `127.0.0.1`、Docker 私有网络、`host.docker.internal` 或本地数据库。
+
+未来重新部署前，还需要完成：
+
+1. TrueForge 与 MCP 的远端可达性及 HTTPS 鉴权。
+2. 多实例会话续接状态持久化。
+3. 用户身份和会话隔离。
+4. 共享状态、原子续接与重复请求处理。
+5. 远端 API、数据库和业务流程的完整验收。
+
+在上述条件完成前，不将 Netlify 作为当前正式演示入口。
+
+## 06. 不同演示工作区的区别
+
+当前工作区中存在不同版本的演示项目，请勿混用其部署说明。
+
+| 项目 | 定位 | 推荐入口 |
+|---|---|---|
+| 当前 FinEase TrueForge 项目 | 完整本地 Agent 联调项目 | Docker |
+| 独立静态客户端 Demo | 旧版客户端演示项目 | 按其自身说明运行 |
+
+旧版项目中的 Qwen、Netlify、静态导出说明，不自动适用于当前 TrueForge Docker 演示项目。
+
+## 07. 重要文档
+
+| 文档 | 用途 |
 |---|---|
-| [Agent Architecture](AGENT_ARCHITECTURE.md) | 确定性 Agent 框架及任务编排 |
-| [Banking Agent API](docs/Banking-Agent-API.md) | Banking Agent 接口与回复合同 |
-| [Banking Core](docs/Banking-Core.md) | 金融操作底座与安全机制 |
-| [Unified Conversation Routing](docs/Unified-Conversation-Routing.md) | 自然语言路由、任务恢复与能力目录 |
-| [Financial Analysis Context](docs/financial-analysis-context.md) | 金融数据来源与可信度管理 |
+| `docs/Banking-Agent-API.md` | Banking Agent API 接口与部署边界 |
+| `docs/Banking-Core.md` | Core 数据合同、预览、确认、执行及回执 |
+| `docs/trueforge-trial.md` | TrueForge / MCP 试点接入 |
+| `docs/docker-test-report.md` | 本地 Docker 运行和持久化检测 |
+| `docs/netlify-preview-report.md` | Netlify 历史预览验收记录 |
+| `docs/Qwen接入与部署.md` | 旧版 Qwen 接入说明 |
 
-项目仓库：
+---
 
-https://github.com/Zihan-li-1/FinEase-demo
+**当前项目定位：基于合成金融数据的本地 AI Banking Agent 演示系统。**
 
+FinEase 当前优先保证本地业务链路、安全边界和可复现性，不以尚未完成验收的公网部署作为项目完成依据。
