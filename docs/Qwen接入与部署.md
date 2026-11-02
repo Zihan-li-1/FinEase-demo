@@ -1,103 +1,193 @@
-# Qwen 接入与部署
+# FinEase Qwen 接入与部署说明
 
-FinEase 已增加真实模型接口。默认模型为北京地域 `qwen-plus`，非思考模式、JSON 输出、单次最多1000个输出 Token。**模型推理可以是真实的，账单和资金操作仍为模拟**。本次交付不包含真实银行、支付或账户连接。
+> 文档性质：Qwen 模型接入及旧版部署方式说明。
+>
+> 注意：本文描述的是 Qwen 独立模型调用链，不代表当前 FinEase TrueForge Docker 演示环境的部署方式，也不代表任何线上网址已经更新。
 
-## 本地启动
+## 1. 适用范围
 
-需要 Node.js >=22.12。在 `finease-demo` 目录执行：
+FinEase 工作区中存在不同的演示运行入口。
+
+| 项目 | 技术路径 | 说明 |
+|---|---|---|
+| 旧版 Qwen 演示 | Qwen API / 本地服务 / Netlify Functions | 独立的模型接入路径 |
+| 当前 TrueForge 试点 | Docker Web / TrueForge / MCP / Bridge | 当前推荐的完整本地演示路径 |
+
+本文中的 Qwen 配置不应被直接用于部署 TrueForge。
+
+当前 TrueForge 演示入口及启动方法见项目根目录 `README.md`。
+
+## 2. Qwen 接入说明
+
+旧版 Qwen 模式通过服务端调用阿里云百炼兼容接口。
+
+原有配置：
+
+- 模型：`qwen-plus`
+- 地域：北京
+- 输出：JSON 格式
+- 单次最多输出：1000 Token
+
+模型推理可以使用真实模型，但账单和资金操作仍为模拟数据。本接入不包含真实银行、支付或账户连接。
+
+## 3. 本地运行（Qwen 独立路径）
+
+在对应的 Qwen 项目目录执行：
 
 ```powershell
-# 如已有 .env.local，请手动补充字段，不要覆盖原文件。
-Copy-Item .env.example .env.local
 npm run dev:qwen
 ```
 
-启动前用编辑器填写 `.env.local`（已被 Git 忽略）：
+如需新建本地环境文件，先检查是否已经存在 `.env.local`。已有文件应手动补充配置，不要覆盖原有内容。
+
+原有配置涉及：
 
 ```dotenv
-NEXT_PUBLIC_FINEASE_API_MODE=mock
 DASHSCOPE_API_KEY=你的北京地域百炼密钥
 QWEN_MODEL=qwen-plus
 QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-FINEASE_ACCESS_CODE=自己设置的至少16位演示访问码
-CONTINUATION_TOKEN_SECRET=另一个至少16位服务端续接密钥
 ```
 
-`DASHSCOPE_API_KEY` 只交给后端。`FINEASE_ACCESS_CODE` 是另外设置的私人演示口令，在网页输入；它不等于百炼密钥。二者都不能加 `NEXT_PUBLIC_` 前缀，不能提交到仓库。演示访问码只保存在页面内存，刷新后需重输。
+演示访问码使用当前代码已经定义的服务端环境变量名称，不要仅为了文档统一而自行修改变量名。
 
-打开终端提示的 `http://127.0.0.1:3000`，选择“Qwen 真实模型”，输入演示访问码，勾选发送对话和模拟账单摘要的授权，再提问。修改环境变量后重启服务。普通 `npm run dev` 仍仅启动前端；只有 `npm run dev:qwen` 同时启动模型接口。
+安全要求：
 
-可测试：
+- `DASHSCOPE_API_KEY` 只能保存在服务端。
+- 演示访问码不是模型 API Key。
+- 密钥和访问码不得添加不必要的 `NEXT_PUBLIC_` 前缀。
+- 不得提交 `.env.local` 或密钥到 Git。
+- 演示访问码不替代正式用户身份认证。
 
-- “我想每月存2000元。” → 返回只包含月金额的待确认目标计划。
-- “我想存2万元。” → 信息不足时询问期限或月金额；可继续回答“分12个月”。
-- “餐饮储蓄规则设为5%。” → 明确提示消费比例储蓄规则已不支持，不生成计划。
-- “帮我分析账单。” → 用服务端模拟摘要回答，不创建计划。
-- “找出闲置订阅。” → 仅能解释当前模拟摘要，不捏造订阅使用情况。
+修改环境变量后需要重新启动服务。
 
-选择“离线模拟”不会调用模型。Qwen 模式缺密钥、访问码不正确、接口未部署、超时、额度不足或格式错误均明确显示错误，不静默回退模拟。重试由用户主动触发；重复提问可能重复计费。
+普通 `npm run dev` 不一定会启动完整的模型接口；应以项目实际配置的 `dev:qwen` 启动脚本为准。
 
-## 更新现有 Netlify 网址
+## 4. Qwen 请求链路
 
-**只拖拽 `out` 或旧的静态部署 ZIP 不会部署模型后端。** 保留原站点 `startling-flan-ed8dcb`，使用以下任一种方式部署完整项目。
+```text
+浏览器
+  ↓
+/api/agent
+  ↓
+本地开发服务 / Netlify Function
+  ↓
+访问码、来源、请求大小、授权及字段校验
+  ↓
+Qwen 服务端模型调用
+  ↓
+JSON 结构与业务规则校验
+  ↓
+前端展示回答或待确认计划
+```
 
-Banking Core 已新增独立的模拟接口与确认流程，说明见 [Banking Core](Banking-Core.md)。默认离线业务模式保持不变，模型不会自动确认转账。
+主要组件：
 
-### 方式一：原站点连接 Git 仓库
+| 文件 | 职责 |
+|---|---|
+| `server/qwen.mjs` | 服务端模型请求处理、密钥保护及输出校验 |
+| `netlify/functions/agent.mjs` | Netlify 版本的模型接口 Function |
+| `scripts/dev-qwen.mjs` | 本地同源服务及相关 API |
+| `src/lib/agent-client.ts` | 前端请求与响应校验 |
 
-1. 将项目推送到自己的仓库（排除 `.env.local`、密钥、node_modules）。
-2. 在现有 Netlify 项目的构建设置里连接该仓库，不新建站点。
-3. 如果仓库根目录就是项目目录，Base directory 留空；否则填 `finease-demo`。
-4. Build command 为 `npm run build`，Publish directory 为 `out`。仓库中的 `netlify.toml` 已配置 `netlify/functions` 为函数目录。
-5. 在项目 Environment variables 中增加 `DASHSCOPE_API_KEY`、`QWEN_MODEL`、`QWEN_BASE_URL`、`FINEASE_ACCESS_CODE`、`CONTINUATION_TOKEN_SECRET`，确保对 **Functions 运行时和 Production 部署**生效。业务接口模式保持默认 `mock`。
-6. 触发部署，在部署结果中确认有 `agent` Function，查看日志确认限流规则成功生效。打开原网址，选择 Qwen、输入演示访问码并提问。
+Qwen 模型负责理解和生成候选结果，数值校验、业务约束和用户确认仍由程序控制。
 
-### 方式二：Netlify CLI 发布到原站点
+模型文字不能直接触发金融操作。
 
-本机安装并登录官方 Netlify CLI 后，在项目目录执行：
+## 5. Netlify 部署（可选历史路径）
+
+**本节只描述旧版 Qwen 接口的可选部署方式，不代表当前 Netlify 线上状态，也不是当前 TrueForge Docker 项目的部署指引。**
+
+### 5.1 完整部署要求
+
+旧版 Qwen 应用需要同时部署：
+
+1. Next.js 静态构建产物 `out`。
+2. `netlify/functions` 中的服务端 Functions。
+3. Netlify 后台配置的服务端环境变量。
+
+仅上传 `out` 或旧版静态 ZIP，不会自动部署模型后端。
+
+### 5.2 Netlify 环境变量
+
+需要在 Netlify 对应站点的 Environment variables 中配置：
+
+- `DASHSCOPE_API_KEY`
+- `QWEN_MODEL`
+- `QWEN_BASE_URL`
+- 项目现有的服务端演示访问码变量
+
+变量必须对 Functions 运行时和对应部署环境生效。
+
+本地 `.env.local` 不会自动成为线上环境变量。
+
+### 5.3 可选部署命令
+
+只有在明确决定重新部署旧版 Qwen 项目，并核实 Netlify 站点归属、权限、构建设置和环境变量后，才执行：
 
 ```powershell
 netlify login
 netlify link
-# 交互选择已有的 startling-flan-ed8dcb 站点，不能选择新建。
+
 npm run build
+
 netlify deploy --prod --dir=out --functions=netlify/functions
 ```
 
-部署前同样必须在该站点后台配置运行时环境变量；本地 `.env.local` 不会自动成为线上函数环境变量。部署需要有该站点权限的登录账号。本次尚未取得该站点部署连接，因此不会声称线上已更新。
+`netlify link` 时必须确认绑定的是预期站点。
 
-## 实现和边界
+历史文档中出现过的站点标识只是旧站点标识，不能据此推断当前站点绑定、部署版本或线上运行状态。
+
+执行 `--prod` 会发布生产版本，不应将其作为日常测试命令。
+
+### 5.4 当前线上状态
+
+本项目没有足够证据证明旧版 Qwen 路径对应的公共网址目前正在运行最新代码。
+
+历史 Deploy Preview 的构建完成记录不能代替应用访问和业务验收。
+
+当前 Netlify 状态请查看：
+
+`docs/netlify-preview-report.md`
+
+## 6. 当前 TrueForge 项目的部署边界
+
+当前 TrueForge 演示使用另一条运行链路：
 
 ```text
-浏览器 /api/agent
-→ 本地自定义开发服务 / Netlify Function
-→ 访问码、来源、请求大小、授权与字段检查
-→ 北京地域 Qwen 兼容接口（服务端持有密钥）
-→ JSON 结构与业务约束校验
-→ 前端追问 / 回答 / 待确认计划
-→ 用户确认后调用已有模拟业务接口
+Docker Web / API
+  ↓
+TrueForge Runtime
+  ↓
+Docker MCP / Bridge
+  ↓
+FinEase 业务能力
+  ↓
+合成 Banking Core
 ```
 
-- `server/qwen.mjs`：共享服务端处理器，固定支持北京地域官方域名；客户端不能指定模型地址、系统提示词或供应商密钥。仅发送模拟汇总，不发送原始账单文件。
-- `netlify/functions/agent.mjs`：生产 Function，映射 `/api/agent`，配置每 IP/域名每60秒10次的限流。部署日志必须确认规则生效；平台限流不是严格的全局费用封顶。
-- `scripts/dev-qwen.mjs`：本地同源服务，监听回环地址，同时启动 Next、`/api/agent`、`/api/banking` 和旧 POST `/api/finease`，本地每分钟最多10次请求。
-- `src/lib/agent-client.ts`：前端调用和响应校验。消息上限500字，最多保留最近6条成功对话，上下文只在内存保留。
-- `src/lib/use-finease.ts`、`flow-machine.ts`：支持“等待补充信息”和“已回答”状态；回答类意图不会直接跳到计划确认。
-- 每个请求只调用一次模型；服务端25秒超时，客户端30秒超时；不自动重试。即使超时，供应商已经处理的请求仍可能收费。
-- 页面显示最近一次输入/输出 Token。没有 usage 时显示0只是缺少计数，不代表免费；最终金额以百炼账单为准。
-- 数值上限、每月储蓄计算和现金流检查由程序执行，模型输出不能直接触发支付。模型提供的用户意图和参数仍可能有误，必须由用户核对确认。
-- “目标总额”按公共仓库的目标进度计算剩余差额，当前种子为0元；月份为演示计算口径，包含当前月。当前草稿不保存正式到期日期，也不保证达到目标。
-- 模拟计划仍不具备跨设备状态恢复，也不会修改银行消费规则。
-- 演示访问码用于限制私人演示使用，不替代生产身份认证。多人公开上线需接入登录、用户级额度和持久化限流/账务日志。付费限额应在供应商可用的额度控制和应用预算服务中落实，不能把单 IP 限流当成总预算。
+不能因为 Qwen 路径已经配置了 Netlify Functions，就认为 TrueForge 已经可以从 Netlify 云端访问本地 MCP、Bridge 或数据库。
 
-自动化测试使用假的供应商响应，不产生模型费用，也不能替代真实账号联调。完成环境变量后，首次用一条合成指令验证返回和 Token，再逐步扩大测试。
+远端部署还需要：
 
-## 官方资料
+- TrueForge 远端服务。
+- MCP / Bridge 远端可达地址。
+- HTTPS 和服务身份认证。
+- 共享会话与续接状态。
+- 多实例持久化和恢复验收。
+- 云端业务流程完整测试。
 
-- [阿里云兼容接口与地域说明](https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope)：北京旧域名仍可用，也可将 `QWEN_BASE_URL` 改成业务空间专属 `https://业务空间ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`；密钥必须与地域匹配。
-- [创建 API Key](https://help.aliyun.com/zh/model-studio/get-api-key)
-- [Qwen Plus 能力及价格](https://help.aliyun.com/zh/model-studio/qwen-plus)
-- [Netlify Functions 入门](https://docs.netlify.com/build/functions/get-started/)
-- [Netlify 限流规则](https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/)
+在这些条件满足前，使用本地 Docker 作为当前主要演示环境。
 
-Banking Agent 为 IM 默认入口，旧 Qwen 储蓄助手需手动切换。新合同与部署验收范围见 [Banking Agent API](Banking-Agent-API.md) 和 [联调记录](Banking-Agent-Integration.md)。
+## 7. 安全与功能边界
+
+- 模型密钥仅存在服务端。
+- 模型不能直接修改真实银行数据。
+- 模型回复中的“确认”不构成金融操作授权。
+- 模拟业务结果不能描述为真实银行执行回执。
+- 演示访问码不能替代生产身份认证。
+- 单 IP 限流不能等同于全局费用预算。
+- 网络超时不能被自动解释为业务操作失败或成功。
+
+---
+
+**文档结论：Qwen 接入与 Netlify 部署属于独立的历史模型接入路径。当前 FinEase TrueForge 演示以本地 Docker 为主，二者的部署状态和验收结果必须分别记录。**
